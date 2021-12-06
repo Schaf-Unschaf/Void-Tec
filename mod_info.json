@@ -1,0 +1,12 @@
+{
+  "id": "voidtec",
+  "name": "Void-Tec",
+  "author": "Schaf-Unschaf",
+  "version": "0.1.0",
+  "description": "SECRET",
+  "gameVersion": "0.95a-RC15",
+  "jars": [
+    "jars/Void-Tec.jar"
+  ],
+  "modPlugin": "de.schafunschaf.voidtec.plugins.VoidTecPlugin"
+}
