@@ -5,42 +5,64 @@ import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import de.schafunschaf.voidtec.scripts.combat.effects.StatManager;
+import de.schafunschaf.voidtec.VT_Colors;
+import de.schafunschaf.voidtec.scripts.combat.effects.engineeringsuite.HullModDataStorage;
+import de.schafunschaf.voidtec.scripts.combat.effects.engineeringsuite.SlotManager;
 
 import java.awt.*;
 import java.util.Random;
 
-import static de.schafunschaf.bountiesexpanded.util.ComparisonTools.isNull;
+import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
+
 
 public class VoidTecEngineeringSuite extends BaseHullMod {
     public static final String HULL_MOD_ID = "voidTec_engineeringSuite";
 
     @Override
     public void applyEffectsBeforeShipCreation(ShipAPI.HullSize hullSize, MutableShipStatsAPI stats, String id) {
-        FleetMemberAPI ship = stats.getFleetMember();
-        if (isNull(ship))
+        FleetMemberAPI fleetMember = stats.getFleetMember();
+        if (isNull(fleetMember))
             return;
 
-        StatManager statManager = StatManager.getInstance();
-        Random random = new Random(ship.getId().hashCode());
+        Random random = new Random(fleetMember.getId().hashCode());
+        HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
+        SlotManager slotManager = hullModDataStorage.getSlotManager(fleetMember);
 
-        statManager.apply(stats, id, random, null);
+        if (isNull(slotManager)) {
+            slotManager = new SlotManager(fleetMember);
+            hullModDataStorage.storeShipData(fleetMember, slotManager);
+        }
+
+        slotManager.applySlotEffects(stats, id, random);
     }
 
     @Override
     public void addPostDescriptionSection(TooltipMakerAPI tooltip, ShipAPI.HullSize hullSize, ShipAPI ship, float width, boolean isForModSpec) {
-        StatManager statManager = StatManager.getInstance();
-        statManager.generateTooltipEntry(ship.getMutableStats(), HULL_MOD_ID, tooltip);
+        FleetMemberAPI fleetMember = ship.getFleetMember();
+        if (isNull(fleetMember))
+            return;
+
+        HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
+        SlotManager slotManager = hullModDataStorage.getSlotManager(fleetMember);
+        if (isNull(slotManager))
+            return;
+
+        slotManager.generateTooltip(fleetMember.getStats(), HULL_MOD_ID, tooltip, width);
     }
 
     @Override
     public Color getBorderColor() {
-        return new Color(255, 150, 0);
+        return VT_Colors.VT_COLOR_MAIN;
     }
 
     @Override
     public Color getNameColor() {
-        return new Color(255, 150, 0);
+        return VT_Colors.VT_COLOR_MAIN;
+    }
+
+    @Override
+    public boolean shouldAddDescriptionToTooltip(ShipAPI.HullSize hullSize, ShipAPI ship, boolean isForModSpec) {
+        return false;
     }
 
     @Override

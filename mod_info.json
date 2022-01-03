@@ -1,12 +1,18 @@
 {
   "id": "voidtec",
-  "name": "Void-Tec",
+  "name": "VoidTec",
   "author": "Schaf-Unschaf",
   "version": "0.1.0",
   "description": "SECRET",
   "gameVersion": "0.95a-RC15",
   "jars": [
-    "jars/Void-Tec.jar"
+    "jars/VoidTec.jar"
+  ],
+  "dependencies": [
+    {
+      "id": "bountiesexpanded",
+      "name": "Bounties Expanded"
+    }
   ],
   "modPlugin": "de.schafunschaf.voidtec.plugins.VoidTecPlugin"
 }

@@ -1,7 +1,22 @@
 {
+  "designTypeColors":{
+    "VoidTec":[150,0,255,255]
+  },
+
   "graphics": {
     "misc": {
-      "bountiesExpanded_hullmod_placeholder": "graphics/hullmods/placeholder.png"
+      "bountiesExpanded_hullmod_emptySlot": "graphics/hullmods/vt_empty_slot.png",
+      "bountiesExpanded_hullmod_universalSlot": "graphics/hullmods/vt_universal_slot.png",
+      "bountiesExpanded_hullmod_weaponSlot": "graphics/hullmods/vt_weapon_slot.png",
+      "bountiesExpanded_hullmod_structureSlot": "graphics/hullmods/vt_structure_slot.png",
+      "bountiesExpanded_hullmod_reactorSlot": "graphics/hullmods/vt_reactor_slot.png",
+      "bountiesExpanded_hullmod_engineSlot": "graphics/hullmods/vt_engine_slot.png",
+      "bountiesExpanded_hullmod_logisticSlot": "graphics/hullmods/vt_logistic_slot.png",
+      "bountiesExpanded_hullmod_specialSlot": "graphics/hullmods/vt_special_slot.png",
+      "bountiesExpanded_hullmod_systemSlot": "graphics/hullmods/vt_system_slot.png"
+    },
+    "intel": {
+      "vt_vesai_icon": "graphics/icons/intel/vt_vesai_icon.png"
     }
   }
 }
