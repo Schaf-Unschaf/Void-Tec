@@ -1,0 +1,6 @@
+augmentID,manufacturer,name,description,rarity,primarySlot,primaryStatMods,primaryStatValues,secondarySlots,secondaryStatMods,secondaryStatValues,augmentQuality,equalQualityRoll
+vt_reactorOverdrive,VoidTec,Reactor Overdrive,Removes 'unnecessary' safety locks from the ships flux grid. This will put the reactor under more stress in exchange for a higher flux throughput.,80,REACTOR,"FLUX_DISSIPATION,VENT_RATE,PEAK_CR","20,40,true_10,25,true_-15,-30,true","UNIVERSAL,SYSTEM","SYSTEM_REGEN,SYSTEM_COOLDOWN,OVERLOAD_DURATION","10,20,true_-10,-20,true_15,30,false","SALVAGED,DOMAIN",false
+vt_hardenedPlating,Hegemony,Hardened Plating,bla,80,STRUCTURE,ARMOR_HEALTH,"10,20,true",,,,"SALVAGED,EXPERIMENTAL",
+,,,,,,,,,,,,
+"# NOTES: A list of all Slot-Types, StatMods and Qualities can be found in VoidTec\Help\DataTypes.txt",,,,,,,,,,,,
+# Unique ID (use a prefix),# Manufacturer (can assign color via vt_augment_manufacturer.json),# Displayed name of the Augment,# Description,"# Rarity (100 - 1, highest to lowest)",# Primary slot,# Primary stat modifiers,# Values used for each primary stat,,,,"# Min and Max rolled quality (MIN,MAX - each can be null or left empty for random quality)","# If true, will pick a random quality and ignore its weighting"

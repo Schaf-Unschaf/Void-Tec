@@ -1,6 +1,7 @@
-package de.schafunschaf.voidtec.scripts.combat.effects.engineeringsuite;
+package de.schafunschaf.voidtec.scripts.combat.effects.vesai;
 
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
+import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
 
@@ -8,9 +9,13 @@ import java.util.List;
 import java.util.Random;
 
 public interface AugmentApplier {
-    void apply(MutableShipStatsAPI stats, String id, Random random, UpgradeQuality quality, boolean isPrimary);
+    void apply(MutableShipStatsAPI stats, String id, Random random, AugmentQuality quality, boolean isPrimary);
 
     void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory, boolean isPrimary);
+
+    void generateStatDescription(TooltipMakerAPI tooltip, boolean isPrimary, float padding);
+
+    void runCombatScript(ShipAPI ship, float amount);
 
     String getAugmentID();
 
@@ -26,5 +31,13 @@ public interface AugmentApplier {
 
     List<BaseStatMod> getSecondaryStatMods();
 
-    UpgradeQuality getUpgradeQuality();
+    AugmentQuality getAugmentQuality();
+
+    AugmentQuality getInitialQuality();
+
+    void damageAugment();
+
+    void repairAugment();
+
+    void setInstalledSlot(AugmentSlot augmentSlot);
 }

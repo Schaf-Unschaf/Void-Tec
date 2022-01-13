@@ -1,13 +1,15 @@
 package de.schafunschaf.voidtec.scripts.combat.hullmods;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.BaseHullMod;
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import de.schafunschaf.voidtec.VT_Colors;
-import de.schafunschaf.voidtec.scripts.combat.effects.engineeringsuite.HullModDataStorage;
-import de.schafunschaf.voidtec.scripts.combat.effects.engineeringsuite.SlotManager;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.HullModDataStorage;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.HullModManager;
 
 import java.awt.*;
 import java.util.Random;
@@ -20,20 +22,27 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
 
     @Override
     public void applyEffectsBeforeShipCreation(ShipAPI.HullSize hullSize, MutableShipStatsAPI stats, String id) {
+        removeVanillaSModSlots(stats, id);
+
         FleetMemberAPI fleetMember = stats.getFleetMember();
         if (isNull(fleetMember))
             return;
 
         Random random = new Random(fleetMember.getId().hashCode());
         HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
-        SlotManager slotManager = hullModDataStorage.getSlotManager(fleetMember);
+        HullModManager hullmodManager = hullModDataStorage.getHullModManager(fleetMember);
 
-        if (isNull(slotManager)) {
-            slotManager = new SlotManager(fleetMember);
-            hullModDataStorage.storeShipData(fleetMember, slotManager);
+        if (isNull(hullmodManager)) {
+            hullmodManager = new HullModManager(fleetMember);
+            hullModDataStorage.storeShipData(fleetMember, hullmodManager);
         }
 
-        slotManager.applySlotEffects(stats, id, random);
+        hullmodManager.applySlotEffects(stats, id, random);
+    }
+
+    private void removeVanillaSModSlots(MutableShipStatsAPI stats, String id) {
+        float maxPermanentHullmods = Global.getSettings().getFloat("maxPermanentHullmods");
+        stats.getDynamic().getMod(Stats.MAX_PERMANENT_HULLMODS_MOD).modifyFlat(id, -maxPermanentHullmods);
     }
 
     @Override
@@ -43,11 +52,11 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
             return;
 
         HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
-        SlotManager slotManager = hullModDataStorage.getSlotManager(fleetMember);
-        if (isNull(slotManager))
+        HullModManager hullmodManager = hullModDataStorage.getHullModManager(fleetMember);
+        if (isNull(hullmodManager))
             return;
 
-        slotManager.generateTooltip(fleetMember.getStats(), HULL_MOD_ID, tooltip, width);
+        hullmodManager.generateTooltip(fleetMember.getStats(), HULL_MOD_ID, tooltip, width);
     }
 
     @Override
@@ -67,5 +76,15 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
 
     @Override
     public void advanceInCombat(ShipAPI ship, float amount) {
+        FleetMemberAPI fleetMember = ship.getFleetMember();
+        if (isNull(fleetMember))
+            return;
+
+        HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
+        HullModManager hullmodManager = hullModDataStorage.getHullModManager(fleetMember);
+        if (isNull(hullmodManager))
+            return;
+
+        hullmodManager.runCombatScript(ship, amount);
     }
 }

@@ -4,7 +4,7 @@ import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.scripts.combat.effects.engineeringsuite.UpgradeQuality;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatModValue;
 import de.schafunschaf.voidtec.util.ComparisonTools;
@@ -14,7 +14,7 @@ import java.util.Random;
 
 public class SystemUses extends BaseStatMod {
     @Override
-    public void apply(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random, UpgradeQuality quality) {
+    public void apply(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random, AugmentQuality quality) {
         stats.getSystemUsesBonus().modifyFlat(id, Math.round(generateModValue(statModValue, random, quality)));
     }
 
@@ -37,11 +37,22 @@ public class SystemUses extends BaseStatMod {
     protected void generateTooltip(TooltipMakerAPI tooltip, MutableStat.StatMod statMod, String description, Color bulletColor, boolean flipColors) {
         float value = statMod.value;
         boolean isPositive = value >= 1f;
+        String bullet = "•";
         String incDec = isPositive ? "increased" : "decreased";
         if (flipColors)
             isPositive = !isPositive;
         Color hlColor = isPositive ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor();
-        Color qualityColor = UpgradeQuality.getColorByName(statMod.desc);
-        tooltip.addPara("• " + description + "  (%s)", 0f, new Color[]{hlColor, hlColor, qualityColor}, incDec, String.valueOf(Math.abs(Math.round(value))), statMod.desc);
+        tooltip.addPara("%s " + description, 0f, new Color[]{bulletColor, hlColor, hlColor}, bullet, incDec, String.valueOf(Math.abs(Math.round(value))));
+    }
+
+    @Override
+    public void generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float avgModValue) {
+        boolean isPositive = avgModValue >= 0;
+        String incDec = isPositive ? "Increases" : "Decreases";
+        String hlString = "maximum amount";
+        String hlString2 = "system ability charges";
+        String description = String.format("the %s of the ships %s", hlString, hlString2);
+
+        generateStatDescription(tooltip, description, incDec, bulletColor, isPositive, hlString, hlString2);
     }
 }

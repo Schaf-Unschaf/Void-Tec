@@ -3,7 +3,7 @@ package de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.durability;
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import de.schafunschaf.voidtec.scripts.combat.effects.engineeringsuite.UpgradeQuality;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatModValue;
 import de.schafunschaf.voidtec.util.ComparisonTools;
@@ -13,7 +13,7 @@ import java.util.Random;
 
 public class WeaponRepair extends BaseStatMod {
     @Override
-    public void apply(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random, UpgradeQuality quality) {
+    public void apply(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random, AugmentQuality quality) {
         stats.getCombatWeaponRepairTimeMult().modifyPercent(id, -generateModValue(statModValue, random, quality));
     }
 
@@ -30,5 +30,15 @@ public class WeaponRepair extends BaseStatMod {
 
         String description = "Engine repair time %s by %s";
         generateTooltip(tooltip, statMod, description, bulletColor, true);
+    }
+
+    @Override
+    public void generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float avgModValue) {
+        boolean isPositive = avgModValue <= 0;
+        String incDec = isPositive ? "Shortens" : "Extends";
+        String hlString = "weapon repairs";
+        String description = String.format("the time needed for %s to be finished", hlString);
+
+        generateStatDescription(tooltip, description, incDec, bulletColor, isPositive, hlString);
     }
 }

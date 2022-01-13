@@ -11,6 +11,7 @@ public class ModLoadingUtils {
 
     public static void loadAugmentData() {
         StatProvider.initStatMap();
+        AugmentDataLoader.loadAugmentsFromFiles();
     }
 
 }

@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.scripts.combat.effects.engineeringsuite;
+package de.schafunschaf.voidtec.scripts.combat.effects.vesai;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -21,7 +21,7 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNullOrEmpty;
 @NoArgsConstructor
 public class HullModDataStorage {
     public static final String KEY = "$voidTec_hullModStorageManager";
-    private final Map<String, SlotManager> dataStorage = new HashMap<>();
+    private final Map<String, HullModManager> dataStorage = new HashMap<>();
 
     public static HullModDataStorage getInstance() {
         MemoryAPI memory = Global.getSector().getMemoryWithoutUpdate();
@@ -36,12 +36,12 @@ public class HullModDataStorage {
         return (HullModDataStorage) instance;
     }
 
-    public SlotManager getSlotManager(FleetMemberAPI fleetMember) {
+    public HullModManager getHullModManager(FleetMemberAPI fleetMember) {
         return dataStorage.get(fleetMember.getId());
     }
 
-    public void storeShipData(FleetMemberAPI fleetMember, SlotManager slotManager) {
-        dataStorage.put(fleetMember.getId(), slotManager);
+    public void storeShipData(FleetMemberAPI fleetMember, HullModManager hullmodManager) {
+        dataStorage.put(fleetMember.getId(), hullmodManager);
     }
 
     public void cleanDataStorage() {

@@ -4,7 +4,7 @@ import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.scripts.combat.effects.engineeringsuite.UpgradeQuality;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatModValue;
 import de.schafunschaf.voidtec.util.ComparisonTools;
@@ -14,7 +14,7 @@ import java.util.Random;
 
 public class BurnLevel extends BaseStatMod {
     @Override
-    public void apply(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random, UpgradeQuality quality) {
+    public void apply(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random, AugmentQuality quality) {
         stats.getMaxBurnLevel().modifyFlat(id, Math.round(generateModValue(statModValue, random, quality)));
     }
 
@@ -42,5 +42,15 @@ public class BurnLevel extends BaseStatMod {
             isPositive = !isPositive;
         Color hlColor = isPositive ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor();
         tooltip.addPara("%s " + description, 0f, new Color[]{bulletColor, hlColor, hlColor}, "•", incDec, String.valueOf(Math.abs(value)));
+    }
+
+    @Override
+    public void generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float avgModValue) {
+        boolean isPositive = avgModValue >= 0;
+        String incDec = isPositive ? "Increases" : "Decreases";
+        String hlString = "burn level";
+        String description = String.format("the ships maximum %s", hlString);
+
+        generateStatDescription(tooltip, description, incDec, bulletColor, isPositive, hlString);
     }
 }

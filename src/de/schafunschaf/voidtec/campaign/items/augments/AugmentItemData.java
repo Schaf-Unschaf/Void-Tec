@@ -1,7 +1,7 @@
 package de.schafunschaf.voidtec.campaign.items.augments;
 
 import com.fs.starfarer.api.campaign.SpecialItemData;
-import de.schafunschaf.voidtec.scripts.combat.effects.engineeringsuite.augments.BaseAugment;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.BaseAugment;
 import lombok.Getter;
 
 @Getter
@@ -26,7 +26,7 @@ public class AugmentItemData extends SpecialItemData {
         if (obj instanceof AugmentItemData) {
             BaseAugment otherAugment = ((AugmentItemData) obj).augment;
             boolean isSameAugment = otherAugment.getAugmentID().equals(this.augment.getAugmentID());
-            boolean isSameQuality = otherAugment.getUpgradeQuality() == this.augment.getUpgradeQuality();
+            boolean isSameQuality = otherAugment.getAugmentQuality() == this.augment.getAugmentQuality();
 
             return isSameAugment && isSameQuality;
         }
