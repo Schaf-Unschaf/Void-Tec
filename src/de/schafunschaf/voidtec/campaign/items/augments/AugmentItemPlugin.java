@@ -3,7 +3,6 @@ package de.schafunschaf.voidtec.campaign.items.augments;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CargoTransferHandlerAPI;
-import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
 import com.fs.starfarer.api.campaign.impl.items.BaseSpecialItemPlugin;
@@ -15,6 +14,7 @@ import de.schafunschaf.voidtec.Settings;
 import de.schafunschaf.voidtec.VT_Icons;
 import de.schafunschaf.voidtec.VT_Strings;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
+import de.schafunschaf.voidtec.helper.AugmentUtils;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.BaseAugment;
@@ -103,18 +103,11 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
     private void createTechInfo(TooltipMakerAPI tooltip, float largePad, float smallPad) {
         String manufacturerName = isNull(augment.getManufacturer()) ? "Unknown" : augment.getManufacturer();
-        Color manufacturerColor = getManufacturerColor(manufacturerName);
+        Color manufacturerColor = AugmentUtils.getManufacturerColor(manufacturerName);
 
         tooltip.addPara("Manufacturer: %s", largePad, Misc.getGrayColor(), manufacturerColor, manufacturerName);
         tooltip.addPara(String.format("Quality: %s", augment.getAugmentQuality().getName()), smallPad, Misc.getGrayColor(), augment.getAugmentQuality().getColor(), augment.getAugmentQuality().getName());
         tooltip.addPara("Type: %s", smallPad, Misc.getGrayColor(), augment.getPrimarySlot().getColor(), augment.getPrimarySlot().toString());
-    }
-
-    private Color getManufacturerColor(String manufacturerString) {
-        FactionAPI faction = Global.getSector().getFaction(manufacturerString);
-        Color manufacturerColor = isNull(faction) ? Global.getSettings().getDesignTypeColor(manufacturerString) : faction.getColor();
-
-        return isNull(manufacturerColor) ? Misc.getGrayColor() : manufacturerColor;
     }
 
     @Override

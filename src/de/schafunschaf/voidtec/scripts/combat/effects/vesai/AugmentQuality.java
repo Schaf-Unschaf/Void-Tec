@@ -6,7 +6,6 @@ import lombok.Getter;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -22,7 +21,7 @@ public enum AugmentQuality {
     EXPERIMENTAL("Experimental", 1.4f, new Color(0, 150, 255), 20f),
     REMNANT("Remnant", 1.6f, new Color(70, 255, 235), 5f),
     DOMAIN("Domain", 2f, new Color(255, 120, 0), 1f),
-    UNIQUE("Unique", 1f, new Color(150, 0, 255), 1f);
+    UNIQUE("Unique", 1f, new Color(200, 0, 255), 0f);
 
     String name;
     float modifier;
@@ -33,6 +32,7 @@ public enum AugmentQuality {
 
     public static List<AugmentQuality> getAllowedQualities() {
         List<AugmentQuality> allowedSet = new ArrayList<>();
+
         allowedSet.add(DESTROYED);
         allowedSet.add(DAMAGED);
         allowedSet.add(COMMON);
@@ -90,7 +90,7 @@ public enum AugmentQuality {
             return getRandomQuality(random, ignoreWeighting);
 
         if (qualityStrings.length == 1)
-            return getRandomQuality(random, Collections.singletonList(getEnum(qualityStrings[0])), ignoreWeighting);
+            return getEnum(qualityStrings[0]);
 
         AugmentQuality minQuality = getEnum(qualityStrings[0]);
         AugmentQuality maxQuality = getEnum(qualityStrings[1]);

@@ -103,22 +103,22 @@ public class BaseAugment implements AugmentApplier {
         tooltip.addSpacer(3f);
 
         List<BaseStatMod> statMods = isPrimary ? getPrimaryStatMods() : getSecondaryStatMods();
-        if (isNull(statMods))
-            return;
+        if (!isNull(statMods) && !statMods.isEmpty()) {
+            Color bulletColor = primarySlot.getColor();
 
-        Color bulletColor = primarySlot.getColor();
+            if (!isNull(installedSlot))
+                bulletColor = installedSlot.getSlotCategory().getColor();
 
-        if (!isNull(installedSlot))
-            bulletColor = installedSlot.getSlotCategory().getColor();
+            TooltipMakerAPI imageWithText = tooltip.beginImageWithText(slotCategory.getIcon(), 40f);
+            if (augmentQuality == AugmentQuality.DESTROYED)
+                imageWithText.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), 0f);
+            else
+                for (StatApplier statApplier : statMods)
+                    statApplier.generateTooltipEntry(stats, id + "_" + getAugmentID(), imageWithText, bulletColor);
 
-        TooltipMakerAPI imageWithText = tooltip.beginImageWithText(slotCategory.getIcon(), 40f);
-        if (augmentQuality == AugmentQuality.DESTROYED)
-            imageWithText.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), 0f);
-        else
-            for (StatApplier statApplier : statMods)
-                statApplier.generateTooltipEntry(stats, id + "_" + getAugmentID(), imageWithText, bulletColor);
+            tooltip.addImageWithText(3f);
+        }
 
-        tooltip.addImageWithText(3f);
         tooltip.addButton("", null, getAugmentQuality().getColor(), getAugmentQuality().getColor(), width, 0f, 3f);
     }
 

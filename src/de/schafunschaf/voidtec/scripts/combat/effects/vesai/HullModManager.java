@@ -41,7 +41,16 @@ public class HullModManager {
         tooltip.addPara("The %s is equipped with a special device, allowing her to install up to %s so called '%s'.\n" +
                 "Each Augment can only be installed once in the device and it's impossible to remove them afterwards.", 10f, new Color[]{Misc.getBasePlayerColor(), highlightColor, highlightColor}, shipName, String.valueOf(maxSlots), "Augments");
 
+        tooltip.addSpacer(10f);
+
         int numLockedSlots = 0;
+
+        AugmentSlot specialSlot = getSpecialSlot();
+        if (specialSlot.isEmpty())
+            addEmptySlotDesc(tooltip, width, specialSlot);
+        else
+            specialSlot.generateTooltip(stats, id, tooltip, width);
+
         for (AugmentSlot augmentSlot : getSlotsForDisplay()) {
             if (!augmentSlot.isUnlocked()) {
                 numLockedSlots++;
@@ -51,12 +60,7 @@ public class HullModManager {
             tooltip.addSpacer(10f);
 
             if (augmentSlot.isEmpty()) {
-                tooltip.addButton("", null, VT_GREY_COLOR, VT_GREY_COLOR, width, 0f, 3f);
-                tooltip.addPara("Empty Augment Slot", VT_GREY_COLOR, 3f);
-                TooltipMakerAPI imageWithText = tooltip.beginImageWithText(VT_Icons.EMPTY_SLOT_ICON, 40f);
-                imageWithText.addPara("Type: %s", 3f, augmentSlot.getSlotCategory().color, augmentSlot.getSlotCategory().toString());
-                tooltip.addImageWithText(3f);
-                tooltip.addButton("", null, VT_GREY_COLOR, VT_GREY_COLOR, width, 0f, 3f);
+                addEmptySlotDesc(tooltip, width, augmentSlot);
                 continue;
             }
 
@@ -86,9 +90,18 @@ public class HullModManager {
         tooltip.addPara("HINT: Some %s Augments can grant additional slots for building in hullmods", 3f, Misc.getGrayColor(), SlotCategory.SPECIAL.getColor(), SlotCategory.SPECIAL.name());
     }
 
+    private void addEmptySlotDesc(TooltipMakerAPI tooltip, float width, AugmentSlot augmentSlot) {
+        tooltip.addButton("", null, VT_GREY_COLOR, VT_GREY_COLOR, width, 0f, 3f);
+        tooltip.addPara("Empty Augment Slot", VT_GREY_COLOR, 3f);
+        TooltipMakerAPI imageWithText = tooltip.beginImageWithText(VT_Icons.EMPTY_SLOT_ICON, 40f);
+        imageWithText.addPara("Type: %s", 3f, augmentSlot.getSlotCategory().color, augmentSlot.getSlotCategory().toString());
+        tooltip.addImageWithText(3f);
+        tooltip.addButton("", null, VT_GREY_COLOR, VT_GREY_COLOR, width, 0f, 3f);
+    }
+
     public void runCombatScript(ShipAPI ship, float amount) {
-        AugmentSlot augmentSlot = getSlotOfType(SlotCategory.SPECIAL);
-        if (isNull(augmentSlot))
+        AugmentSlot augmentSlot = getSpecialSlot();
+        if (isNull(augmentSlot) || augmentSlot.isEmpty())
             return;
 
         augmentSlot.getSlottedAugment().runCombatScript(ship, amount);
@@ -106,6 +119,9 @@ public class HullModManager {
 
         if (slotCategory.equals(augment.getPrimarySlot()))
             return true;
+
+        if (isNull(augment.getSecondarySlots()))
+            return false;
 
         return augment.getSecondarySlots().contains(slotCategory);
     }
@@ -139,9 +155,9 @@ public class HullModManager {
         return false;
     }
 
-    public AugmentSlot getSlotOfType(SlotCategory slotCategory) {
+    public AugmentSlot getSpecialSlot() {
         for (AugmentSlot augmentSlot : shipAugmentSlots)
-            if (augmentSlot.getSlotCategory() == slotCategory)
+            if (augmentSlot.getSlotCategory() == SlotCategory.SPECIAL)
                 return augmentSlot;
 
         return null;
@@ -151,11 +167,14 @@ public class HullModManager {
         List<AugmentSlot> slotsForDisplay = new ArrayList<>();
         List<AugmentSlot> lockedSlots = new ArrayList<>();
 
-        for (AugmentSlot augmentSlot : shipAugmentSlots)
+        for (AugmentSlot augmentSlot : shipAugmentSlots) {
+            if (augmentSlot.getSlotCategory() == SlotCategory.SPECIAL)
+                continue;
             if (augmentSlot.isUnlocked())
                 slotsForDisplay.add(augmentSlot);
             else
                 lockedSlots.add(augmentSlot);
+        }
 
         Collections.sort(slotsForDisplay, new Comparator<AugmentSlot>() {
             @Override
@@ -234,13 +253,11 @@ public class HullModManager {
                     break;
             }
 
+        shipAugmentSlots.add(new AugmentSlot(this, SlotCategory.SPECIAL, true));
+
         for (int i = 0; i < maxSlots; i++) {
             boolean isUnlocked = i < numSlots;
-
-            if (hasSlotOfType(SlotCategory.SPECIAL))
-                shipAugmentSlots.add(new AugmentSlot(this, Collections.singletonList(SlotCategory.SPECIAL), random, isUnlocked));
-            else
-                shipAugmentSlots.add(new AugmentSlot(this, random, isUnlocked));
+            shipAugmentSlots.add(new AugmentSlot(this, random, isUnlocked));
         }
     }
 

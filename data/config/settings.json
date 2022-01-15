@@ -17,7 +17,9 @@
       "voidTec_hullmod_systemSlot": "graphics/hullmods/vt_system_slot.png",
       "voidTec_item_augmentChip": "graphics/icons/cargo/vt_augment_chip.png",
       "voidTec_item_augmentChip_cover": "graphics/icons/cargo/vt_augment_chip_cover.png",
-      "voidTec_item_augmentChip_glow": "graphics/icons/cargo/vt_augment_chip_glow.png"
+      "voidTec_item_augmentChip_glow": "graphics/icons/cargo/vt_augment_chip_glow.png",
+      "voidTec_item_storageChest": "graphics/icons/cargo/vt_storage_chest.png",
+      "voidTec_item_storageChest_glow": "graphics/icons/cargo/vt_storage_chest_glow.png"
     },
     "intel": {
       "vt_vesai_icon": "graphics/icons/intel/vt_vesai_icon.png"

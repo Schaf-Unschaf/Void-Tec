@@ -1,2 +1,3 @@
 name,id,tags,tech/manufacturer,rarity,base price,stack size,cargo space,baseRaidDanger,icon,sound id,sound id drop,plugin,plugin params,desc,order
-Augment Chip,VT_augment,,VoidTec,,50000,1,1,,graphics\icons\cargo\vt_augment_chip_dummy.png,ui_chip_pickup,ui_ship_bp_drop,de.schafunschaf.voidtec.campaign.items.augments.AugmentItemPlugin,,This strange looking chip is still lacking a description.,95
+Augment Chip,VT_augment,,VoidTec,,2000,1,0,,graphics\icons\cargo\vt_augment_chip_dummy.png,ui_chip_pickup,ui_ship_bp_drop,de.schafunschaf.voidtec.campaign.items.augments.AugmentItemPlugin,,,95
+Augment Storage Chest,VT_storageChest,,VoidTec,,100000,1,1,,graphics\icons\cargo\vt_storage_chest.png,ui_cargo_special_military_pickup,ui_cargo_special_military_drop,de.schafunschaf.voidtec.campaign.items.augments.AugmentChestPlugin,,,94

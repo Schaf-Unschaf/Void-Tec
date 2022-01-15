@@ -26,6 +26,7 @@ public class VT_LootListener implements ShowLootListener {
 
         if (interactionTarget instanceof CampaignTerrainAPI && ((CampaignTerrainAPI) interactionTarget).getPlugin() instanceof DebrisFieldTerrainPlugin) {
             DebrisFieldTerrainPlugin debrisFieldTerrainPlugin = (DebrisFieldTerrainPlugin) ((CampaignTerrainAPI) interactionTarget).getPlugin();
+
             switch (debrisFieldTerrainPlugin.params.source) {
                 case BATTLE: // after battle
                 case GEN: // sector generation

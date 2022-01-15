@@ -7,6 +7,7 @@ import de.schafunschaf.voidtec.Settings;
 import de.schafunschaf.voidtec.campaign.ids.VT_Items;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
+import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestData;
 import de.schafunschaf.voidtec.campaign.listeners.VT_CampaignListener;
 import de.schafunschaf.voidtec.campaign.listeners.VT_LootListener;
 import de.schafunschaf.voidtec.helper.ModLoadingUtils;
@@ -47,6 +48,7 @@ public class VoidTecPlugin extends BaseModPlugin {
         }
 
         Global.getSector().getPlayerFleet().getCargo().addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, AugmentDataManager.getAugment(VT_RainbowEngines.AUGMENT_ID)), 1f);
+        Global.getSector().getPlayerFleet().getCargo().addSpecial(new AugmentChestData(VT_Items.STORAGE_CHEST, null),1f);
     }
 
     @Override

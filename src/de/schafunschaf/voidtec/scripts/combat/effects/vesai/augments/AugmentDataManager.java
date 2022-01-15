@@ -51,13 +51,6 @@ public class AugmentDataManager {
         return createAugmentFromData(picker.pick(), random);
     }
 
-    private static AugmentData getFailOverAugment(Random random) {
-        Object[] augmentArray = AUGMENT_DATA_MAP.values().toArray();
-        Object augment = augmentArray[random.nextInt(augmentArray.length)];
-
-        return ((AugmentData) augment);
-    }
-
     private static BaseAugment createAugmentFromData(AugmentData augmentData, Random random) {
         return isNull(augmentData) ? null : new BaseAugment(augmentData, random);
     }
