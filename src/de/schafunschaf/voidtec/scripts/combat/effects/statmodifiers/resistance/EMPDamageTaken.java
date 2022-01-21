@@ -14,7 +14,7 @@ import java.util.Random;
 public class EMPDamageTaken extends BaseStatMod {
     @Override
     public void apply(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random, AugmentQuality quality) {
-        stats.getEmpDamageTakenMult().modifyPercent(id, -generateModValue(statModValue, random, quality));
+        stats.getEmpDamageTakenMult().modifyPercent(id, generateModValue(statModValue, random, quality));
     }
 
     @Override
@@ -34,7 +34,7 @@ public class EMPDamageTaken extends BaseStatMod {
 
     @Override
     public void generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float avgModValue) {
-        boolean isPositive = avgModValue <= 0;
+        boolean isPositive = avgModValue >= 0;
         String incDec = isPositive ? "Reduces" : "Increases";
         String hlString1 = "damage taken";
         String hlString2 = "EMP";

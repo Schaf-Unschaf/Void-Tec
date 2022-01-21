@@ -5,9 +5,11 @@ import de.schafunschaf.voidtec.plugins.VoidTecPlugin;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatModValue;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatProvider;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.AugmentData;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.AugmentDataManager;
+import de.schafunschaf.voidtec.util.TextWithHighlights;
 import lombok.extern.log4j.Log4j;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,11 +66,18 @@ public class AugmentDataLoader {
                 if (!secondaryStatModValueString.isEmpty())
                     secondaryStatValues = getStatValuesFromString(secondaryStatModValueString);
 
+                String[] augmentQualityValueString = row.optString("allowedAugmentQualities").split("\\s*(,\\s*)+");
+                String[] augmentQuality;
+                if (augmentQualityValueString.length == 1 && augmentQualityValueString[0].isEmpty())
+                    augmentQuality = AugmentQuality.allowedValues;
+                else
+                    augmentQuality = augmentQualityValueString;
+
                 try {
                     AugmentData augmentData = new AugmentData(augmentID,
                             row.optString("manufacturer"),
                             row.optString("name"),
-                            row.optString("description"),
+                            new TextWithHighlights(row.optString("description")),
                             row.optInt("rarity"),
                             SlotCategory.getEnum(row.getString("primarySlot")),
                             primaryStatMods,
@@ -76,7 +85,8 @@ public class AugmentDataLoader {
                             secondarySlots,
                             secondaryStatMods,
                             secondaryStatValues,
-                            row.optString("augmentQuality").split("\\s*(,\\s*)+"),
+                            augmentQuality,
+                            new TextWithHighlights(row.optString("combatScriptDescription")),
                             row.optBoolean("equalQualityRoll"),
                             null);
 

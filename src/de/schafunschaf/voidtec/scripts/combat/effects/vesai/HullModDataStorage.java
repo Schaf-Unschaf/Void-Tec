@@ -36,12 +36,12 @@ public class HullModDataStorage {
         return (HullModDataStorage) instance;
     }
 
-    public HullModManager getHullModManager(FleetMemberAPI fleetMember) {
-        return dataStorage.get(fleetMember.getId());
+    public HullModManager getHullModManager(String fleetMemberID) {
+        return dataStorage.get(fleetMemberID);
     }
 
-    public void storeShipData(FleetMemberAPI fleetMember, HullModManager hullmodManager) {
-        dataStorage.put(fleetMember.getId(), hullmodManager);
+    public void storeShipID(String fleetMemberID, HullModManager hullmodManager) {
+        dataStorage.put(fleetMemberID, hullmodManager);
     }
 
     public void cleanDataStorage() {
@@ -54,10 +54,7 @@ public class HullModDataStorage {
             if (fleetMember.getVariant().hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID))
                 newKeys.add(fleetMember.getId());
 
-        currentKeys.removeAll(newKeys);
-
-        for (String unnecessaryKey : currentKeys)
-            dataStorage.remove(unnecessaryKey);
+        currentKeys.retainAll(newKeys);
     }
 
     public void saveToMemory() {

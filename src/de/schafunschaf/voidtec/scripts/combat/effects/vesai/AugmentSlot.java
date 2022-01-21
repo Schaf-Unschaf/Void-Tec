@@ -2,7 +2,6 @@ package de.schafunschaf.voidtec.scripts.combat.effects.vesai;
 
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.BaseAugment;
 import lombok.Getter;
 
 import java.util.List;
@@ -44,29 +43,34 @@ public class AugmentSlot {
         slottedAugment.apply(stats, id, random, quality, isPrimary);
     }
 
-    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width) {
+    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, boolean isItemTooltip) {
         if (isNull(slottedAugment))
             return;
 
-        slottedAugment.generateTooltip(stats, id, tooltip, width, slotCategory, isPrimary);
+        slottedAugment.generateTooltip(stats, id, tooltip, width, slotCategory, isPrimary, isItemTooltip);
     }
 
     public void unlockSlot() {
         isUnlocked = true;
     }
 
-    public boolean installAugment(BaseAugment augment) {
+    public boolean installAugment(AugmentApplier augment) {
         return hullmodManager.installAugment(this, augment);
     }
 
-    protected boolean insertAugment(BaseAugment augment) {
+    protected boolean insertAugment(AugmentApplier augment) {
         if (isEmpty()) {
             slottedAugment = augment;
-            augment.setInstalledSlot(this);
+            augment.installAugment(this);
             isPrimary = slotCategory.equals(augment.getPrimarySlot());
             return true;
         }
         return false;
+    }
+
+    public void removeAugment() {
+        slottedAugment.removeAugment();
+        slottedAugment = null;
     }
 
     public boolean isEmpty() {

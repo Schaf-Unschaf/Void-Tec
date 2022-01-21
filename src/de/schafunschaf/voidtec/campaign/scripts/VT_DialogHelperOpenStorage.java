@@ -33,7 +33,7 @@ public class VT_DialogHelperOpenStorage implements EveryFrameScript {
     @Override
     public void advance(float amount) {
         if (success)
-            Global.getSector().removeScript(this);
+            Global.getSector().removeTransientScript(this);
         else {
             robot.keyPress(KeyEvent.VK_ESCAPE);
             robot.keyRelease(KeyEvent.VK_ESCAPE);

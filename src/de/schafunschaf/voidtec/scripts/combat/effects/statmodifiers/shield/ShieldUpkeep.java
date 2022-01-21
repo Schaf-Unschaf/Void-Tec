@@ -14,7 +14,7 @@ import java.util.Random;
 public class ShieldUpkeep extends BaseStatMod {
     @Override
     public void apply(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random, AugmentQuality quality) {
-        stats.getShieldUpkeepMult().modifyPercent(id, -generateModValue(statModValue, random, quality));
+        stats.getShieldUpkeepMult().modifyPercent(id, generateModValue(statModValue, random, quality));
     }
 
     @Override

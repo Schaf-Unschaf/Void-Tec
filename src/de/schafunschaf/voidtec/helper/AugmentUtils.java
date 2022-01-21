@@ -8,7 +8,7 @@ import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.ids.VT_Items;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.BaseAugment;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
 
 import java.awt.*;
 import java.util.List;
@@ -39,7 +39,7 @@ public class AugmentUtils {
             cargoToAdjust.removeItems(CargoAPI.CargoItemType.SPECIAL, sourceCargoStack.getData(), sourceCargoStack.getSize());
     }
 
-    public static BaseAugment getAugmentFromStack(CargoStackAPI cargoStack) {
+    public static AugmentApplier getAugmentFromStack(CargoStackAPI cargoStack) {
         if (isNull(cargoStack))
             return null;
 
@@ -47,7 +47,7 @@ public class AugmentUtils {
     }
 
     public static Color getManufacturerColor(String manufacturerString) {
-        FactionAPI faction = Global.getSector().getFaction(manufacturerString);
+        FactionAPI faction = Global.getSector().getFaction(manufacturerString.toLowerCase());
         Color manufacturerColor = isNull(faction) ? Global.getSettings().getDesignTypeColor(manufacturerString) : faction.getColor();
 
         return isNull(manufacturerColor) ? Misc.getGrayColor() : manufacturerColor;

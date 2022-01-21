@@ -18,22 +18,22 @@ public enum AugmentQuality {
     DAMAGED("Damaged", 0.6f, new Color(200, 50, 0), 100f),
     COMMON("Common", 1f, new Color(200, 200, 200), 70f),
     MILITARY("Military", 1.2f, new Color(0, 180, 50), 45f),
-    EXPERIMENTAL("Experimental", 1.4f, new Color(0, 150, 255), 20f),
-    REMNANT("Remnant", 1.6f, new Color(70, 255, 235), 5f),
+    EXPERIMENTAL("Experimental", 1.5f, new Color(0, 150, 255), 20f),
+    REMNANT("Remnant", 1.7f, new Color(70, 255, 235), 5f),
     DOMAIN("Domain", 2f, new Color(255, 120, 0), 1f),
     UNIQUE("Unique", 1f, new Color(200, 0, 255), 0f);
 
-    String name;
-    float modifier;
-    Color color;
-    float weighing;
+    private final String name;
+    private final float modifier;
+    private final Color color;
+    private final float weighing;
 
     public static final AugmentQuality[] values = values();
+    public static final String[] allowedValues = getAllowedQualitiesArray();
 
-    public static List<AugmentQuality> getAllowedQualities() {
+    private static List<AugmentQuality> getAllowedQualities() {
         List<AugmentQuality> allowedSet = new ArrayList<>();
 
-        allowedSet.add(DESTROYED);
         allowedSet.add(DAMAGED);
         allowedSet.add(COMMON);
         allowedSet.add(MILITARY);
@@ -42,6 +42,16 @@ public enum AugmentQuality {
         allowedSet.add(DOMAIN);
 
         return allowedSet;
+    }
+
+    private static String[] getAllowedQualitiesArray() {
+        return new String[]{
+                DAMAGED.name(),
+                COMMON.name(),
+                MILITARY.name(),
+                EXPERIMENTAL.name(),
+                REMNANT.name(),
+                DOMAIN.name()};
     }
 
     public static AugmentQuality getRandomQuality(Random random, List<AugmentQuality> allowedQualities, boolean ignoreWeighting) {
@@ -85,7 +95,7 @@ public enum AugmentQuality {
         return getRandomQuality(random, augmentQualityList, ignoreWeighting);
     }
 
-    public static AugmentQuality getQuality(String[] qualityStrings, Random random, boolean ignoreWeighting) {
+    public static AugmentQuality getRandomQualityInRange(String[] qualityStrings, Random random, boolean ignoreWeighting) {
         if (isNull(qualityStrings))
             return getRandomQuality(random, ignoreWeighting);
 
@@ -106,26 +116,6 @@ public enum AugmentQuality {
         return getRandomQuality(random, augmentQualityList, ignoreWeighting);
     }
 
-    public static List<AugmentQuality> getQualitiesInRange(String[] qualityRange) {
-        List<AugmentQuality> allowedList = new ArrayList<>();
-        if (!(qualityRange.length == 2))
-            return allowedList;
-
-        AugmentQuality minQuality = getEnum(qualityRange[0]);
-        AugmentQuality maxQuality = getEnum(qualityRange[1]);
-
-        if (isNull(minQuality) || isNull(maxQuality))
-            return allowedList;
-
-        for (AugmentQuality allowedQuality : getAllowedQualities()) {
-            if (allowedQuality.ordinal() <= minQuality.ordinal()
-                    && allowedQuality.ordinal() <= maxQuality.ordinal())
-                allowedList.add(allowedQuality);
-        }
-
-        return allowedList;
-    }
-
     public static AugmentQuality getEnum(String valueString) {
         for (AugmentQuality value : values)
             if (value.name.equalsIgnoreCase(valueString))
@@ -139,6 +129,6 @@ public enum AugmentQuality {
     }
 
     public AugmentQuality getLowerQuality() {
-        return this.ordinal() == 0 ? this : getAllowedQualities().get(ordinal() + 1);
+        return this.ordinal() == 0 ? this : getAllowedQualities().get(ordinal() - 1);
     }
 }

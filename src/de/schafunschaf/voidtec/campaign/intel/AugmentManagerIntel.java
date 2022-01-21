@@ -1,22 +1,23 @@
 package de.schafunschaf.voidtec.campaign.intel;
 
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
-import com.fs.starfarer.api.impl.campaign.ids.Strings;
+import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.VT_Colors;
 import de.schafunschaf.voidtec.VT_Icons;
 import de.schafunschaf.voidtec.campaign.ids.VT_Items;
+import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestData;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
-import de.schafunschaf.voidtec.helper.AugmentUtils;
+import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.*;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.BaseAugment;
 import de.schafunschaf.voidtec.scripts.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.util.FormattingTools;
 
@@ -25,7 +26,9 @@ import java.util.List;
 import java.util.*;
 
 import static de.schafunschaf.voidtec.Settings.*;
+import static de.schafunschaf.voidtec.helper.AugmentCargoWrapper.CargoSource;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
+import static de.schafunschaf.voidtec.util.ComparisonTools.isNullOrEmpty;
 
 public class AugmentManagerIntel extends BaseIntelPlugin {
     protected enum ButtonOption {
@@ -34,12 +37,14 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
         AUGMENT_SELECTED,
         UNLOCK_SLOT,
         REMOVE_AUGMENT,
-        REPAIR_AUGMENT
+        REPAIR_AUGMENT,
+        SORT_BY_SLOT
     }
 
     public static final String STACK_SOURCE = "augmentManagerIntel";
 
-    private static CargoStackAPI selectedAugmentInCargo;
+    private static AugmentCargoWrapper selectedAugmentInCargo;
+    private static SlotCategory activeCategoryFilter;
     private float titleSize = 0f;
     private float shipListSize = 0f;
     private float shipListWidth = 0f;
@@ -80,7 +85,7 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
         float itemPadding = 16f;
         float itemHeight = 104f;
         int numMaxColumns = 4;
-        int numMaxRows = 3;
+        int numMaxRows = 5;
         float panelWidth = numMaxColumns * (itemWidth + itemPadding);
         float panelHeight = numMaxRows * itemHeight;
         int cols = (int) Math.floor(panelWidth / (itemWidth + itemPadding));
@@ -128,7 +133,7 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
         float hullSizeMult = Misc.getSizeNum(ship.getHullSpec().getHullSize());
 
         boolean hasVESAI = true;
-        HullModManager hullmodManager = HullModDataStorage.getInstance().getHullModManager(ship);
+        HullModManager hullmodManager = HullModDataStorage.getInstance().getHullModManager(ship.getId());
         if (isNull(hullmodManager))
             hasVESAI = false;
 
@@ -145,9 +150,12 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
         textComponent.getPosition().rightOfTop(shipListComponent, 0f);
 
         if (hasVESAI) {
-            ButtonAPI specialSlotButton = createAugmentSlotButton(shipElement, ship, hullmodManager.getSpecialSlot(), buttonSize);
+            AugmentSlot specialSlot = hullmodManager.getSpecialSlot();
+            ButtonAPI specialSlotButton = createAugmentSlotButton(shipElement, ship, specialSlot, buttonSize);
             specialSlotButton.getPosition().belowLeft(textComponent, 3f);
-            shipElement.addPara("Special Slot Empty", 0f).getPosition().rightOfMid(specialSlotButton, buttonPadding);
+            String specialButtonText = specialSlot.isEmpty() ? "Special Slot Empty" : specialSlot.getSlottedAugment().getName();
+            Color textColor = specialSlot.isEmpty() ? Misc.getGrayColor() : specialSlot.getSlottedAugment().getAugmentQuality().getColor();
+            shipElement.addPara(specialButtonText, textColor, 0f).getPosition().rightOfMid(specialSlotButton, buttonPadding + 4f);
 
             UIComponentAPI lastCreatedButton = null;
 
@@ -180,7 +188,7 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
                 if (canPayForInstallation(hullSizeMult))
                     buttonText = "Install VESAI";
                 else
-                    buttonText = "Not enough " + (hullmodInstallationWithSP ? "SP" : Strings.C);
+                    buttonText = "Not enough " + (hullmodInstallationWithSP ? "SP" : "credits");
             else
                 buttonText = "Need Spaceport";
             shipElement.addButton(buttonText, buttonData, base, bg, Alignment.MID, CutStyle.C2_MENU, buttonSize * MAX_SLOTS + buttonPadding * (MAX_SLOTS - 1), buttonSize, 6f).setEnabled(canPerformInstallation);
@@ -223,7 +231,7 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
         }
 
         if (hasAugmentSelected) {
-            if (isEmpty && isUnlocked && hullmodManager.isAugmentCompatible(augmentSlot, AugmentUtils.getAugmentFromStack(selectedAugmentInCargo))) {
+            if (isEmpty && isUnlocked && hullmodManager.isAugmentCompatible(augmentSlot, selectedAugmentInCargo.getAugment())) {
                 buttonColor = slotCategory.getColor();
                 if (isDockedAtSpaceport())
                     buttonData.put(ButtonOption.INSTALL_AUGMENT, augmentSlot);
@@ -245,7 +253,7 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
                     buttonData.put(ButtonOption.UNLOCK_SLOT, augmentSlot);
             } else if (isEmpty) {
                 buttonColor = Misc.scaleColor(slotCategory.getColor(), 0.5f);
-                buttonData = null;
+                buttonData.put(ButtonOption.SORT_BY_SLOT, augmentSlot);
             } else {
                 buttonColor = slotCategory.getColor();
                 if (isDockedAtSpaceport())
@@ -259,7 +267,7 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
             uiElement.addTooltipToPrevious(new BaseTooltipCreator() {
                 @Override
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                    slottedAugment.generateTooltip(ship.getStats(), VoidTecEngineeringSuite.HULL_MOD_ID, tooltip, getTooltipWidth(this), slotCategory, augmentSlot.isPrimary());
+                    slottedAugment.generateTooltip(ship.getStats(), VoidTecEngineeringSuite.HULL_MOD_ID, tooltip, getTooltipWidth(this), slotCategory, augmentSlot.isPrimary(), false);
                 }
             }, TooltipMakerAPI.TooltipLocation.BELOW);
 
@@ -321,33 +329,76 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
     }
 
     private boolean isDockedAtSpaceport() {
-        return Global.getSector().hasScript(VT_DockedAtSpaceportHelper.class);
+        return Global.getSector().hasTransientScript(VT_DockedAtSpaceportHelper.class);
     }
 
     private void addAugmentsInCargoPanel(CustomPanelAPI panel, float width, float height) {
-        List<CargoAPI> augmentStacksInCargo = getAugmentsInCargo();
+        List<AugmentCargoWrapper> augmentsInCargo = getAugmentsInCargo();
         final float panelWidth = width - shipListWidth;
         float headerHeight = 21f;
+        float sorterHeight = 68f;
         float panelPadding = titleSize + 10f;
         float buttonHeight = 30f;
         float itemSpacing = 3f;
 
-        TooltipMakerAPI headerElement = panel.createUIElement(panelWidth - 3f, height - headerHeight, false);
+        TooltipMakerAPI headerElement = panel.createUIElement(panelWidth - 3f, 0f, false);
         headerElement.addSectionHeading("Available Augments", Misc.getBrightPlayerColor(), Misc.getDarkPlayerColor(), Alignment.MID, 0f);
         panel.addUIElement(headerElement).inTR(0f, headerHeight);
 
-        TooltipMakerAPI uiElement = panel.createUIElement(panelWidth, height - titleSize - headerHeight, true);
+        final TooltipMakerAPI sorterElement = panel.createUIElement(panelWidth - 3f, 0f, false);
+        String selectedSlot = isNull(activeCategoryFilter) ? "ALL" : activeCategoryFilter.name();
+        Color selectedColor = isNull(activeCategoryFilter) ? Color.WHITE : activeCategoryFilter.getColor();
+        sorterElement.setParaFont(Fonts.ORBITRON_20AA);
+
+        sorterElement.addPara("Filter:", Misc.getBasePlayerColor(), 10f);
+        UIComponentAPI sortingTextComp = sorterElement.getPrev();
+
+        ButtonAPI lastButton = null;
+        for (final SlotCategory slotCategory : SlotCategory.values) {
+            Color buttonColor = isNull(activeCategoryFilter) || activeCategoryFilter == slotCategory ? slotCategory.getColor() : Misc.scaleColorOnly(slotCategory.getColor(), 0.3f);
+            final String tooltipText = String.format("Display only %s slots", slotCategory.name());
+            final float tooltipWidth = headerElement.computeStringWidth(tooltipText);
+
+            HashMap<ButtonOption, SlotCategory> buttonData = new HashMap<>();
+            buttonData.put(ButtonOption.SORT_BY_SLOT, slotCategory);
+
+            ButtonAPI augmentButton = sorterElement.addButton("", buttonData, slotCategory.getColor(), buttonColor, Alignment.MID, CutStyle.ALL, 20, 20, 0f);
+            if (!isNull(lastButton))
+                augmentButton.getPosition().rightOfMid(lastButton, 4f);
+            else
+                augmentButton.getPosition().leftOfMid(sortingTextComp, -74f);
+
+            sorterElement.addTooltipToPrevious(new BaseTooltipCreator() {
+                @Override
+                public float getTooltipWidth(Object tooltipParam) {
+                    return tooltipWidth;
+                }
+
+                @Override
+                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
+                    tooltip.addPara(tooltipText, 0f, slotCategory.getColor(), slotCategory.name());
+                }
+            }, TooltipMakerAPI.TooltipLocation.ABOVE);
+
+            lastButton = augmentButton;
+        }
+
+        sorterElement.addPara("%s", 6f, Misc.getGrayColor(), selectedColor, selectedSlot).setAlignment(Alignment.MID);
+        sorterElement.getPrev().getPosition().belowLeft(sortingTextComp, 6f);
+        sorterElement.addButton("", null, panelWidth - 8f, 0f, 6f);
+        panel.addUIElement(sorterElement).belowLeft(headerElement, 0f);
+
+        TooltipMakerAPI uiElement = panel.createUIElement(panelWidth, height - titleSize - headerHeight - sorterHeight, true);
         List<CustomPanelAPI> panelList = new ArrayList<>();
 
-        for (CargoAPI cargo : augmentStacksInCargo) {
-            final CargoStackAPI augmentCargoStack = cargo.getStacksCopy().get(0);
-            final BaseAugment augmentInStack = AugmentUtils.getAugmentFromStack(augmentCargoStack);
-            if (isNull(augmentInStack) || augmentInStack.getAugmentQuality() == AugmentQuality.DESTROYED)
+        for (AugmentCargoWrapper augmentCargoWrapper : augmentsInCargo) {
+            final AugmentApplier augmentInStack = augmentCargoWrapper.getAugment();
+            if (!(isNull(activeCategoryFilter) || augmentValidForDisplay(augmentInStack)))
                 continue;
 
             CustomPanelAPI cargoPanel = panel.createCustomPanel(panelWidth, buttonHeight, null);
             TooltipMakerAPI cargoElement = cargoPanel.createUIElement(width / 2 - 10f, buttonHeight, false);
-            generateAugmentForPanel(cargoElement, width, augmentCargoStack, augmentInStack);
+            generateAugmentForPanel(cargoElement, width, augmentCargoWrapper, augmentInStack);
 
             cargoPanel.addUIElement(cargoElement);
             panelList.add(cargoPanel);
@@ -358,28 +409,64 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
             uiElement.addCustom(customPanelAPI, i == 0 ? itemSpacing + 10f : itemSpacing);
         }
 
-        panel.addUIElement(uiElement).inTR(0f, panelPadding + headerHeight - 6f);
+        panel.addUIElement(uiElement).inTR(0f, panelPadding + headerHeight + 60f - 6f);
     }
 
-    private List<CargoAPI> getAugmentsInCargo() {
-        CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
-        List<CargoAPI> augmentsInCargo = new ArrayList<>();
+    private boolean augmentValidForDisplay(AugmentApplier augment) {
+        if (isNull(augment))
+            return false;
 
-        for (CargoStackAPI cargoStackAPI : playerCargo.getStacksCopy()) {
+        boolean hasPrimarySlot = !isNull(augment.getPrimarySlot());
+        boolean hasSecondarySlots = !isNullOrEmpty(augment.getSecondarySlots());
+        boolean isNotDestroyed = augment.getAugmentQuality() != AugmentQuality.DESTROYED;
+        boolean matchesPrimarySlot = !isNull(activeCategoryFilter) && activeCategoryFilter == augment.getPrimarySlot();
+        boolean matchesSecondarySlot = !isNull(activeCategoryFilter) && augment.getSecondarySlots().contains(activeCategoryFilter);
+
+        return (hasPrimarySlot || hasSecondarySlots) && isNotDestroyed && (matchesPrimarySlot || matchesSecondarySlot);
+    }
+
+    private List<AugmentCargoWrapper> getAugmentsInCargo() {
+        CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
+        CargoAPI localCargo = Global.getFactory().createCargo(true);
+
+        List<AugmentChestData> chestsInStorage = new ArrayList<>();
+        List<AugmentCargoWrapper> augmentCargoWrappers = new ArrayList<>();
+
+        for (EveryFrameScript transientScript : Global.getSector().getTransientScripts()) {
+            if (transientScript instanceof VT_DockedAtSpaceportHelper) {
+                localCargo = ((VT_DockedAtSpaceportHelper) transientScript).getMarket().getSubmarket(Submarkets.SUBMARKET_STORAGE).getCargo();
+                break;
+            }
+        }
+
+        searchCargoForItems(localCargo, chestsInStorage, augmentCargoWrappers, CargoSource.LOCAL_STORAGE);
+        searchCargoForItems(playerCargo, chestsInStorage, augmentCargoWrappers, CargoSource.PLAYER_FLEET);
+        for (AugmentChestData augmentChestData : chestsInStorage)
+            searchCargoForItems(augmentChestData.getChestStorage(), chestsInStorage, augmentCargoWrappers, CargoSource.CARGO_CHEST);
+
+        return augmentCargoWrappers;
+    }
+
+    private void searchCargoForItems(CargoAPI storageCargo, List<AugmentChestData> chestsInStorage, List<AugmentCargoWrapper> augmentCargoWrappers, CargoSource cargoSource) {
+        for (CargoStackAPI cargoStackAPI : storageCargo.getStacksCopy()) {
             SpecialItemData specialItemData = cargoStackAPI.getSpecialDataIfSpecial();
             if (isNull(specialItemData))
                 continue;
 
+            if (specialItemData.getId().equals(VT_Items.STORAGE_CHEST)) {
+                chestsInStorage.add(((AugmentChestData) specialItemData));
+                continue;
+            }
+
             if (specialItemData.getId().equals(VT_Items.AUGMENT_ITEM)) {
                 CargoAPI cargo = Global.getFactory().createCargo(false);
                 cargo.addFromStack(cargoStackAPI);
-                augmentsInCargo.add(cargo);
+                augmentCargoWrappers.add(new AugmentCargoWrapper(cargoStackAPI, cargoSource, storageCargo));
             }
         }
-        return augmentsInCargo;
     }
 
-    private void generateAugmentForPanel(TooltipMakerAPI cargoElement, float width, final CargoStackAPI augmentCargoStack, BaseAugment augment) {
+    private void generateAugmentForPanel(TooltipMakerAPI cargoElement, float width, final AugmentCargoWrapper augmentCargoWrapper, AugmentApplier augment) {
         final float panelWidth = width - shipListWidth;
         float buttonWidth = 80f;
         float buttonHeight = 24f;
@@ -390,14 +477,14 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
         Color baseColor = Misc.getBrightPlayerColor();
         Color bgColor = Misc.getDarkPlayerColor();
 
-        if (!isNull(selectedAugmentInCargo) && augment == AugmentUtils.getAugmentFromStack(selectedAugmentInCargo)) {
+        if (!isNull(selectedAugmentInCargo) && augment == selectedAugmentInCargo.getAugment()) {
             buttonText = "Selected";
             baseColor = Misc.getHighlightColor();
             bgColor = Misc.getDarkHighlightColor();
         }
 
-        Map<ButtonOption, CargoStackAPI> buttonData = new HashMap<>();
-        buttonData.put(ButtonOption.AUGMENT_SELECTED, augmentCargoStack);
+        Map<ButtonOption, AugmentCargoWrapper> buttonData = new HashMap<>();
+        buttonData.put(ButtonOption.AUGMENT_SELECTED, augmentCargoWrapper);
         cargoElement.addButton(buttonText, buttonData, baseColor, bgColor, Alignment.MID, CutStyle.TL_BR, buttonWidth, buttonHeight, 0f);
         UIComponentAPI buttonComponent = cargoElement.getPrev();
 
@@ -407,7 +494,7 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
         cargoElement.addTooltipToPrevious(new BaseTooltipCreator() {
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                augmentCargoStack.getPlugin().createTooltip(tooltip, true, null, STACK_SOURCE);
+                augmentCargoWrapper.getAugmentCargoStack().getPlugin().createTooltip(tooltip, true, null, STACK_SOURCE);
             }
 
             @Override
@@ -442,7 +529,8 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
     public boolean doesButtonHaveConfirmDialog(Object buttonId) {
         boolean isEmptyMap = ((HashMap<?, ?>) buttonId).isEmpty();
         boolean isNotSelectAugment = !((HashMap<?, ?>) buttonId).containsKey(ButtonOption.AUGMENT_SELECTED);
-        return !isEmptyMap && isNotSelectAugment;
+        boolean isNotSortAugment = !((HashMap<?, ?>) buttonId).containsKey(ButtonOption.SORT_BY_SLOT);
+        return !isEmptyMap && isNotSelectAugment && isNotSortAugment;
     }
 
     @Override
@@ -483,7 +571,7 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
 
         if (((HashMap<?, ?>) buttonId).containsKey(ButtonOption.INSTALL_AUGMENT)) {
             AugmentSlot augmentSlot = (AugmentSlot) ((HashMap<?, ?>) buttonId).get(ButtonOption.INSTALL_AUGMENT);
-            BaseAugment augment = AugmentUtils.getAugmentFromStack(selectedAugmentInCargo);
+            AugmentApplier augment = selectedAugmentInCargo.getAugment();
             prompt.addPara("Install the augment in this slot (%s)?", 0f, augmentSlot.getSlotCategory().getColor(), augmentSlot.getSlotCategory().getName());
             if (!isNull(augment))
                 prompt.addPara(bullet + augment.getName(), augment.getAugmentQuality().getColor(), 10f);
@@ -532,7 +620,7 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
 
         if (((HashMap<?, ?>) buttonId).containsKey(ButtonOption.INSTALL_AUGMENT)) {
             AugmentSlot augmentSlot = (AugmentSlot) ((HashMap<?, ?>) buttonId).get(ButtonOption.INSTALL_AUGMENT);
-            boolean success = augmentSlot.installAugment(AugmentUtils.getAugmentFromStack(selectedAugmentInCargo));
+            boolean success = augmentSlot.installAugment(selectedAugmentInCargo.getAugment());
             if (success)
                 removeAugmentFromCargo();
 
@@ -553,12 +641,25 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
         }
 
         if (((HashMap<?, ?>) buttonId).containsKey(ButtonOption.AUGMENT_SELECTED)) {
-            CargoStackAPI selectedAugment = (CargoStackAPI) ((HashMap<?, ?>) buttonId).get(ButtonOption.AUGMENT_SELECTED);
+            AugmentCargoWrapper selectedAugment = (AugmentCargoWrapper) ((HashMap<?, ?>) buttonId).get(ButtonOption.AUGMENT_SELECTED);
 
-            if (!isNull(selectedAugmentInCargo) && AugmentUtils.getAugmentFromStack(selectedAugment) == AugmentUtils.getAugmentFromStack(selectedAugmentInCargo))
+            if (!isNull(selectedAugmentInCargo) && selectedAugment.getAugment() == selectedAugmentInCargo.getAugment())
                 selectedAugmentInCargo = null;
             else
                 selectedAugmentInCargo = selectedAugment;
+        }
+
+        if (((HashMap<?, ?>) buttonId).containsKey(ButtonOption.SORT_BY_SLOT)) {
+            Object buttonData = ((HashMap<?, ?>) buttonId).get(ButtonOption.SORT_BY_SLOT);
+
+            SlotCategory selectedSlot = buttonData instanceof AugmentSlot
+                    ? ((AugmentSlot) buttonData).getSlotCategory()
+                    : ((SlotCategory) buttonData);
+
+            if (!isNull(activeCategoryFilter) && activeCategoryFilter == selectedSlot)
+                activeCategoryFilter = null;
+            else
+                activeCategoryFilter = selectedSlot;
         }
 
         Global.getSector().getPlayerFleet().getFleetData().setSyncNeeded();
@@ -571,11 +672,11 @@ public class AugmentManagerIntel extends BaseIntelPlugin {
     }
 
     private void removeAugmentFromCargo() {
-        CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
-        for (CargoStackAPI playerCargoStack : playerCargo.getStacksCopy()) {
-            if (playerCargoStack.getData() == selectedAugmentInCargo.getData()) {
-                playerCargoStack.setSize(playerCargoStack.getSize() - 1);
-                playerCargo.removeEmptyStacks();
+        CargoAPI cargo = selectedAugmentInCargo.getSourceCargo();
+        for (CargoStackAPI cargoStackAPI : cargo.getStacksCopy()) {
+            if (cargoStackAPI.getData() == selectedAugmentInCargo.getAugmentCargoStack().getData()) {
+                cargoStackAPI.setSize(cargoStackAPI.getSize() - 1);
+                cargo.removeEmptyStacks();
                 return;
             }
         }

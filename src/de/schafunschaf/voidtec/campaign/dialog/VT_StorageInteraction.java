@@ -27,7 +27,7 @@ public class VT_StorageInteraction implements InteractionDialogPlugin {
 
     public VT_StorageInteraction(AugmentChestPlugin augmentChestPlugin) {
         this.augmentChestPlugin = augmentChestPlugin;
-        this.chestStorage = augmentChestPlugin.getChestStorage();
+        this.chestStorage = augmentChestPlugin.getAugmentChestData().getChestStorage();
     }
 
     enum OptionId {
@@ -65,7 +65,7 @@ public class VT_StorageInteraction implements InteractionDialogPlugin {
                 dialog.showCargoPickerDialog("Store Augments", "Store", "Cancel", false, 100f, AugmentUtils.getAugmentsInPlayerCargo(), new VT_AugmentChestStorageListener(augmentChestPlugin, chestStorage, true));
                 break;
             case RETRIEVE_AUGMENTS:
-                dialog.showCargoPickerDialog("Take Augments", "Store", "Cancel", false, 100f, chestStorage, new VT_AugmentChestStorageListener(augmentChestPlugin, playerFleet.getCargo(), false));
+                dialog.showCargoPickerDialog("Take Augments", "Take", "Cancel", false, 100f, chestStorage, new VT_AugmentChestStorageListener(augmentChestPlugin, playerFleet.getCargo(), false));
                 break;
             case CLOSE:
                 Global.getSector().addTransientScript(new VT_DialogHelperLeaveStorage());

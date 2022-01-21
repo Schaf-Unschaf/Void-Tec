@@ -4,6 +4,7 @@ import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
+import de.schafunschaf.voidtec.util.TextWithHighlights;
 
 import java.util.List;
 import java.util.Random;
@@ -11,7 +12,7 @@ import java.util.Random;
 public interface AugmentApplier {
     void apply(MutableShipStatsAPI stats, String id, Random random, AugmentQuality quality, boolean isPrimary);
 
-    void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory, boolean isPrimary);
+    void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory, boolean isPrimary, boolean isItemTooltip);
 
     void generateStatDescription(TooltipMakerAPI tooltip, boolean isPrimary, float padding);
 
@@ -21,7 +22,9 @@ public interface AugmentApplier {
 
     String getName();
 
-    String getDescription();
+    TextWithHighlights getDescription();
+
+    String getManufacturer();
 
     SlotCategory getPrimarySlot();
 
@@ -35,9 +38,13 @@ public interface AugmentApplier {
 
     AugmentQuality getInitialQuality();
 
-    void damageAugment();
+    TextWithHighlights getCombatScriptDescription();
 
-    void repairAugment();
+    AugmentApplier damageAugment(int numLevelsDamaged);
 
-    void setInstalledSlot(AugmentSlot augmentSlot);
+    AugmentApplier repairAugment(int numLevelsRepaired);
+
+    void installAugment(AugmentSlot augmentSlot);
+
+    void removeAugment();
 }

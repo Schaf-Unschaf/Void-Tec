@@ -3,11 +3,13 @@ package de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments;
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.VT_Strings;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatApplier;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatModValue;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.*;
+import de.schafunschaf.voidtec.util.TextWithHighlights;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,7 +25,7 @@ public class BaseAugment implements AugmentApplier {
     protected String augmentID;
     protected String manufacturer;
     protected String name;
-    protected String description;
+    protected TextWithHighlights description;
     protected int rarity;
     protected SlotCategory primarySlot;
     protected List<BaseStatMod> primaryStatMods;
@@ -32,11 +34,12 @@ public class BaseAugment implements AugmentApplier {
     protected List<BaseStatMod> secondaryStatMods;
     protected List<StatModValue<Float, Float, Boolean>> secondaryStatValues;
     protected AugmentQuality augmentQuality;
+    protected TextWithHighlights combatScriptDescription;
     protected CombatScriptRunner combatScript;
     protected AugmentQuality initialQuality;
     private AugmentSlot installedSlot;
 
-    public BaseAugment(AugmentData augmentData, Random random) {
+    public BaseAugment(AugmentData augmentData, AugmentQuality augmentQuality, Random random) {
         this.augmentID = augmentData.getAugmentID();
         this.manufacturer = augmentData.getManufacturer();
         this.name = augmentData.getName();
@@ -48,15 +51,18 @@ public class BaseAugment implements AugmentApplier {
         this.secondarySlots = augmentData.getSecondarySlots();
         this.secondaryStatMods = augmentData.getSecondaryStatMods();
         this.secondaryStatValues = augmentData.getSecondaryStatValues();
-        this.augmentQuality = AugmentQuality.getQuality(augmentData.getAugmentQualityRange(), random, augmentData.isEqualQualityRoll());
-        this.initialQuality = this.augmentQuality;
+        this.augmentQuality = isNull(augmentQuality)
+                ? AugmentQuality.getRandomQualityInRange(augmentData.getAugmentQualityRange(), random, augmentData.isEqualQualityRoll())
+                : augmentQuality;
+        this.initialQuality = augmentQuality;
+        this.combatScriptDescription = augmentData.getCombatScriptDescription();
         this.combatScript = augmentData.getCombatScript();
     }
 
     public BaseAugment(String augmentID,
                        String manufacturer,
                        String name,
-                       String description,
+                       TextWithHighlights description,
                        int rarity,
                        SlotCategory primarySlot,
                        List<BaseStatMod> primaryStatMods,
@@ -65,7 +71,9 @@ public class BaseAugment implements AugmentApplier {
                        List<BaseStatMod> secondaryStatMods,
                        List<StatModValue<Float, Float, Boolean>> secondaryStatValues,
                        AugmentQuality augmentQuality,
-                       CombatScriptRunner combatScript) {
+                       TextWithHighlights combatScriptDescription,
+                       CombatScriptRunner combatScript
+    ) {
         this.augmentID = augmentID;
         this.manufacturer = manufacturer;
         this.name = name;
@@ -78,6 +86,8 @@ public class BaseAugment implements AugmentApplier {
         this.secondaryStatMods = secondaryStatMods;
         this.secondaryStatValues = secondaryStatValues;
         this.augmentQuality = augmentQuality;
+        this.initialQuality = augmentQuality;
+        this.combatScriptDescription = combatScriptDescription;
         this.combatScript = combatScript;
     }
 
@@ -96,10 +106,11 @@ public class BaseAugment implements AugmentApplier {
     }
 
     @Override
-    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory, boolean isPrimary) {
+    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory, boolean isPrimary, boolean isItemTooltip) {
         tooltip.addButton("", null, getAugmentQuality().getColor(), getAugmentQuality().getColor(), width, 0f, 3f);
         tooltip.addPara(String.format("%s (%s)", getName(), getAugmentQuality().getName()), getAugmentQuality().getColor(), 3f);
-        tooltip.addPara(getDescription(), 3f);
+        if (isItemTooltip || slotCategory == SlotCategory.SPECIAL)
+            tooltip.addPara(getDescription().getDisplayString(), 3f, Misc.getHighlightColor(), getDescription().getHighlights());
         tooltip.addSpacer(3f);
 
         List<BaseStatMod> statMods = isPrimary ? getPrimaryStatMods() : getSecondaryStatMods();
@@ -117,6 +128,10 @@ public class BaseAugment implements AugmentApplier {
                     statApplier.generateTooltipEntry(stats, id + "_" + getAugmentID(), imageWithText, bulletColor);
 
             tooltip.addImageWithText(3f);
+        }
+
+        if (!isNull(combatScriptDescription) && !combatScriptDescription.getDisplayString().isEmpty()) {
+            tooltip.addPara(getCombatScriptDescription().getDisplayString(), 3f, Misc.getHighlightColor(), getCombatScriptDescription().getHighlights());
         }
 
         tooltip.addButton("", null, getAugmentQuality().getColor(), getAugmentQuality().getColor(), width, 0f, 3f);
@@ -153,17 +168,28 @@ public class BaseAugment implements AugmentApplier {
     }
 
     @Override
-    public void damageAugment() {
-        augmentQuality = augmentQuality.getLowerQuality();
+    public AugmentApplier damageAugment(int numLevelsDamaged) {
+        for (int i = 0; i < numLevelsDamaged; i++)
+            augmentQuality = augmentQuality.getLowerQuality();
+
+        return this;
     }
 
     @Override
-    public void repairAugment() {
-        augmentQuality = augmentQuality.getHigherQuality();
+    public AugmentApplier repairAugment(int numLevelsRepaired) {
+        for (int i = 0; i < numLevelsRepaired; i++)
+            augmentQuality = augmentQuality.getHigherQuality();
+
+        return this;
     }
 
     @Override
-    public void setInstalledSlot(AugmentSlot augmentSlot) {
+    public void installAugment(AugmentSlot augmentSlot) {
         this.installedSlot = augmentSlot;
+    }
+
+    @Override
+    public void removeAugment() {
+        installedSlot = null;
     }
 }

@@ -6,19 +6,15 @@ import com.fs.starfarer.api.campaign.comm.IntelManagerAPI;
 import de.schafunschaf.voidtec.Settings;
 import de.schafunschaf.voidtec.campaign.ids.VT_Items;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
-import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestData;
+import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
 import de.schafunschaf.voidtec.campaign.listeners.VT_CampaignListener;
 import de.schafunschaf.voidtec.campaign.listeners.VT_LootListener;
 import de.schafunschaf.voidtec.helper.ModLoadingUtils;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.HullModDataStorage;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.AugmentDataManager;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.BaseAugment;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.VT_RainbowEngines;
 import lombok.extern.log4j.Log4j;
-
-import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @Log4j
 public class VoidTecPlugin extends BaseModPlugin {
@@ -41,14 +37,13 @@ public class VoidTecPlugin extends BaseModPlugin {
 
         Settings.isIndEvoActive = Global.getSettings().getModManager().isModEnabled("IndEvo");
 
-        for (AugmentQuality augmentQuality : AugmentQuality.getAllowedQualities()) {
-            BaseAugment randomAugment = AugmentDataManager.getRandomAugment(augmentQuality, null);
-            if (!isNull(randomAugment))
-                Global.getSector().getPlayerFleet().getCargo().addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, randomAugment), 1f);
+        if (!newGame) {
+            for (int i = 0; i < 20; i++) {
+                Global.getSector().getPlayerFleet().getCargo().addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, AugmentDataManager.getRandomAugment(null)), 1);
+            }
+            Global.getSector().getPlayerFleet().getCargo().addSpecial(new AugmentChestData(VT_Items.STORAGE_CHEST, null, 100),1f);
         }
 
-        Global.getSector().getPlayerFleet().getCargo().addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, AugmentDataManager.getAugment(VT_RainbowEngines.AUGMENT_ID)), 1f);
-        Global.getSector().getPlayerFleet().getCargo().addSpecial(new AugmentChestData(VT_Items.STORAGE_CHEST, null),1f);
     }
 
     @Override

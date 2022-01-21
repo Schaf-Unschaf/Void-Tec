@@ -28,13 +28,13 @@ public class ShieldAbsorbtion extends BaseStatMod {
         if (ComparisonTools.isNull(statMod))
             return;
 
-        String description = "TODO SHIELD ABSORPTION %s by %s";
+        String description = "Shield efficiency %s by %s";
         generateTooltip(tooltip, statMod, description, bulletColor, false);
     }
 
     @Override
     public void generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float avgModValue) {
-        boolean isPositive = avgModValue >= 0;
+        boolean isPositive = avgModValue <= 0;
         String incDec = isPositive ? "Improves" : "Worsens";
         String hlString = "shields";
         String hlString2 = "absorb damage";

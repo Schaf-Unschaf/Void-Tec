@@ -1,16 +1,32 @@
 package de.schafunschaf.voidtec.campaign.items.augments;
 
 import com.fs.starfarer.api.campaign.SpecialItemData;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.BaseAugment;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
+import de.schafunschaf.voidtec.util.ColorShifter;
+import de.schafunschaf.voidtec.util.MalfunctionEffect;
 import lombok.Getter;
 
 @Getter
 public class AugmentItemData extends SpecialItemData {
-    private final BaseAugment augment;
+    private final AugmentApplier augment;
+    private MalfunctionEffect malfunctionEffect;
+    private ColorShifter colorShifter;
 
-    public AugmentItemData(String id, String data, BaseAugment augment) {
+    public AugmentItemData(String id, String data, AugmentApplier augment) {
         super(id, data);
         this.augment = augment;
+        float modifier = augment.getAugmentQuality().getModifier();
+        float breathingLength = 300f;
+        if (augment.getAugmentQuality() == AugmentQuality.UNIQUE) {
+            colorShifter = new ColorShifter(null);
+        } else if (!(augment.getAugmentQuality() == AugmentQuality.DESTROYED || augment.getAugmentQuality() == AugmentQuality.DOMAIN)) {
+            float maxTimeAtFull = (1 / (3f - modifier)) * breathingLength * 3;
+            int flickerChance = (int) ((2f - modifier) / (modifier * modifier) * 50);
+            int maxNumFlickers = Math.max(Math.round(6 - modifier * 3), 1);
+
+            malfunctionEffect = new MalfunctionEffect(breathingLength, maxTimeAtFull, flickerChance, maxNumFlickers, modifier);
+        }
     }
 
     @Override
@@ -24,7 +40,7 @@ public class AugmentItemData extends SpecialItemData {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof AugmentItemData) {
-            BaseAugment otherAugment = ((AugmentItemData) obj).augment;
+            AugmentApplier otherAugment = ((AugmentItemData) obj).augment;
             boolean isSameAugment = otherAugment.getAugmentID().equals(this.augment.getAugmentID());
             boolean isSameQuality = otherAugment.getAugmentQuality() == this.augment.getAugmentQuality();
 

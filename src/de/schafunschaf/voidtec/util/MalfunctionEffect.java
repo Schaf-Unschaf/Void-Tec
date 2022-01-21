@@ -25,10 +25,10 @@ public class MalfunctionEffect {
      * of its 'breath', aka at full strength.
      *
      * @param breathingLength the length in frames of a full cycle (in-out-in) without malfunctions
-     * @param maxTimeAtFull amount of frames the 'breath' is getting hold (full intensity)
-     * @param flickerChance chance to trigger a malfunction (chance/10_000)
-     * @param maxNumFlickers maximum number of malfunction flickers
-     * @param speedModifier modifies the speed of the breathing and flickering
+     * @param maxTimeAtFull   amount of frames the 'breath' is getting hold (full intensity)
+     * @param flickerChance   chance to trigger a malfunction (chance/10_000)
+     * @param maxNumFlickers  maximum number of malfunction flickers
+     * @param speedModifier   modifies the speed of the breathing and flickering
      */
     public MalfunctionEffect(float breathingLength, float maxTimeAtFull, int flickerChance, int maxNumFlickers, float speedModifier) {
         this.breathingLength = breathingLength;
@@ -60,10 +60,12 @@ public class MalfunctionEffect {
                     flickerSpeed = new Random().nextInt(20) + baseFrameChange;
                     numFlickers--;
                 }
-            } else if (counter < breathingLength) {
-                counter += speedModifier * baseFrameChange;
-            } else {
+            } else if (counter >= breathingLength / 2) {
                 isFlickering = false;
+                timeSpentOn = 0f;
+                isBreathingIn = false;
+            } else {
+                counter += flickerSpeed;
             }
         } else {
             if (isBreathingIn) {

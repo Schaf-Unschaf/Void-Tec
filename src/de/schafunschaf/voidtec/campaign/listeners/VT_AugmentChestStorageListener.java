@@ -5,21 +5,31 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoPickerListener;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
-import com.fs.starfarer.api.ui.*;
+import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.ButtonAPI;
+import com.fs.starfarer.api.ui.CutStyle;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestData;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestPlugin;
 import de.schafunschaf.voidtec.helper.AugmentUtils;
-import de.schafunschaf.voidtec.util.ColorShifter;
-import lombok.RequiredArgsConstructor;
 
 import java.awt.*;
 
-@RequiredArgsConstructor
+import static de.schafunschaf.voidtec.util.ProgressBar.addStorageMeter;
+
 public class VT_AugmentChestStorageListener implements CargoPickerListener {
     private final AugmentChestPlugin augmentChestPlugin;
     private final CargoAPI targetStorage;
     private final boolean transferFromPlayer;
-    private ColorShifter colorShifter = new ColorShifter(Color.RED);
+    private final AugmentChestData augmentChestData;
+
+    public VT_AugmentChestStorageListener(AugmentChestPlugin augmentChestPlugin, CargoAPI targetStorage, boolean transferFromPlayer) {
+        this.augmentChestPlugin = augmentChestPlugin;
+        this.targetStorage = targetStorage;
+        this.transferFromPlayer = transferFromPlayer;
+        this.augmentChestData = augmentChestPlugin.getAugmentChestData();
+    }
 
     @Override
     public void pickedCargo(CargoAPI cargo) {
@@ -27,7 +37,7 @@ public class VT_AugmentChestStorageListener implements CargoPickerListener {
         for (CargoStackAPI stack : cargo.getStacksCopy())
             sumCargoAffected += (int) stack.getSize();
 
-        if (transferFromPlayer && augmentChestPlugin.getCurrentSize() + sumCargoAffected > augmentChestPlugin.getMaxSize())
+        if (transferFromPlayer && augmentChestData.getCurrentSize() + sumCargoAffected > augmentChestData.getMaxSize())
             return;
 
         augmentChestPlugin.addToSize(transferFromPlayer ? sumCargoAffected : -sumCargoAffected);
@@ -51,37 +61,17 @@ public class VT_AugmentChestStorageListener implements CargoPickerListener {
 
         sumCargoAffected = transferFromPlayer ? sumCargoAffected : -sumCargoAffected;
 
-        float maxSize = augmentChestPlugin.getMaxSize();
-        float currentSize = augmentChestPlugin.getCurrentSize() + sumCargoAffected;
-        Color spaceHLColor = currentSize < maxSize ? Misc.getHighlightColor() : Misc.getNegativeHighlightColor();
+        float maxSize = augmentChestData.getMaxSize();
+        float currentSize = augmentChestData.getCurrentSize() + sumCargoAffected;
 
-//        panel.setParaFont(Fonts.INSIGNIA_LARGE);
+        ButtonAPI outerButton = addStorageMeter(panel, 200f, 22f, currentSize, maxSize, Misc.scaleColorOnly(Misc.getBasePlayerColor(), 0.8f), Misc.scaleColorOnly(Misc.getDarkPlayerColor(), 0.2f), Misc.getBasePlayerColor(), 0f);
 
-
-        maxSize = 10;
-//        currentSize = sumCargoAffected;
-        Color barColor = colorShifter.shiftColor(0.5f);
-        float outerWidth = 90;
-        float innerWidth = Math.min(Math.max((currentSize / maxSize) * outerWidth + 8f, 8f), outerWidth);
-        ButtonAPI outerButton = panel.addButton("", null, Color.BLACK, Color.DARK_GRAY, Alignment.MID, CutStyle.ALL, outerWidth, 22f, 10f);
-        LabelAPI numberDisplay = panel.addPara(String.format("%s/%s", (int) currentSize, (int) maxSize), 3f, Misc.getGrayColor(), spaceHLColor, String.valueOf((int) currentSize), String.valueOf((int) maxSize));
-        ButtonAPI bgButton = panel.addButton("", null, Color.BLACK, Color.BLACK, Alignment.MID, CutStyle.ALL, outerWidth, 16f, 10f);
-        ButtonAPI innerButton = panel.addButton("", null, Color.BLACK, Misc.scaleColorOnly(barColor, 0.5f), Alignment.MID, CutStyle.ALL, innerWidth, 16f, 0);
-
-        panel.addPara("Allowed Items", Misc.getHighlightColor(), 10f).getPosition().inTR(0f, 20f);
+        augmentChestPlugin.createTooltip(panel, false, null, null);
+        panel.addPara("Allowed Items", Misc.getHighlightColor(), 10f);
         panel.addButton("", null, Color.BLACK, Misc.getBasePlayerColor(), Alignment.MID, CutStyle.ALL, panel.computeStringWidth("Allowed Items"), 0f, 3f);
         panel.addPara(" - Augments", 6f);
 
-        outerButton.getPosition().setYAlignOffset(-662f);
-        outerButton.getPosition().setXAlignOffset(124f);
-//        numberDisplay.setAlignment(Alignment.MID);
-        numberDisplay.getPosition().rightOfMid(outerButton, 20);
-        bgButton.getPosition().rightOfMid(outerButton, -outerWidth - 2);
-        innerButton.getPosition().rightOfMid(outerButton, 0);
-        innerButton.getPosition().setXAlignOffset(-outerWidth - 2);
-    }
-
-    private void addStorageMeter(TooltipMakerAPI panel) {
-
+        outerButton.getPosition().setXAlignOffset(184f);
+        outerButton.getPosition().setYAlignOffset(-663f);
     }
 }

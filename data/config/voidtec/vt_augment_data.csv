@@ -1,6 +1,31 @@
-augmentID,manufacturer,name,description,rarity,primarySlot,primaryStatMods,primaryStatValues,secondarySlots,secondaryStatMods,secondaryStatValues,augmentQuality,equalQualityRoll
-vt_reactorOverdrive,VoidTec,Reactor Overdrive,Removes 'unnecessary' safety locks from the ships flux grid. This will put the reactor under more stress in exchange for a higher flux throughput.,80,REACTOR,"FLUX_DISSIPATION,VENT_RATE,PEAK_CR","20,40,true_10,25,true_-15,-30,true","UNIVERSAL,SYSTEM","SYSTEM_REGEN,SYSTEM_COOLDOWN,OVERLOAD_DURATION","10,20,true_-10,-20,true_15,30,false","SALVAGED,DOMAIN",false
-vt_hardenedPlating,Hegemony,Hardened Plating,bla,80,STRUCTURE,ARMOR_HEALTH,"10,20,true",,,,"SALVAGED,EXPERIMENTAL",
-,,,,,,,,,,,,
-"# NOTES: A list of all Slot-Types, StatMods and Qualities can be found in VoidTec\Help\DataTypes.txt",,,,,,,,,,,,
-# Unique ID (use a prefix),# Manufacturer (can assign color via vt_augment_manufacturer.json),# Displayed name of the Augment,# Description,"# Rarity (100 - 1, highest to lowest)",# Primary slot,# Primary stat modifiers,# Values used for each primary stat,,,,"# Min and Max rolled quality (MIN,MAX - each can be null or left empty for random quality)","# If true, will pick a random quality and ignore its weighting"
+augmentID,manufacturer,name,description,rarity,primarySlot,primaryStatMods,primaryStatValues,secondarySlots,secondaryStatMods,secondaryStatValues,allowedAugmentQualities,combatScriptDescription,equalQualityRoll
+vt_reactorOverdrive,VoidTec,Reactor Overdrive,Removes '==unnecessary==' safety locks from the ships flux grid. This will put the reactor under more stress in exchange for a higher flux throughput.,40,REACTOR,"FLUX_DISSIPATION,VENT_RATE,PEAK_CR","20,40,true_10,25,true_-15,-30,true","UNIVERSAL,LOGISTIC","SYSTEM_REGEN,SYSTEM_COOLDOWN,OVERLOAD_DURATION","10,20,true_-10,-20,true_15,30,false","DAMAGED,EXPERIMENTAL",,false
+vt_hardenedPlating,Hegemony,Hardened Plating,Strengthens the ships external armor plating,90,STRUCTURE,ARMOR_HEALTH,"10,20,true","UNIVERSAL,ENGINE",ENGINE_HEALTH,"30,45,true",,,
+vt_shapedCharge,Mercenary,Shaped Charges,Modifies the internal forge of the ship to produce ammunition with ==improved anti-armor== capabilities.,95,LOGISTIC,HIT_STRENGTH,"15,25,true","UNIVERSAL,WEAPON","HIT_STRENGTH,PROJECTILE_SPEED","20,30,true_-10,-20,false",,,
+vt_improvedCapacitor,Tritachyon,Improved Capacitors,Increases the damage output of energy based weapons.,95,WEAPON,ENERGY_DAMAGE,"10,20,true","UNIVERSAL,REACTOR","FLUX_CAPACITY, EMP_DAMAGE_TAKEN","10,20,true_-10,-15,true",,,
+vt_modulatingShield,Tritachyon,Modulating Shield Emitters,Reduces the overall damage taken by shields.,65,SHIELD,"SHIELD_ABSORPTION,SHIELD_UPKEEP","-7,-15,true_20,40,false","UNIVERSAL,STRUCTURE,LOGISTIC","EMP_DAMAGE_TAKEN,OVERLOAD_DURATION,CRITICAL_MALFUNCTIONS","-20,-30,true_-15,-25,false_-20,-30,false",,,
+vt_fluxInjector,Independent,Flux Injector,Reroutes some of the ships generated flux back into its system for a small boost.,80,ENGINE,"ZERO_FLUX_SPEED,BURN_LEVEL,ENGINE_HEALTH","20,30,true_1,2,false_-20,-30,false",REACTOR,"ZERO_FLUX_LIMIT,VENT_RATE,FLUX_DISSIPATION","1,1,false_10,15,true_-10,-15,true",,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+"# NOTES:
+A list of all Slot-Types, StatMods and Qualities can be found in VoidTec\Help\DataTypes.txt",,,,,,,,,,,,,
+# Unique ID (use a prefix),"# Manufacturer
+Can be a faction or custom entry.
+Will color the entry in faction-, designType- or playercolor",# Displayed name of the Augment,# Description,"# Rarity
+100 highest spawn chance
+1 lowest spawn chance",# Primary slot,"# Primary stat modifiers
+MOD1,MOD2,MOD3...","# Values used for each primary stat
+needs to be grouped as follow:
+minValueInt,maxValueInt,modifiedByQualityBoolean_minValueInt,maxValueInt,modifiedByQualityBoolean_...","# Secondary slots
+Can be more than one
+SLOT1,SLOT2,SLOT3,...","# Secondary stat modifiers
+MOD1,MOD2,MOD3,...","# Values used for each secondary stat
+needs to be grouped as follow:
+minValueInt,maxValueInt,modifiedByQualityBoolean_minValueInt,maxValueInt,modifiedByQualityBoolean_...","# Min and Max rolled quality
+MIN,MAX
+,MAX
+MIN,
+each can be null or left empty for random quality",,"# If true, will pick a random quality and ignore its weighting"
