@@ -43,52 +43,44 @@ public class AugmentDataLoader {
 
                 String primaryStatModString = row.optString("primaryStatMods");
                 List<BaseStatMod> primaryStatMods = null;
-                if (!primaryStatModString.isEmpty())
+                if (!primaryStatModString.isEmpty()) {
                     primaryStatMods = getStatModsFromString(primaryStatModString);
+                }
 
                 String primaryStatModValueString = row.optString("primaryStatValues");
                 List<StatModValue<Float, Float, Boolean>> primaryStatValues = null;
-                if (!primaryStatModValueString.isEmpty())
+                if (!primaryStatModValueString.isEmpty()) {
                     primaryStatValues = getStatValuesFromString(primaryStatModValueString);
+                }
 
                 String secondarySlotString = row.optString("secondarySlots");
                 List<SlotCategory> secondarySlots = null;
-                if (!secondarySlotString.isEmpty())
+                if (!secondarySlotString.isEmpty()) {
                     secondarySlots = getSlotsFromString(secondarySlotString);
+                }
 
                 String secondaryStatModString = row.optString("secondaryStatMods");
                 List<BaseStatMod> secondaryStatMods = null;
-                if (!secondaryStatModString.isEmpty())
+                if (!secondaryStatModString.isEmpty()) {
                     secondaryStatMods = getStatModsFromString(secondaryStatModString);
+                }
 
                 String secondaryStatModValueString = row.optString("secondaryStatValues");
                 List<StatModValue<Float, Float, Boolean>> secondaryStatValues = null;
-                if (!secondaryStatModValueString.isEmpty())
+                if (!secondaryStatModValueString.isEmpty()) {
                     secondaryStatValues = getStatValuesFromString(secondaryStatModValueString);
+                }
 
                 String[] augmentQualityValueString = row.optString("allowedAugmentQualities").split("\\s*(,\\s*)+");
                 String[] augmentQuality;
-                if (augmentQualityValueString.length == 1 && augmentQualityValueString[0].isEmpty())
+                if (augmentQualityValueString.length == 1 && augmentQualityValueString[0].isEmpty()) {
                     augmentQuality = AugmentQuality.allowedValues;
-                else
+                } else {
                     augmentQuality = augmentQualityValueString;
+                }
 
                 try {
-                    AugmentData augmentData = new AugmentData(augmentID,
-                            row.optString("manufacturer"),
-                            row.optString("name"),
-                            new TextWithHighlights(row.optString("description")),
-                            row.optInt("rarity"),
-                            SlotCategory.getEnum(row.getString("primarySlot")),
-                            primaryStatMods,
-                            primaryStatValues,
-                            secondarySlots,
-                            secondaryStatMods,
-                            secondaryStatValues,
-                            augmentQuality,
-                            new TextWithHighlights(row.optString("combatScriptDescription")),
-                            row.optBoolean("equalQualityRoll"),
-                            null);
+                    AugmentData augmentData = new AugmentData(augmentID, row.optString("manufacturer"), row.optString("name"), new TextWithHighlights(row.optString("description")), row.optInt("rarity"), SlotCategory.getEnum(row.getString("primarySlot")), primaryStatMods, primaryStatValues, secondarySlots, secondaryStatMods, secondaryStatValues, augmentQuality, new TextWithHighlights(row.optString("combatScriptDescription")), row.optBoolean("equalQualityRoll"), null);
 
                     AugmentDataManager.storeAugmentData(augmentID, augmentData);
                 } catch (JSONException error) {
@@ -105,8 +97,9 @@ public class AugmentDataLoader {
 
         for (String statModAsString : primaryStatModString.split("\\s*(,\\s*)+")) {
             BaseStatMod statMod = StatProvider.getStatMod(statModAsString.toLowerCase().trim());
-            if (!isNull(statMod))
+            if (!isNull(statMod)) {
                 statMods.add(statMod);
+            }
         }
 
         return statMods;
@@ -115,9 +108,11 @@ public class AugmentDataLoader {
     private static List<SlotCategory> getSlotsFromString(String slotString) {
         List<SlotCategory> slotCategories = new ArrayList<>();
 
-        for (String slotAsString : slotString.split("\\s*(,\\s*)+"))
-            if (!isNull(slotAsString) && !slotAsString.isEmpty())
+        for (String slotAsString : slotString.split("\\s*(,\\s*)+")) {
+            if (!isNull(slotAsString) && !slotAsString.isEmpty()) {
                 slotCategories.add(SlotCategory.valueOf(slotAsString.trim()));
+            }
+        }
 
         return slotCategories;
     }
@@ -125,9 +120,11 @@ public class AugmentDataLoader {
     private static List<StatModValue<Float, Float, Boolean>> getStatValuesFromString(String primaryStatModValueString) {
         List<StatModValue<Float, Float, Boolean>> statModValues = new ArrayList<>();
 
-        for (String statModValue : primaryStatModValueString.split("\\s*(_\\s*)+"))
-            if (!isNull(statModValue) && !statModValue.isEmpty())
+        for (String statModValue : primaryStatModValueString.split("\\s*(_\\s*)+")) {
+            if (!isNull(statModValue) && !statModValue.isEmpty()) {
                 statModValues.add(getStatModValueDataFromString(statModValue.trim()));
+            }
+        }
 
         return statModValues;
     }

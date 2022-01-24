@@ -11,7 +11,7 @@ import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.List;
 
 import static de.schafunschaf.voidtec.Settings.*;
@@ -24,11 +24,13 @@ public class VoidTecUtils {
 
         for (CargoStackAPI itemData : playerCargo.getStacksCopy()) {
             SpecialItemData specialItemData = itemData.getSpecialDataIfSpecial();
-            if (isNull(specialItemData))
+            if (isNull(specialItemData)) {
                 continue;
+            }
 
-            if (specialItemData.getId().equals(VT_Items.AUGMENT_ITEM))
+            if (specialItemData.getId().equals(VT_Items.AUGMENT_ITEM)) {
                 cargo.addFromStack(itemData);
+            }
         }
 
         return cargo;
@@ -37,13 +39,15 @@ public class VoidTecUtils {
     public static void adjustItemInCargo(CargoAPI sourceCargo, CargoAPI cargoToAdjust) {
         List<CargoStackAPI> sourceCargoStacks = sourceCargo.getStacksCopy();
 
-        for (CargoStackAPI sourceCargoStack : sourceCargoStacks)
+        for (CargoStackAPI sourceCargoStack : sourceCargoStacks) {
             cargoToAdjust.removeItems(CargoAPI.CargoItemType.SPECIAL, sourceCargoStack.getData(), sourceCargoStack.getSize());
+        }
     }
 
     public static AugmentApplier getAugmentFromStack(CargoStackAPI cargoStack) {
-        if (isNull(cargoStack))
+        if (isNull(cargoStack)) {
             return null;
+        }
 
         return ((AugmentItemData) cargoStack.getData()).getAugment();
     }
@@ -60,8 +64,9 @@ public class VoidTecUtils {
     }
 
     public static boolean canPayForInstallation(float hullSizeMult) {
-        if (hullmodInstallationWithSP)
+        if (hullmodInstallationWithSP) {
             return Global.getSector().getPlayerStats().getStoryPoints() >= installCostSP;
+        }
 
         return Global.getSector().getPlayerFleet().getCargo().getCredits().get() >= installCostCredits * hullSizeMult;
     }

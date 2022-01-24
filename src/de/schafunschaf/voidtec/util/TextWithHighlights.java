@@ -9,11 +9,10 @@ import java.util.regex.Pattern;
 
 @Getter
 public class TextWithHighlights {
+    private static final Pattern highlightPattern = Pattern.compile("==.*?==", Pattern.MULTILINE);
     private final String originalString;
     private final String displayString;
     private final String[] highlights;
-
-    private static final Pattern highlightPattern = Pattern.compile("==.*?==", Pattern.MULTILINE);
 
     public TextWithHighlights(String string) {
         this.originalString = string;
@@ -25,8 +24,9 @@ public class TextWithHighlights {
         List<String> matchList = new ArrayList<>();
 
         Matcher matcher = highlightPattern.matcher(text);
-        while (matcher.find())
+        while (matcher.find()) {
             matchList.add(cleanStringFromHighlightSymbols(matcher.group()));
+        }
 
         return matchList.toArray(new String[0]);
     }

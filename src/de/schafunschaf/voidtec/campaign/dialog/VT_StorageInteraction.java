@@ -15,27 +15,17 @@ import java.util.Map;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class VT_StorageInteraction implements InteractionDialogPlugin {
+    private final AugmentChestPlugin augmentChestPlugin;
+    private final CargoAPI chestStorage;
     private InteractionDialogAPI dialog;
     private OptionPanelAPI optionPanel;
     private VisualPanelAPI visualPanel;
     private TextPanelAPI textPanel;
-
     private CampaignFleetAPI playerFleet;
-
-    private final AugmentChestPlugin augmentChestPlugin;
-    private final CargoAPI chestStorage;
 
     public VT_StorageInteraction(AugmentChestPlugin augmentChestPlugin) {
         this.augmentChestPlugin = augmentChestPlugin;
         this.chestStorage = augmentChestPlugin.getAugmentChestData().getChestStorage();
-    }
-
-    enum OptionId {
-        INIT,
-        LIST_AUGMENTS,
-        STORE_AUGMENTS,
-        RETRIEVE_AUGMENTS,
-        CLOSE
     }
 
     @Override
@@ -52,8 +42,9 @@ public class VT_StorageInteraction implements InteractionDialogPlugin {
 
     @Override
     public void optionSelected(String optionText, Object optionData) {
-        if (isNull(optionData))
+        if (isNull(optionData)) {
             return;
+        }
 
         OptionId selectedOption = (OptionId) optionData;
 
@@ -104,5 +95,9 @@ public class VT_StorageInteraction implements InteractionDialogPlugin {
     @Override
     public Map<String, MemoryAPI> getMemoryMap() {
         return null;
+    }
+
+    enum OptionId {
+        INIT, LIST_AUGMENTS, STORE_AUGMENTS, RETRIEVE_AUGMENTS, CLOSE
     }
 }

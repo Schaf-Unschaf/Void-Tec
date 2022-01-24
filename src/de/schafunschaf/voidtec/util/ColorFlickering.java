@@ -2,12 +2,10 @@ package de.schafunschaf.voidtec.util;
 
 import com.fs.starfarer.api.util.Misc;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Random;
 
 public class ColorFlickering {
-    private boolean isFlickeringNow = false;
-    private boolean pausedBetween = false;
     private final float minIntensity;
     private final float maxIntensity;
     private final int maxFramesBeforeRestart;
@@ -17,15 +15,17 @@ public class ColorFlickering {
     private final int maxFlickerSpeed;
     private final int minFlickerSpeed;
     private final int maxSpeedAfterLastFlicker;
-
+    float frameCounter = 0f;
+    private boolean isFlickeringNow = false;
+    private boolean pausedBetween = false;
     private float currentIntensity;
     private int framesBetweenRestart;
     private int flickerSpeed;
     private int numOfFlickers;
 
-    float frameCounter = 0f;
-
-    public ColorFlickering(float minIntensity, float maxIntensity, int maxFramesBeforeRestart, int minFramesBeforeRestart, int maxFramesBetweenFlicker, int maxNumOfFlickers, int maxFlickerSpeed, int minFlickerSpeed, int maxSpeedAfterLastFlicker) {
+    public ColorFlickering(float minIntensity, float maxIntensity, int maxFramesBeforeRestart,
+                           int minFramesBeforeRestart, int maxFramesBetweenFlicker, int maxNumOfFlickers,
+                           int maxFlickerSpeed, int minFlickerSpeed, int maxSpeedAfterLastFlicker) {
         this.minIntensity = minIntensity * 100f;
         this.maxIntensity = maxIntensity * 100f;
         this.maxFramesBeforeRestart = maxFramesBeforeRestart;

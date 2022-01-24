@@ -1,6 +1,6 @@
 package de.schafunschaf.voidtec;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class VT_Colors {
     public static Color VT_COLOR_MAIN = new Color(150, 0, 255);

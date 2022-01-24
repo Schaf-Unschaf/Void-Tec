@@ -32,17 +32,21 @@ public class CargoUtils {
 
         searchCargoForItems(localCargo, chestsInStorage, augmentCargoWrappers, AugmentCargoWrapper.CargoSource.LOCAL_STORAGE);
         searchCargoForItems(playerCargo, chestsInStorage, augmentCargoWrappers, AugmentCargoWrapper.CargoSource.PLAYER_FLEET);
-        for (AugmentChestData augmentChestData : chestsInStorage)
+        for (AugmentChestData augmentChestData : chestsInStorage) {
             searchCargoForItems(augmentChestData.getChestStorage(), chestsInStorage, augmentCargoWrappers, AugmentCargoWrapper.CargoSource.CARGO_CHEST);
+        }
 
         return augmentCargoWrappers;
     }
 
-    public static void searchCargoForItems(CargoAPI storageCargo, List<AugmentChestData> chestsInStorage, List<AugmentCargoWrapper> augmentCargoWrappers, AugmentCargoWrapper.CargoSource cargoSource) {
+    public static void searchCargoForItems(CargoAPI storageCargo, List<AugmentChestData> chestsInStorage,
+                                           List<AugmentCargoWrapper> augmentCargoWrappers,
+                                           AugmentCargoWrapper.CargoSource cargoSource) {
         for (CargoStackAPI cargoStackAPI : storageCargo.getStacksCopy()) {
             SpecialItemData specialItemData = cargoStackAPI.getSpecialDataIfSpecial();
-            if (isNull(specialItemData))
+            if (isNull(specialItemData)) {
                 continue;
+            }
 
             if (specialItemData.getId().equals(VT_Items.STORAGE_CHEST)) {
                 chestsInStorage.add(((AugmentChestData) specialItemData));

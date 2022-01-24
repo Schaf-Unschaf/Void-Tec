@@ -16,7 +16,8 @@ import de.schafunschaf.voidtec.util.ColorShifter;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
@@ -24,7 +25,8 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 @Getter
 public class AugmentChestPlugin extends BaseSpecialItemPlugin {
     @Override
-    public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, CargoTransferHandlerAPI transferHandler, Object stackSource) {
+    public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, CargoTransferHandlerAPI transferHandler,
+                              Object stackSource) {
         float largePad = 10f;
 
         AugmentChestData augmentChestData = getAugmentChestData();
@@ -41,11 +43,9 @@ public class AugmentChestPlugin extends BaseSpecialItemPlugin {
         tooltip.addPara(String.format("This handy little chest was designed for any eager captain or collector in the sector and stores up to %s inside.", hlString), largePad, Misc.getHighlightColor(), hlString);
 
         if (!isNull(stackSource)) {
-            if (expanded && (transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.SUBMARKET_STORAGE)
-                    || transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.LOCAL_RESOURCES))) {
+            if (expanded && (transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.SUBMARKET_STORAGE) || transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.LOCAL_RESOURCES))) {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
-            } else if (!(transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.SUBMARKET_STORAGE)
-                    || transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.LOCAL_RESOURCES))) {
+            } else if (!(transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.SUBMARKET_STORAGE) || transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.LOCAL_RESOURCES))) {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
             }
 
@@ -94,7 +94,8 @@ public class AugmentChestPlugin extends BaseSpecialItemPlugin {
     }
 
     @Override
-    public void render(float x, float y, float w, float h, float alphaMult, float glowMult, SpecialItemRendererAPI renderer) {
+    public void render(float x, float y, float w, float h, float alphaMult, float glowMult,
+                       SpecialItemRendererAPI renderer) {
         AugmentChestData augmentChestData = getAugmentChestData();
         ColorShifter colorShifter = augmentChestData.getColorShifter();
 

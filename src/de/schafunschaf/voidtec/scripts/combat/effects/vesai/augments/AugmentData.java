@@ -1,9 +1,9 @@
 package de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments;
 
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.CombatScriptRunner;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatModValue;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.CombatScriptRunner;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
 import de.schafunschaf.voidtec.util.TextWithHighlights;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

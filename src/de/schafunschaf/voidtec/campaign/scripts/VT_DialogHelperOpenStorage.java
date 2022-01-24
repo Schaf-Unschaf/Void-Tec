@@ -6,7 +6,7 @@ import de.schafunschaf.voidtec.campaign.dialog.VT_StorageInteraction;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestPlugin;
 import lombok.SneakyThrows;
 
-import java.awt.*;
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
 
 public class VT_DialogHelperOpenStorage implements EveryFrameScript {
@@ -32,9 +32,9 @@ public class VT_DialogHelperOpenStorage implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        if (success)
+        if (success) {
             Global.getSector().removeTransientScript(this);
-        else {
+        } else {
             robot.keyPress(KeyEvent.VK_ESCAPE);
             robot.keyRelease(KeyEvent.VK_ESCAPE);
             success = Global.getSector().getCampaignUI().showInteractionDialog(new VT_StorageInteraction(augmentChestPlugin), null);

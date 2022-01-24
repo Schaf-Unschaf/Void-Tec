@@ -1,6 +1,6 @@
 package de.schafunschaf.voidtec.util;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Random;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
@@ -13,10 +13,11 @@ public class ColorShifter {
     }
 
     public float getNextHueValue(float shiftAmount) {
-        if (hueValue + shiftAmount >= 360f)
+        if (hueValue + shiftAmount >= 360f) {
             hueValue = hueValue + shiftAmount - 360f;
-        else
+        } else {
             hueValue += shiftAmount;
+        }
 
         return hueValue;
     }

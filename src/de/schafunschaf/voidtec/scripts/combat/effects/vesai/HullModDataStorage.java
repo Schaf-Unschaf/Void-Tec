@@ -50,9 +50,11 @@ public class HullModDataStorage {
         List<FleetMemberAPI> allPlayerOwnedShips = Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy();
         allPlayerOwnedShips.addAll(getPlayerStoredShips());
 
-        for (FleetMemberAPI fleetMember : allPlayerOwnedShips)
-            if (fleetMember.getVariant().hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID))
+        for (FleetMemberAPI fleetMember : allPlayerOwnedShips) {
+            if (fleetMember.getVariant().hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID)) {
                 newKeys.add(fleetMember.getId());
+            }
+        }
 
         currentKeys.retainAll(newKeys);
     }
@@ -67,7 +69,9 @@ public class HullModDataStorage {
 
         for (SubmarketAPI storage : playerStorage) {
             List<FleetMemberAPI> mothballedShips = storage.getCargo().getMothballedShips().getMembersListCopy();
-            if (isNullOrEmpty(mothballedShips)) continue;
+            if (isNullOrEmpty(mothballedShips)) {
+                continue;
+            }
 
             storedShips.addAll(mothballedShips);
         }
@@ -82,7 +86,9 @@ public class HullModDataStorage {
             for (MarketAPI factionMarket : Misc.getFactionMarkets(faction)) {
                 if (Misc.playerHasStorageAccess(factionMarket)) {
                     SubmarketAPI storage = factionMarket.getSubmarket(Submarkets.SUBMARKET_STORAGE);
-                    if (isNull(storage)) continue;
+                    if (isNull(storage)) {
+                        continue;
+                    }
 
                     storageList.add(storage);
                 }

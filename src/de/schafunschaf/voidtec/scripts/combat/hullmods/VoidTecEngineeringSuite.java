@@ -11,7 +11,7 @@ import de.schafunschaf.voidtec.VT_Colors;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.HullModDataStorage;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.HullModManager;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Random;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
@@ -23,8 +23,9 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
     @Override
     public void applyEffectsBeforeShipCreation(ShipAPI.HullSize hullSize, MutableShipStatsAPI stats, String id) {
         FleetMemberAPI fleetMember = stats.getFleetMember();
-        if (isNull(fleetMember))
+        if (isNull(fleetMember)) {
             return;
+        }
 
         disableVanillaSModInstallation(stats, id);
 
@@ -46,15 +47,18 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
     }
 
     @Override
-    public void addPostDescriptionSection(TooltipMakerAPI tooltip, ShipAPI.HullSize hullSize, ShipAPI ship, float width, boolean isForModSpec) {
+    public void addPostDescriptionSection(TooltipMakerAPI tooltip, ShipAPI.HullSize hullSize, ShipAPI ship, float width,
+                                          boolean isForModSpec) {
         FleetMemberAPI fleetMember = ship.getFleetMember();
-        if (isNull(fleetMember))
+        if (isNull(fleetMember)) {
             return;
+        }
 
         HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
         HullModManager hullmodManager = hullModDataStorage.getHullModManager(fleetMember.getId());
-        if (isNull(hullmodManager))
+        if (isNull(hullmodManager)) {
             return;
+        }
 
         hullmodManager.generateTooltip(fleetMember.getStats(), HULL_MOD_ID, tooltip, width, false);
     }
@@ -62,13 +66,15 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
     @Override
     public void advanceInCombat(ShipAPI ship, float amount) {
         FleetMemberAPI fleetMember = ship.getFleetMember();
-        if (isNull(fleetMember))
+        if (isNull(fleetMember)) {
             return;
+        }
 
         HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
         HullModManager hullmodManager = hullModDataStorage.getHullModManager(fleetMember.getId());
-        if (isNull(hullmodManager))
+        if (isNull(hullmodManager)) {
             return;
+        }
 
         hullmodManager.runCombatScript(ship, amount);
     }

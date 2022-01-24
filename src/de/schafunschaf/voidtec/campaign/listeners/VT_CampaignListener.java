@@ -34,8 +34,9 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
     @Override
     public void reportShownInteractionDialog(InteractionDialogAPI dialog) {
         SectorEntityToken interactionTarget = dialog.getInteractionTarget();
-        if (isNull(interactionTarget))
+        if (isNull(interactionTarget)) {
             return;
+        }
 
         // Clean the storage when docking at a friendly spaceport
         if (!isNull(interactionTarget.getMarket())) {
@@ -49,12 +50,14 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
         if (interactionTarget instanceof CampaignFleetAPI && !interactionTarget.isPlayerFleet()) {
             FleetDataAPI fleetData = ((CampaignFleetAPI) interactionTarget).getFleetData();
             LootCategory lootCategory = LootCategory.getFleetType(fleetData.getFleet());
-            if (isNull(lootCategory))
+            if (isNull(lootCategory)) {
                 return;
+            }
 
             for (FleetMemberAPI fleetMember : fleetData.getMembersListCopy()) {
-                if (fleetMember.isStation())
+                if (fleetMember.isStation()) {
                     continue;
+                }
 
                 Random random = new Random(fleetMember.getId().hashCode() * 1337L);
                 if (random.nextInt(100) + 1 <= Settings.aiHullmodChance) {
@@ -89,9 +92,11 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
 
     private List<FleetMemberData> getUnrecoverableShips(List<FleetMemberData> casualties) {
         List<FleetMemberData> unrecoverableShips = new ArrayList<>();
-        for (FleetMemberData casualty : casualties)
-            if (casualty.getStatus() == Status.DESTROYED || casualty.getStatus() == Status.DISABLED)
+        for (FleetMemberData casualty : casualties) {
+            if (casualty.getStatus() == Status.DESTROYED || casualty.getStatus() == Status.DISABLED) {
                 unrecoverableShips.add(casualty);
+            }
+        }
 
         return unrecoverableShips;
     }

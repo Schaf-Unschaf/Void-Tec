@@ -7,12 +7,6 @@ import lombok.Getter;
 
 @Getter
 public class AugmentCargoWrapper {
-    public enum CargoSource {
-        PLAYER_FLEET,
-        CARGO_CHEST,
-        LOCAL_STORAGE
-    }
-
     private final AugmentApplier augment;
     private final CargoStackAPI augmentCargoStack;
     private final CargoSource cargoSource;
@@ -23,5 +17,9 @@ public class AugmentCargoWrapper {
         this.cargoSource = cargoSource;
         this.sourceCargo = sourceCargo;
         this.augment = VoidTecUtils.getAugmentFromStack(augmentCargoStack);
+    }
+
+    public enum CargoSource {
+        PLAYER_FLEET, CARGO_CHEST, LOCAL_STORAGE
     }
 }

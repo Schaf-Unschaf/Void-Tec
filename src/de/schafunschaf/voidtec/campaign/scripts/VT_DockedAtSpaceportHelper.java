@@ -25,7 +25,8 @@ public class VT_DockedAtSpaceportHelper implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        if (!Global.getSector().getCampaignUI().isShowingDialog())
+        if (!Global.getSector().getCampaignUI().isShowingDialog()) {
             Global.getSector().removeTransientScript(this);
+        }
     }
 }

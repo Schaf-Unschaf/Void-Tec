@@ -19,9 +19,9 @@ public class VT_DialogHelperLeaveStorage implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        if (success)
+        if (success) {
             Global.getSector().removeTransientScript(this);
-        else {
+        } else {
             Global.getSector().setPaused(true);
             Global.getSector().getCampaignUI().showCoreUITab(CoreUITabId.CARGO);
             success = Global.getSector().getCampaignUI().getCurrentCoreTab().equals(CoreUITabId.CARGO);

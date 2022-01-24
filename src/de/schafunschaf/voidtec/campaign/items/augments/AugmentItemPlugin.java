@@ -23,7 +23,7 @@ import de.schafunschaf.voidtec.util.ColorShifter;
 import de.schafunschaf.voidtec.util.MalfunctionEffect;
 import lombok.Getter;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -33,17 +33,19 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 @Getter
 public class AugmentItemPlugin extends BaseSpecialItemPlugin {
     @Override
-    public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, CargoTransferHandlerAPI transferHandler, Object stackSource) {
+    public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, CargoTransferHandlerAPI transferHandler,
+                              Object stackSource) {
         float largePad = 10f;
         float smallPad = 3f;
 
         AugmentApplier augment = getAugmentItemData().getAugment();
         AugmentQuality augmentQuality = augment.getAugmentQuality();
 
-        if (stackSource.equals(AugmentManagerIntel.STACK_SOURCE))
+        if (stackSource.equals(AugmentManagerIntel.STACK_SOURCE)) {
             tooltip.addTitle(String.format("%sx %s", ((int) stack.getSize()), getName()));
-        else
+        } else {
             tooltip.addTitle(getName());
+        }
 
         createTechInfo(tooltip, largePad, smallPad);
 
@@ -59,8 +61,9 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
         }
 
         if (expanded) {
-            if (!stackSource.equals(AugmentManagerIntel.STACK_SOURCE))
+            if (!stackSource.equals(AugmentManagerIntel.STACK_SOURCE)) {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
+            }
 
             if (!(augmentQuality == AugmentQuality.DESTROYED) && !isNull(augment.getPrimaryStatMods()) && !augment.getPrimaryStatMods().isEmpty()) {
                 tooltip.addSectionHeading("Primary Stat Modification Info", augment.getPrimarySlot().getColor(), Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
@@ -80,8 +83,9 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                     secondarySlotStringBuilder.append(secondarySlot.toString());
                     hlStrings.add(secondarySlot.toString());
                     hlColors.add(secondarySlot.getColor());
-                    if (iterator.hasNext())
+                    if (iterator.hasNext()) {
                         secondarySlotStringBuilder.append(", ");
+                    }
                 }
 
                 tooltip.addSectionHeading("Secondary Stat Modification Info", augment.getPrimarySlot().getColor(), Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
@@ -90,8 +94,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                 tooltip.addPara(secondarySlotStringBuilder.toString(), largePad, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
             }
         } else {
-            if (!(transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.SUBMARKET_STORAGE)
-                    || transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.LOCAL_RESOURCES))) {
+            if (!(transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.SUBMARKET_STORAGE) || transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.LOCAL_RESOURCES))) {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
             }
             tooltip.addPara("Expand to see detailed modification info.", Misc.getGrayColor(), largePad);
@@ -104,8 +107,9 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
         String manufacturerName = isNull(augment.getManufacturer()) ? "Unknown" : augment.getManufacturer();
         FactionAPI faction = Global.getSector().getFaction(manufacturerName.toLowerCase());
         Color manufacturerColor = VoidTecUtils.getManufacturerColor(manufacturerName);
-        if (!isNull(faction))
+        if (!isNull(faction)) {
             manufacturerName = Misc.ucFirst(faction.getDisplayNameWithArticleWithoutArticle());
+        }
 
         tooltip.addPara("Manufacturer: %s", largePad, Misc.getGrayColor(), manufacturerColor, manufacturerName);
         tooltip.addPara(String.format("Quality: %s", augment.getAugmentQuality().getName()), smallPad, Misc.getGrayColor(), augment.getAugmentQuality().getColor(), augment.getAugmentQuality().getName());
@@ -135,7 +139,8 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
     }
 
     @Override
-    public void render(float x, float y, float w, float h, float alphaMult, float glowMult, SpecialItemRendererAPI renderer) {
+    public void render(float x, float y, float w, float h, float alphaMult, float glowMult,
+                       SpecialItemRendererAPI renderer) {
         AugmentApplier augment = getAugmentItemData().getAugment();
         ColorShifter colorShifter = getAugmentItemData().getColorShifter();
         MalfunctionEffect malfunctionEffect = getAugmentItemData().getMalfunctionEffect();
@@ -144,14 +149,17 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
         SpriteAPI glow = Global.getSettings().getSprite(VT_Icons.AUGMENT_ITEM_ICON_GLOW);
         Color glowColor = augment.getPrimarySlot().getColor();
 
-        if (Settings.iconFlicker)
-            if (!isNull(colorShifter))
+        if (Settings.iconFlicker) {
+            if (!isNull(colorShifter)) {
                 glowColor = colorShifter.shiftColor(0.5f);
-            else if (!isNull(malfunctionEffect))
+            } else if (!isNull(malfunctionEffect)) {
                 glowColor = malfunctionEffect.renderFlicker(augment.getPrimarySlot().getColor());
+            }
+        }
 
-        if (augment.getAugmentQuality() == AugmentQuality.DESTROYED)
+        if (augment.getAugmentQuality() == AugmentQuality.DESTROYED) {
             glowColor = Misc.scaleColorOnly(augment.getAugmentQuality().getColor(), 0.3f);
+        }
 
         Color coverColor = augment.getAugmentQuality() == AugmentQuality.DESTROYED ? Color.LIGHT_GRAY : Color.WHITE;
 

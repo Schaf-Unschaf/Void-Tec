@@ -7,15 +7,15 @@ import de.schafunschaf.voidtec.util.ColorShifter;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.awt.*;
+import java.awt.Color;
 
 @Getter
 @Setter
 public class AugmentChestData extends SpecialItemData {
     private final CargoAPI chestStorage;
     private final int maxSize;
-    private int currentSize;
     private final ColorShifter colorShifter;
+    private int currentSize;
 
     public AugmentChestData(String id, String data, int size) {
         super(id, data);

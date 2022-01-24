@@ -9,38 +9,43 @@ import de.schafunschaf.voidtec.campaign.intel.buttons.IntelButton;
 public class BaseIntel extends BaseIntelPlugin {
     @Override
     public boolean doesButtonHaveConfirmDialog(Object buttonId) {
-        if (buttonId instanceof IntelButton)
+        if (buttonId instanceof IntelButton) {
             return ((IntelButton) buttonId).doesButtonHaveConfirmDialog();
+        }
 
         return false;
     }
 
     @Override
     public void createConfirmationPrompt(Object buttonId, TooltipMakerAPI prompt) {
-        if (buttonId instanceof IntelButton)
+        if (buttonId instanceof IntelButton) {
             ((IntelButton) buttonId).createConfirmationPrompt(prompt);
+        }
     }
 
     @Override
     public String getConfirmText(Object buttonId) {
-        if (buttonId instanceof IntelButton)
+        if (buttonId instanceof IntelButton) {
             return ((IntelButton) buttonId).getConfirmText();
+        }
 
         return "Confirm";
     }
 
     @Override
     public String getCancelText(Object buttonId) {
-        if (buttonId instanceof IntelButton)
+        if (buttonId instanceof IntelButton) {
             return ((IntelButton) buttonId).getCancelText();
+        }
 
         return "Cancel";
     }
 
     @Override
     public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
-        if (buttonId instanceof IntelButton)
+        if (buttonId instanceof IntelButton) {
             ((IntelButton) buttonId).buttonPressConfirmed(ui);
+        }
 
         Global.getSector().getPlayerFleet().getFleetData().setSyncNeeded();
         Global.getSector().getPlayerFleet().getFleetData().syncMemberLists();

@@ -29,8 +29,9 @@ public class VoidTecPlugin extends BaseModPlugin {
     @Override
     public void onGameLoad(boolean newGame) {
         IntelManagerAPI intelManager = Global.getSector().getIntelManager();
-        if (!intelManager.hasIntelOfClass(AugmentManagerIntel.class))
+        if (!intelManager.hasIntelOfClass(AugmentManagerIntel.class)) {
             intelManager.addIntel(new AugmentManagerIntel(), true);
+        }
 
         Global.getSector().addTransientListener(new VT_CampaignListener(false));
         Global.getSector().getListenerManager().addListener(new VT_LootListener(), true);
@@ -41,7 +42,7 @@ public class VoidTecPlugin extends BaseModPlugin {
             for (int i = 0; i < 20; i++) {
                 Global.getSector().getPlayerFleet().getCargo().addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, AugmentDataManager.getRandomAugment(null)), 1);
             }
-            Global.getSector().getPlayerFleet().getCargo().addSpecial(new AugmentChestData(VT_Items.STORAGE_CHEST, null, 100),1f);
+            Global.getSector().getPlayerFleet().getCargo().addSpecial(new AugmentChestData(VT_Items.STORAGE_CHEST, null, 100), 1f);
         }
 
     }

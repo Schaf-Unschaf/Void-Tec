@@ -5,17 +5,18 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatModValue;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.util.ComparisonTools;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Random;
 
 public class SModSlot extends BaseStatMod {
     @Override
-    public void apply(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random, AugmentQuality quality) {
+    public void apply(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue,
+                      Random random, AugmentQuality quality) {
         stats.getDynamic().getMod(Stats.MAX_PERMANENT_HULLMODS_MOD).modifyFlat(id, generateModValue(statModValue, random, quality));
     }
 
@@ -27,8 +28,9 @@ public class SModSlot extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor) {
         MutableStat.StatMod statMod = stats.getDynamic().getMod(Stats.MAX_PERMANENT_HULLMODS_MOD).getFlatBonus(id);
-        if (ComparisonTools.isNull(statMod))
+        if (ComparisonTools.isNull(statMod)) {
             return;
+        }
 
         String description = "Permanent Build-In slots %s by %s";
 
@@ -40,7 +42,8 @@ public class SModSlot extends BaseStatMod {
 
         Color hlColor = isPositive ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor();
 
-        tooltip.addPara("%s " + description, 0f, new Color[]{bulletColor, hlColor, hlColor}, bullet, incDec, String.valueOf(Math.abs(value)));
+        tooltip.addPara("%s " + description, 0f, new Color[]{bulletColor, hlColor,
+                                                             hlColor}, bullet, incDec, String.valueOf(Math.abs(value)));
     }
 
     @Override

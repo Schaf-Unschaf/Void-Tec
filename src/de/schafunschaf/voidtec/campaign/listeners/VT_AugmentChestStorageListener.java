@@ -14,7 +14,7 @@ import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestData;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestPlugin;
 import de.schafunschaf.voidtec.helper.VoidTecUtils;
 
-import java.awt.*;
+import java.awt.Color;
 
 import static de.schafunschaf.voidtec.util.ProgressBar.addStorageMeter;
 
@@ -24,7 +24,8 @@ public class VT_AugmentChestStorageListener implements CargoPickerListener {
     private final boolean transferFromPlayer;
     private final AugmentChestData augmentChestData;
 
-    public VT_AugmentChestStorageListener(AugmentChestPlugin augmentChestPlugin, CargoAPI targetStorage, boolean transferFromPlayer) {
+    public VT_AugmentChestStorageListener(AugmentChestPlugin augmentChestPlugin, CargoAPI targetStorage,
+                                          boolean transferFromPlayer) {
         this.augmentChestPlugin = augmentChestPlugin;
         this.targetStorage = targetStorage;
         this.transferFromPlayer = transferFromPlayer;
@@ -34,18 +35,21 @@ public class VT_AugmentChestStorageListener implements CargoPickerListener {
     @Override
     public void pickedCargo(CargoAPI cargo) {
         int sumCargoAffected = 0;
-        for (CargoStackAPI stack : cargo.getStacksCopy())
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
             sumCargoAffected += (int) stack.getSize();
+        }
 
-        if (transferFromPlayer && augmentChestData.getCurrentSize() + sumCargoAffected > augmentChestData.getMaxSize())
+        if (transferFromPlayer && augmentChestData.getCurrentSize() + sumCargoAffected > augmentChestData.getMaxSize()) {
             return;
+        }
 
         augmentChestPlugin.addToSize(transferFromPlayer ? sumCargoAffected : -sumCargoAffected);
 
         targetStorage.addAll(cargo);
 
-        if (transferFromPlayer)
+        if (transferFromPlayer) {
             VoidTecUtils.adjustItemInCargo(cargo, Global.getSector().getPlayerFleet().getCargo());
+        }
     }
 
     @Override
@@ -54,10 +58,12 @@ public class VT_AugmentChestStorageListener implements CargoPickerListener {
     }
 
     @Override
-    public void recreateTextPanel(TooltipMakerAPI panel, CargoAPI cargo, CargoStackAPI pickedUp, boolean pickedUpFromSource, CargoAPI combined) {
+    public void recreateTextPanel(TooltipMakerAPI panel, CargoAPI cargo, CargoStackAPI pickedUp,
+                                  boolean pickedUpFromSource, CargoAPI combined) {
         int sumCargoAffected = 0;
-        for (CargoStackAPI stack : combined.getStacksCopy())
+        for (CargoStackAPI stack : combined.getStacksCopy()) {
             sumCargoAffected += (int) stack.getSize();
+        }
 
         sumCargoAffected = transferFromPlayer ? sumCargoAffected : -sumCargoAffected;
 

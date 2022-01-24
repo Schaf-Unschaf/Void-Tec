@@ -8,7 +8,7 @@ import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
 import de.schafunschaf.voidtec.util.ColorShifter;
 import de.schafunschaf.voidtec.util.TextWithHighlights;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class VT_RainbowEngines extends AugmentData {
     public static final String AUGMENT_ID = "vt_rainbowEngines";

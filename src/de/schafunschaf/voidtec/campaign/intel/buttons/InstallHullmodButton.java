@@ -11,18 +11,13 @@ import de.schafunschaf.voidtec.scripts.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.util.FormattingTools;
 import lombok.RequiredArgsConstructor;
 
-import java.awt.*;
+import java.awt.Color;
 
 import static de.schafunschaf.voidtec.Settings.*;
 
 @RequiredArgsConstructor
-public class InstallHullmodButton implements IntelButton {
+public class InstallHullmodButton extends EmptySlotButton {
     private final FleetMemberAPI fleetMember;
-
-    @Override
-    public void buttonPressCancelled(IntelUIAPI ui) {
-
-    }
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
@@ -32,10 +27,11 @@ public class InstallHullmodButton implements IntelButton {
 
         memberVariant.addPermaMod(VoidTecEngineeringSuite.HULL_MOD_ID);
 
-        if (hullmodInstallationWithSP)
+        if (hullmodInstallationWithSP) {
             Global.getSector().getPlayerStats().addStoryPoints(-installCostSP);
-        else
+        } else {
             Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(installCostCredits * hullSizeMult);
+        }
     }
 
     @Override
@@ -72,19 +68,16 @@ public class InstallHullmodButton implements IntelButton {
         String buttonText;
         float hullSizeMult = Misc.getSizeNum(fleetMember.getHullSpec().getHullSize());
 
-        if (VoidTecUtils.isPlayerDockedAtSpaceport())
-            if (VoidTecUtils.canPayForInstallation(hullSizeMult))
+        if (VoidTecUtils.isPlayerDockedAtSpaceport()) {
+            if (VoidTecUtils.canPayForInstallation(hullSizeMult)) {
                 buttonText = "Install VESAI";
-            else
+            } else {
                 buttonText = "Not enough " + (hullmodInstallationWithSP ? "SP" : "credits");
-        else
+            }
+        } else {
             buttonText = "Need Spaceport";
+        }
 
         return buttonText;
-    }
-
-    @Override
-    public int getShortcut() {
-        return 0;
     }
 }

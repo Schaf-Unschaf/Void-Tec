@@ -8,28 +8,24 @@ import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.util.FormattingTools;
 import lombok.RequiredArgsConstructor;
 
-import java.awt.*;
+import java.awt.Color;
 
 import static de.schafunschaf.voidtec.Settings.*;
 
 @RequiredArgsConstructor
-public class LockedSlotButton implements IntelButton {
+public class LockedSlotButton extends EmptySlotButton {
     private final AugmentSlot augmentSlot;
-
-    @Override
-    public void buttonPressCancelled(IntelUIAPI ui) {
-
-    }
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
         int unlockedSlots = augmentSlot.getHullmodManager().getUnlockedSlotsNum();
         int installCost = installCostCredits * unlockedSlots;
 
-        if (unlockedSlots <= maxNumSlotsForCreditUnlock)
+        if (unlockedSlots <= maxNumSlotsForCreditUnlock) {
             Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(installCost);
-        else
+        } else {
             Global.getSector().getPlayerStats().addStoryPoints(-installCostSP);
+        }
 
         augmentSlot.unlockSlot();
     }
@@ -68,10 +64,5 @@ public class LockedSlotButton implements IntelButton {
     @Override
     public String getName() {
         return "+";
-    }
-
-    @Override
-    public int getShortcut() {
-        return 0;
     }
 }

@@ -12,31 +12,28 @@ import lombok.RequiredArgsConstructor;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @RequiredArgsConstructor
-public class InstallAugmentButton implements IntelButton {
+public class InstallAugmentButton extends EmptySlotButton {
     private final AugmentSlot augmentSlot;
 
     @Override
-    public void buttonPressCancelled(IntelUIAPI ui) {
-
-    }
-
-    @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
-        boolean success = augmentSlot.installAugment(AugmentManagerIntel.selectedAugmentInCargo.getAugment());
-        if (success)
+        boolean success = augmentSlot.installAugment(AugmentManagerIntel.getSelectedAugmentInCargo().getAugment());
+        if (success) {
             removeAugmentFromCargo();
+        }
 
-        AugmentManagerIntel.selectedAugmentInCargo = null;
+        AugmentManagerIntel.setSelectedAugmentInCargo(null);
     }
 
     @Override
     public void createConfirmationPrompt(TooltipMakerAPI tooltip) {
-        AugmentApplier augment = AugmentManagerIntel.selectedAugmentInCargo.getAugment();
+        AugmentApplier augment = AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
         String bullet = "• ";
 
         tooltip.addPara("Install the augment in this slot (%s)?", 0f, augmentSlot.getSlotCategory().getColor(), augmentSlot.getSlotCategory().getName());
-        if (!isNull(augment))
+        if (!isNull(augment)) {
             tooltip.addPara(bullet + augment.getName(), augment.getAugmentQuality().getColor(), 10f);
+        }
     }
 
     @Override
@@ -54,20 +51,10 @@ public class InstallAugmentButton implements IntelButton {
         return "Cancel";
     }
 
-    @Override
-    public String getName() {
-        return null;
-    }
-
-    @Override
-    public int getShortcut() {
-        return 0;
-    }
-
     private void removeAugmentFromCargo() {
-        CargoAPI cargo = AugmentManagerIntel.selectedAugmentInCargo.getSourceCargo();
+        CargoAPI cargo = AugmentManagerIntel.getSelectedAugmentInCargo().getSourceCargo();
         for (CargoStackAPI cargoStackAPI : cargo.getStacksCopy()) {
-            if (cargoStackAPI.getData() == AugmentManagerIntel.selectedAugmentInCargo.getAugmentCargoStack().getData()) {
+            if (cargoStackAPI.getData() == AugmentManagerIntel.getSelectedAugmentInCargo().getAugmentCargoStack().getData()) {
                 cargoStackAPI.setSize(cargoStackAPI.getSize() - 1);
                 cargo.removeEmptyStacks();
                 return;

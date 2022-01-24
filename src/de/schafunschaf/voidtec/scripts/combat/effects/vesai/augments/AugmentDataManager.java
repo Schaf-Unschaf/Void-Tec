@@ -24,16 +24,19 @@ public class AugmentDataManager {
         return getRandomAugment(null, null, null, random);
     }
 
-    public static BaseAugment getRandomAugment(SlotCategory slotCategory, AugmentQuality augmentQuality, FactionAPI faction, Random random) {
-        if (isNull(random))
+    public static BaseAugment getRandomAugment(SlotCategory slotCategory, AugmentQuality augmentQuality,
+                                               FactionAPI faction, Random random) {
+        if (isNull(random)) {
             random = new Random();
+        }
 
         WeightedRandomPicker<AugmentData> picker = new WeightedRandomPicker<>(random);
 
         Collection<AugmentData> augmentDataCollection = AUGMENT_DATA_MAP.values();
 
-        if (isNull(augmentQuality))
+        if (isNull(augmentQuality)) {
             augmentQuality = AugmentQuality.getRandomQuality(random, false);
+        }
 
         float factionMult;
 
@@ -64,7 +67,8 @@ public class AugmentDataManager {
         return createAugmentFromData(picker.pick(), augmentQuality, random);
     }
 
-    private static BaseAugment createAugmentFromData(AugmentData augmentData, AugmentQuality augmentQuality, Random random) {
+    private static BaseAugment createAugmentFromData(AugmentData augmentData, AugmentQuality augmentQuality,
+                                                     Random random) {
         return isNull(augmentData) ? null : new BaseAugment(augmentData, augmentQuality, random);
     }
 }

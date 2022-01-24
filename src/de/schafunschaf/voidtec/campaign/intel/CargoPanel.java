@@ -12,7 +12,7 @@ import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +33,8 @@ public class CargoPanel {
         panel.addUIElement(headerElement).inTR(0f, headerHeight);
 
         final TooltipMakerAPI filterElement = panel.createUIElement(width - 3f, 0f, false);
-        String selectedSlot = isNull(AugmentManagerIntel.activeCategoryFilter) ? "ALL" : AugmentManagerIntel.activeCategoryFilter.name();
-        Color selectedColor = isNull(AugmentManagerIntel.activeCategoryFilter) ? Color.WHITE : AugmentManagerIntel.activeCategoryFilter.getColor();
+        String selectedSlot = isNull(AugmentManagerIntel.getActiveCategoryFilter()) ? "ALL" : AugmentManagerIntel.getActiveCategoryFilter().name();
+        Color selectedColor = isNull(AugmentManagerIntel.getActiveCategoryFilter()) ? Color.WHITE : AugmentManagerIntel.getActiveCategoryFilter().getColor();
         filterElement.setParaFont(Fonts.ORBITRON_20AA);
 
         filterElement.addPara("Filter:", Misc.getBasePlayerColor(), 10f);
@@ -42,15 +42,16 @@ public class CargoPanel {
 
         ButtonAPI lastButton = null;
         for (final SlotCategory slotCategory : SlotCategory.values) {
-            Color buttonColor = isNull(AugmentManagerIntel.activeCategoryFilter) || AugmentManagerIntel.activeCategoryFilter == slotCategory ? slotCategory.getColor() : Misc.scaleColorOnly(slotCategory.getColor(), 0.3f);
+            Color buttonColor = isNull(AugmentManagerIntel.getActiveCategoryFilter()) || AugmentManagerIntel.getActiveCategoryFilter() == slotCategory ? slotCategory.getColor() : Misc.scaleColorOnly(slotCategory.getColor(), 0.3f);
             final String tooltipText = String.format("Display only %s slots", slotCategory.name());
             final float tooltipWidth = headerElement.computeStringWidth(tooltipText);
 
             ButtonAPI augmentButton = ButtonUtils.addAugmentButton(filterElement, filterButtonHeight, 0f, buttonColor, buttonColor, new FilterByCategoryButton(slotCategory));
-            if (!isNull(lastButton))
+            if (!isNull(lastButton)) {
                 augmentButton.getPosition().rightOfMid(lastButton, 4f);
-            else
+            } else {
                 augmentButton.getPosition().leftOfMid(sortingTextComp, -74f);
+            }
 
             filterElement.addTooltipToPrevious(new BaseTooltipCreator() {
                 @Override
@@ -77,8 +78,9 @@ public class CargoPanel {
 
         for (AugmentCargoWrapper augmentCargoWrapper : augmentsInCargo) {
             final AugmentApplier augmentInStack = augmentCargoWrapper.getAugment();
-            if (!(isNull(AugmentManagerIntel.activeCategoryFilter) || augmentValidForDisplay(augmentInStack)))
+            if (!(isNull(AugmentManagerIntel.getActiveCategoryFilter()) || augmentValidForDisplay(augmentInStack))) {
                 continue;
+            }
 
             CustomPanelAPI cargoPanel = panel.createCustomPanel(width, buttonHeight, null);
             TooltipMakerAPI cargoElement = cargoPanel.createUIElement(width - 10f, buttonHeight, false);
@@ -97,19 +99,21 @@ public class CargoPanel {
     }
 
     private static boolean augmentValidForDisplay(AugmentApplier augment) {
-        if (isNull(augment))
+        if (isNull(augment)) {
             return false;
+        }
 
         boolean hasPrimarySlot = !isNull(augment.getPrimarySlot());
         boolean hasSecondarySlots = !isNullOrEmpty(augment.getSecondarySlots());
         boolean isNotDestroyed = augment.getAugmentQuality() != AugmentQuality.DESTROYED;
-        boolean matchesPrimarySlot = !isNull(AugmentManagerIntel.activeCategoryFilter) && AugmentManagerIntel.activeCategoryFilter == augment.getPrimarySlot();
-        boolean matchesSecondarySlot = !isNull(AugmentManagerIntel.activeCategoryFilter) && augment.getSecondarySlots().contains(AugmentManagerIntel.activeCategoryFilter);
+        boolean matchesPrimarySlot = !isNull(AugmentManagerIntel.getActiveCategoryFilter()) && AugmentManagerIntel.getActiveCategoryFilter() == augment.getPrimarySlot();
+        boolean matchesSecondarySlot = !isNull(AugmentManagerIntel.getActiveCategoryFilter()) && augment.getSecondarySlots().contains(AugmentManagerIntel.getActiveCategoryFilter());
 
         return (hasPrimarySlot || hasSecondarySlots) && isNotDestroyed && (matchesPrimarySlot || matchesSecondarySlot);
     }
 
-    private static void generateAugmentForPanel(TooltipMakerAPI cargoElement, final float width, final AugmentCargoWrapper augmentCargoWrapper, AugmentApplier augment) {
+    private static void generateAugmentForPanel(TooltipMakerAPI cargoElement, final float width,
+                                                final AugmentCargoWrapper augmentCargoWrapper, AugmentApplier augment) {
         float buttonWidth = 80f;
         float buttonHeight = 24f;
         float iconSize = 24f;
@@ -118,7 +122,7 @@ public class CargoPanel {
         Color baseColor = Misc.getBrightPlayerColor();
         Color bgColor = Misc.getDarkPlayerColor();
 
-        if (!isNull(AugmentManagerIntel.selectedAugmentInCargo) && augment == AugmentManagerIntel.selectedAugmentInCargo.getAugment()) {
+        if (!isNull(AugmentManagerIntel.getSelectedAugmentInCargo()) && augment == AugmentManagerIntel.getSelectedAugmentInCargo().getAugment()) {
             baseColor = Misc.getHighlightColor();
             bgColor = Misc.getDarkHighlightColor();
         }

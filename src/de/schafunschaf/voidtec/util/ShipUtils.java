@@ -6,8 +6,9 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class ShipUtils {
     public static String generateShipNameWithClass(FleetMemberAPI ship) {
-        if (isNull(ship))
+        if (isNull(ship)) {
             return "NO SHIP FOR NAME AND CLASS";
+        }
 
         String shipName = ship.getShipName();
         String shipClass = ship.getHullSpec().getHullNameWithDashClass();

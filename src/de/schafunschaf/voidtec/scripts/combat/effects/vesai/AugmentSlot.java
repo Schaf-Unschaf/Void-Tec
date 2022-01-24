@@ -13,8 +13,8 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 @Getter
 public class AugmentSlot {
     private final HullModManager hullmodManager;
-    private AugmentApplier slottedAugment;
     private final SlotCategory slotCategory;
+    private AugmentApplier slottedAugment;
     private boolean isPrimary;
     private boolean isUnlocked;
 
@@ -37,15 +37,18 @@ public class AugmentSlot {
     }
 
     public void apply(MutableShipStatsAPI stats, String id, Random random, AugmentQuality quality) {
-        if (isNull(slottedAugment))
+        if (isNull(slottedAugment)) {
             return;
+        }
 
         slottedAugment.apply(stats, id, random, quality, isPrimary);
     }
 
-    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, boolean isItemTooltip) {
-        if (isNull(slottedAugment))
+    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width,
+                                boolean isItemTooltip) {
+        if (isNull(slottedAugment)) {
             return;
+        }
 
         slottedAugment.generateTooltip(stats, id, tooltip, width, slotCategory, isPrimary, isItemTooltip);
     }

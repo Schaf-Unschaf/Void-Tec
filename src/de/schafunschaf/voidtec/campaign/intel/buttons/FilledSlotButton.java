@@ -1,6 +1,5 @@
 package de.schafunschaf.voidtec.campaign.intel.buttons;
 
-import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
@@ -8,23 +7,13 @@ import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.util.FormattingTools;
 import lombok.RequiredArgsConstructor;
 
-import java.awt.*;
+import java.awt.Color;
 
 import static de.schafunschaf.voidtec.Settings.removalCostSP;
 
 @RequiredArgsConstructor
-public class FilledSlotButton implements IntelButton {
+public class FilledSlotButton extends EmptySlotButton {
     private final AugmentSlot augmentSlot;
-
-    @Override
-    public void buttonPressCancelled(IntelUIAPI ui) {
-
-    }
-
-    @Override
-    public void buttonPressConfirmed(IntelUIAPI ui) {
-
-    }
 
     @Override
     public void createConfirmationPrompt(TooltipMakerAPI tooltip) {
@@ -51,15 +40,5 @@ public class FilledSlotButton implements IntelButton {
     @Override
     public String getCancelText() {
         return "Cancel";
-    }
-
-    @Override
-    public String getName() {
-        return null;
-    }
-
-    @Override
-    public int getShortcut() {
-        return 0;
     }
 }

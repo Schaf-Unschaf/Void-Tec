@@ -14,27 +14,27 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 @Getter
 @AllArgsConstructor
 public enum LootCategory {
-    PIRATE(new String[]{AugmentQuality.DAMAGED.name(), AugmentQuality.COMMON.name()}),
-    CIVILIAN(new String[]{AugmentQuality.DAMAGED.name(), AugmentQuality.MILITARY.name()}),
-    MILITARY(new String[]{AugmentQuality.COMMON.name(), AugmentQuality.MILITARY.name()}),
-    SPECIAL(new String[]{AugmentQuality.MILITARY.name(), AugmentQuality.EXPERIMENTAL.name()}),
-    REMNANT(new String[]{AugmentQuality.REMNANT.name()}),
-    DOMAIN(new String[]{AugmentQuality.DOMAIN.name()});
-
-    String[] qualityRange;
+    PIRATE(new String[]{AugmentQuality.DAMAGED.name(), AugmentQuality.COMMON.name()}), CIVILIAN(new String[]{
+            AugmentQuality.DAMAGED.name(), AugmentQuality.MILITARY.name()}), MILITARY(new String[]{
+            AugmentQuality.COMMON.name(), AugmentQuality.MILITARY.name()}), SPECIAL(new String[]{
+            AugmentQuality.MILITARY.name(), AugmentQuality.EXPERIMENTAL.name()}), REMNANT(new String[]{
+            AugmentQuality.REMNANT.name()}), DOMAIN(new String[]{AugmentQuality.DOMAIN.name()});
 
     public static final String VT_FLEET_LOOT_CATEGORY_KEY = "$vt_lootCategory";
     public static final LootCategory[] values = values();
+    String[] qualityRange;
 
     public static LootCategory getFleetType(CampaignFleetAPI fleet) {
         MemoryAPI memory = fleet.getMemoryWithoutUpdate();
         String lootCategoryFromMemory = (String) memory.get(VT_FLEET_LOOT_CATEGORY_KEY);
-        if (!isNull(lootCategoryFromMemory))
+        if (!isNull(lootCategoryFromMemory)) {
             return getEnum(lootCategoryFromMemory);
+        }
 
         String fleetType = (String) memory.get("$fleetType");
-        if (FleetTypes.TASK_FORCE.equals(fleetType))
+        if (FleetTypes.TASK_FORCE.equals(fleetType)) {
             return SPECIAL;
+        }
 
         FactionAPI faction = fleet.getFaction();
 
@@ -60,9 +60,11 @@ public enum LootCategory {
     }
 
     public static LootCategory getEnum(String valueString) {
-        for (LootCategory value : values)
-            if (value.name().equalsIgnoreCase(valueString))
+        for (LootCategory value : values) {
+            if (value.name().equalsIgnoreCase(valueString)) {
                 return value;
+            }
+        }
 
         return null;
     }

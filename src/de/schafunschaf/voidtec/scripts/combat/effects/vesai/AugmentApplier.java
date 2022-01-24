@@ -12,7 +12,8 @@ import java.util.Random;
 public interface AugmentApplier {
     void apply(MutableShipStatsAPI stats, String id, Random random, AugmentQuality quality, boolean isPrimary);
 
-    void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory, boolean isPrimary, boolean isItemTooltip);
+    void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width,
+                         SlotCategory slotCategory, boolean isPrimary, boolean isItemTooltip);
 
     void generateStatDescription(TooltipMakerAPI tooltip, boolean isPrimary, float padding);
 

@@ -6,16 +6,22 @@ import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.VT_Colors;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class AugmentManagerIntel extends BaseIntel {
     public static final String STACK_SOURCE = "augmentManagerIntel";
 
-    public static AugmentCargoWrapper selectedAugmentInCargo;
-    public static SlotCategory activeCategoryFilter;
+    @Getter
+    @Setter
+    private static AugmentCargoWrapper selectedAugmentInCargo;
+    @Getter
+    @Setter
+    private static SlotCategory activeCategoryFilter;
     private float titleSize = 0f;
-//    private float shipListSize = 0f;
+    //    private float shipListSize = 0f;
     private float shipListWidth = 0f;
 //    private float cargoListSize = 0f;
 
