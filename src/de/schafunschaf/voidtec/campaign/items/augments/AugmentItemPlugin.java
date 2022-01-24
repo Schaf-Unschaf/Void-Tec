@@ -15,7 +15,7 @@ import de.schafunschaf.voidtec.Settings;
 import de.schafunschaf.voidtec.VT_Icons;
 import de.schafunschaf.voidtec.VT_Strings;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
-import de.schafunschaf.voidtec.helper.AugmentUtils;
+import de.schafunschaf.voidtec.helper.VoidTecUtils;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
@@ -103,7 +103,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
         String manufacturerName = isNull(augment.getManufacturer()) ? "Unknown" : augment.getManufacturer();
         FactionAPI faction = Global.getSector().getFaction(manufacturerName.toLowerCase());
-        Color manufacturerColor = AugmentUtils.getManufacturerColor(manufacturerName);
+        Color manufacturerColor = VoidTecUtils.getManufacturerColor(manufacturerName);
         if (!isNull(faction))
             manufacturerName = Misc.ucFirst(faction.getDisplayNameWithArticleWithoutArticle());
 

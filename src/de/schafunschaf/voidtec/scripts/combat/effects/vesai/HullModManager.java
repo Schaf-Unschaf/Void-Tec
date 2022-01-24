@@ -105,8 +105,8 @@ public class HullModManager {
     }
 
     public void runCombatScript(ShipAPI ship, float amount) {
-        for (AugmentSlot augmentSlot : getFilledSlots())
-            augmentSlot.getSlottedAugment().runCombatScript(ship, amount);
+        if (!getSpecialSlot().isEmpty())
+            getSpecialSlot().getSlottedAugment().runCombatScript(ship, amount);
     }
 
     public boolean installAugment(AugmentSlot augmentSlot, AugmentApplier augment) {

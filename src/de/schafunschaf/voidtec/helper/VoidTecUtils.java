@@ -8,14 +8,16 @@ import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.ids.VT_Items;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
+import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
 
 import java.awt.*;
 import java.util.List;
 
+import static de.schafunschaf.voidtec.Settings.*;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
-public class AugmentUtils {
+public class VoidTecUtils {
     public static CargoAPI getAugmentsInPlayerCargo() {
         CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
         CargoAPI cargo = Global.getFactory().createCargo(true);
@@ -51,5 +53,16 @@ public class AugmentUtils {
         Color manufacturerColor = isNull(faction) ? Global.getSettings().getDesignTypeColor(manufacturerString) : faction.getColor();
 
         return isNull(manufacturerColor) ? Misc.getGrayColor() : manufacturerColor;
+    }
+
+    public static boolean isPlayerDockedAtSpaceport() {
+        return Global.getSector().hasTransientScript(VT_DockedAtSpaceportHelper.class);
+    }
+
+    public static boolean canPayForInstallation(float hullSizeMult) {
+        if (hullmodInstallationWithSP)
+            return Global.getSector().getPlayerStats().getStoryPoints() >= installCostSP;
+
+        return Global.getSector().getPlayerFleet().getCargo().getCredits().get() >= installCostCredits * hullSizeMult;
     }
 }

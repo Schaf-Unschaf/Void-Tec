@@ -11,7 +11,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.VT_Icons;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DialogHelperOpenStorage;
-import de.schafunschaf.voidtec.helper.AugmentUtils;
+import de.schafunschaf.voidtec.helper.VoidTecUtils;
 import de.schafunschaf.voidtec.util.ColorShifter;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -32,7 +32,7 @@ public class AugmentChestPlugin extends BaseSpecialItemPlugin {
         int maxSize = augmentChestData.getMaxSize();
 
         String manufacturerName = "VoidTec";
-        Color manufacturerColor = AugmentUtils.getManufacturerColor(manufacturerName);
+        Color manufacturerColor = VoidTecUtils.getManufacturerColor(manufacturerName);
         Color spaceHLColor = currentSize < maxSize ? Misc.getHighlightColor() : Misc.getNegativeHighlightColor();
 
         tooltip.addTitle(getName(), Misc.getHighlightColor());

@@ -28,8 +28,8 @@ public class ShieldAbsorbtion extends BaseStatMod {
         if (ComparisonTools.isNull(statMod))
             return;
 
-        String description = "Shield efficiency %s by %s";
-        generateTooltip(tooltip, statMod, description, bulletColor, false);
+        String description = "Shield flux/damage %s by %s";
+        generateTooltip(tooltip, statMod, description, bulletColor, true);
     }
 
     @Override

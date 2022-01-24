@@ -22,6 +22,6 @@ public class AugmentCargoWrapper {
         this.augmentCargoStack = augmentCargoStack;
         this.cargoSource = cargoSource;
         this.sourceCargo = sourceCargo;
-        this.augment = AugmentUtils.getAugmentFromStack(augmentCargoStack);
+        this.augment = VoidTecUtils.getAugmentFromStack(augmentCargoStack);
     }
 }

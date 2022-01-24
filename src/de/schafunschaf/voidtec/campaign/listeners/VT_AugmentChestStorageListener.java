@@ -12,7 +12,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestData;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestPlugin;
-import de.schafunschaf.voidtec.helper.AugmentUtils;
+import de.schafunschaf.voidtec.helper.VoidTecUtils;
 
 import java.awt.*;
 
@@ -45,7 +45,7 @@ public class VT_AugmentChestStorageListener implements CargoPickerListener {
         targetStorage.addAll(cargo);
 
         if (transferFromPlayer)
-            AugmentUtils.adjustItemInCargo(cargo, Global.getSector().getPlayerFleet().getCargo());
+            VoidTecUtils.adjustItemInCargo(cargo, Global.getSector().getPlayerFleet().getCargo());
     }
 
     @Override

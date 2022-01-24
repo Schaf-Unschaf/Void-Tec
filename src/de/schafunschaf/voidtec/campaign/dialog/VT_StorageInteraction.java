@@ -7,7 +7,7 @@ import com.fs.starfarer.api.combat.EngagementResultAPI;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestPlugin;
 import de.schafunschaf.voidtec.campaign.listeners.VT_AugmentChestStorageListener;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DialogHelperLeaveStorage;
-import de.schafunschaf.voidtec.helper.AugmentUtils;
+import de.schafunschaf.voidtec.helper.VoidTecUtils;
 import org.lwjgl.input.Keyboard;
 
 import java.util.Map;
@@ -62,7 +62,7 @@ public class VT_StorageInteraction implements InteractionDialogPlugin {
                 initOptions();
                 break;
             case STORE_AUGMENTS:
-                dialog.showCargoPickerDialog("Store Augments", "Store", "Cancel", false, 100f, AugmentUtils.getAugmentsInPlayerCargo(), new VT_AugmentChestStorageListener(augmentChestPlugin, chestStorage, true));
+                dialog.showCargoPickerDialog("Store Augments", "Store", "Cancel", false, 100f, VoidTecUtils.getAugmentsInPlayerCargo(), new VT_AugmentChestStorageListener(augmentChestPlugin, chestStorage, true));
                 break;
             case RETRIEVE_AUGMENTS:
                 dialog.showCargoPickerDialog("Take Augments", "Take", "Cancel", false, 100f, chestStorage, new VT_AugmentChestStorageListener(augmentChestPlugin, playerFleet.getCargo(), false));
