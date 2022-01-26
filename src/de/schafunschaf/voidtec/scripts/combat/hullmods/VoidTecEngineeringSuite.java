@@ -12,12 +12,12 @@ import de.schafunschaf.voidtec.scripts.combat.effects.vesai.HullModDataStorage;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.HullModManager;
 
 import java.awt.Color;
-import java.util.Random;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 
 public class VoidTecEngineeringSuite extends BaseHullMod {
+
     public static final String HULL_MOD_ID = "voidTec_engineeringSuite";
 
     @Override
@@ -29,7 +29,6 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
 
         disableVanillaSModInstallation(stats, id);
 
-        Random random = new Random(fleetMember.getId().hashCode());
         HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
         HullModManager hullmodManager = hullModDataStorage.getHullModManager(fleetMember.getId());
 
@@ -38,12 +37,28 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
             hullModDataStorage.storeShipID(fleetMember.getId(), hullmodManager);
         }
 
-        hullmodManager.applySlotEffects(stats, id, random);
+        hullmodManager.applySlotEffects(stats, id);
     }
 
-    private void disableVanillaSModInstallation(MutableShipStatsAPI stats, String id) {
-        float maxPermanentHullmods = Global.getSettings().getFloat("maxPermanentHullmods");
-        stats.getDynamic().getMod(Stats.MAX_PERMANENT_HULLMODS_MOD).modifyFlat(id, -maxPermanentHullmods);
+    @Override
+    public void advanceInCombat(ShipAPI ship, float amount) {
+        FleetMemberAPI fleetMember = ship.getFleetMember();
+        if (isNull(fleetMember)) {
+            return;
+        }
+
+        HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
+        HullModManager hullmodManager = hullModDataStorage.getHullModManager(fleetMember.getId());
+        if (isNull(hullmodManager)) {
+            return;
+        }
+
+        hullmodManager.runCombatScript(ship, amount);
+    }
+
+    @Override
+    public boolean shouldAddDescriptionToTooltip(ShipAPI.HullSize hullSize, ShipAPI ship, boolean isForModSpec) {
+        return false;
     }
 
     @Override
@@ -64,7 +79,7 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
     }
 
     @Override
-    public void advanceInCombat(ShipAPI ship, float amount) {
+    public void applyEffectsToFighterSpawnedByShip(ShipAPI fighter, ShipAPI ship, String id) {
         FleetMemberAPI fleetMember = ship.getFleetMember();
         if (isNull(fleetMember)) {
             return;
@@ -76,7 +91,7 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
             return;
         }
 
-        hullmodManager.runCombatScript(ship, amount);
+        hullmodManager.applyFighterEffects(fighter, id);
     }
 
     @Override
@@ -89,8 +104,8 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
         return VT_Colors.VT_COLOR_MAIN;
     }
 
-    @Override
-    public boolean shouldAddDescriptionToTooltip(ShipAPI.HullSize hullSize, ShipAPI ship, boolean isForModSpec) {
-        return false;
+    private void disableVanillaSModInstallation(MutableShipStatsAPI stats, String id) {
+        float maxPermanentHullmods = Global.getSettings().getFloat("maxPermanentHullmods");
+        stats.getDynamic().getMod(Stats.MAX_PERMANENT_HULLMODS_MOD).modifyFlat(id, -maxPermanentHullmods);
     }
 }

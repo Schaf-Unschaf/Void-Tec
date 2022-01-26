@@ -9,7 +9,6 @@ import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.AugmentData;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.AugmentDataManager;
-import de.schafunschaf.voidtec.util.TextWithHighlights;
 import lombok.extern.log4j.Log4j;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,17 +22,20 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @Log4j
 public class AugmentDataLoader {
+
     public static final String AUGMENT_FILE_PATH = "data/config/voidtec/vt_augment_data.csv";
 
     public static void loadAugmentsFromFiles() {
         try {
-            JSONArray spreadsheet = Global.getSettings().getMergedSpreadsheetDataForMod("augmentID", AUGMENT_FILE_PATH, VoidTecPlugin.MOD_ID);
+            JSONArray spreadsheet = Global.getSettings()
+                                          .getMergedSpreadsheetDataForMod("augmentID", AUGMENT_FILE_PATH, VoidTecPlugin.MOD_ID);
 
             for (int i = 0; i < spreadsheet.length(); i++) {
                 JSONObject row = spreadsheet.getJSONObject(i);
 
                 String augmentID;
-                if (row.has("augmentID") && !isNull(row.getString("augmentID")) && !row.getString("augmentID").isEmpty() && !row.getString("augmentID").contains("#")) {
+                if (row.has("augmentID") && !isNull(row.getString("augmentID")) && !row.getString("augmentID").isEmpty() && !row.getString(
+                        "augmentID").contains("#")) {
                     augmentID = row.getString("augmentID");
                     log.info(String.format("VoidTec: Loading Augment %s", augmentID));
                 } else {
@@ -80,7 +82,13 @@ public class AugmentDataLoader {
                 }
 
                 try {
-                    AugmentData augmentData = new AugmentData(augmentID, row.optString("manufacturer"), row.optString("name"), new TextWithHighlights(row.optString("description")), row.optInt("rarity"), SlotCategory.getEnum(row.getString("primarySlot")), primaryStatMods, primaryStatValues, secondarySlots, secondaryStatMods, secondaryStatValues, augmentQuality, new TextWithHighlights(row.optString("combatScriptDescription")), row.optBoolean("equalQualityRoll"), null);
+                    AugmentData augmentData = new AugmentData(augmentID, row.optString("manufacturer"), row.optString("name"),
+                                                              new TextWithHighlights(row.optString("description")), row.optInt("rarity"),
+                                                              SlotCategory.getEnum(row.getString("primarySlot")), primaryStatMods,
+                                                              primaryStatValues, secondarySlots, secondaryStatMods, secondaryStatValues,
+                                                              augmentQuality,
+                                                              new TextWithHighlights(row.optString("combatScriptDescription")),
+                                                              row.optBoolean("equalQualityRoll"), null);
 
                     AugmentDataManager.storeAugmentData(augmentID, augmentData);
                 } catch (JSONException error) {

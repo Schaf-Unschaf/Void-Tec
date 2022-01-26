@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class EmptySlotButton implements IntelButton {
+
     @Override
     public void buttonPressCancelled(IntelUIAPI ui) {
     }

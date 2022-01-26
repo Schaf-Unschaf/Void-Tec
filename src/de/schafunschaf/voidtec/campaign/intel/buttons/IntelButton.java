@@ -4,6 +4,7 @@ import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 public interface IntelButton {
+
     void buttonPressCancelled(IntelUIAPI ui);
 
     void buttonPressConfirmed(IntelUIAPI ui);

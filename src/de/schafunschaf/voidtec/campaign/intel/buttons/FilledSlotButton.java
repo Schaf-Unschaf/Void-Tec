@@ -9,10 +9,11 @@ import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;
 
-import static de.schafunschaf.voidtec.Settings.removalCostSP;
+import static de.schafunschaf.voidtec.VT_Settings.removalCostSP;
 
 @RequiredArgsConstructor
 public class FilledSlotButton extends EmptySlotButton {
+
     private final AugmentSlot augmentSlot;
 
     @Override

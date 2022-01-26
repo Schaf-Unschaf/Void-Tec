@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 public class ComparisonTools {
+
     public static boolean containsAny(final Collection<?> collection1, final Collection<?> collection2) {
         if (isNull(collection1) || isNull(collection2)) {
             return false;

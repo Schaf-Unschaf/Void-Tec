@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.helper;
+package de.schafunschaf.voidtec.util;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
@@ -14,10 +14,11 @@ import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
 import java.awt.Color;
 import java.util.List;
 
-import static de.schafunschaf.voidtec.Settings.*;
+import static de.schafunschaf.voidtec.VT_Settings.*;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class VoidTecUtils {
+
     public static CargoAPI getAugmentsInPlayerCargo() {
         CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
         CargoAPI cargo = Global.getFactory().createCargo(true);

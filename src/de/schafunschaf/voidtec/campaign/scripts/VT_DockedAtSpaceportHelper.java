@@ -7,6 +7,7 @@ import lombok.Getter;
 
 @Getter
 public class VT_DockedAtSpaceportHelper implements EveryFrameScript {
+
     private final MarketAPI market;
 
     public VT_DockedAtSpaceportHelper(MarketAPI market) {

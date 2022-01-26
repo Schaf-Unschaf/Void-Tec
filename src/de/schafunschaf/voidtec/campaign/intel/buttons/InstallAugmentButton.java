@@ -13,6 +13,7 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @RequiredArgsConstructor
 public class InstallAugmentButton extends EmptySlotButton {
+
     private final AugmentSlot augmentSlot;
 
     @Override
@@ -30,7 +31,8 @@ public class InstallAugmentButton extends EmptySlotButton {
         AugmentApplier augment = AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
         String bullet = "• ";
 
-        tooltip.addPara("Install the augment in this slot (%s)?", 0f, augmentSlot.getSlotCategory().getColor(), augmentSlot.getSlotCategory().getName());
+        tooltip.addPara("Install the augment in this slot (%s)?", 0f, augmentSlot.getSlotCategory().getColor(),
+                        augmentSlot.getSlotCategory().getName());
         if (!isNull(augment)) {
             tooltip.addPara(bullet + augment.getName(), augment.getAugmentQuality().getColor(), 10f);
         }

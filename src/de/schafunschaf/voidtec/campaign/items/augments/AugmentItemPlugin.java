@@ -11,16 +11,16 @@ import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.Settings;
 import de.schafunschaf.voidtec.VT_Icons;
+import de.schafunschaf.voidtec.VT_Settings;
 import de.schafunschaf.voidtec.VT_Strings;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
-import de.schafunschaf.voidtec.helper.VoidTecUtils;
+import de.schafunschaf.voidtec.helper.ColorShifter;
+import de.schafunschaf.voidtec.helper.MalfunctionEffect;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
-import de.schafunschaf.voidtec.util.ColorShifter;
-import de.schafunschaf.voidtec.util.MalfunctionEffect;
+import de.schafunschaf.voidtec.util.VoidTecUtils;
 import lombok.Getter;
 
 import java.awt.Color;
@@ -32,9 +32,9 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @Getter
 public class AugmentItemPlugin extends BaseSpecialItemPlugin {
+
     @Override
-    public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, CargoTransferHandlerAPI transferHandler,
-                              Object stackSource) {
+    public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, CargoTransferHandlerAPI transferHandler, Object stackSource) {
         float largePad = 10f;
         float smallPad = 3f;
 
@@ -49,15 +49,20 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
         createTechInfo(tooltip, largePad, smallPad);
 
-        tooltip.addPara(augment.getDescription().getDisplayString(), largePad, Misc.getHighlightColor(), augment.getDescription().getHighlights());
+        tooltip.addPara(augment.getDescription().getDisplayString(), largePad, Misc.getHighlightColor(),
+                        augment.getDescription().getHighlights());
         if (augmentQuality == AugmentQuality.DESTROYED) {
-            tooltip.addSectionHeading("NON-FUNCTIONAL AUGMENT DETECTED", augmentQuality.getColor(), Misc.scaleColor(augmentQuality.getColor(), 0.5f), Alignment.MID, largePad);
+            tooltip.addSectionHeading("NON-FUNCTIONAL AUGMENT DETECTED", augmentQuality.getColor(),
+                                      Misc.scaleColor(augmentQuality.getColor(), 0.5f), Alignment.MID, largePad);
             tooltip.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), 0f);
-            tooltip.addPara(String.format("Initial Quality: %s", augment.getInitialQuality().getName()), smallPad, Misc.getGrayColor(), augment.getInitialQuality().getColor(), augment.getInitialQuality().getName());
+            tooltip.addPara(String.format("Initial Quality: %s", augment.getInitialQuality().getName()), smallPad, Misc.getGrayColor(),
+                            augment.getInitialQuality().getColor(), augment.getInitialQuality().getName());
         } else if (augmentQuality != augment.getInitialQuality()) {
-            tooltip.addSectionHeading("DAMAGED AUGMENT DETECTED", Misc.getHighlightColor(), Misc.getDarkHighlightColor(), Alignment.MID, largePad);
+            tooltip.addSectionHeading("DAMAGED AUGMENT DETECTED", Misc.getHighlightColor(), Misc.getDarkHighlightColor(), Alignment.MID,
+                                      largePad);
             tooltip.addPara(VT_Strings.VT_DAMAGED_AUGMENT_DESC, Misc.getGrayColor(), 0f);
-            tooltip.addPara(String.format("Initial Quality: %s", augment.getInitialQuality().getName()), smallPad, Misc.getGrayColor(), augment.getInitialQuality().getColor(), augment.getInitialQuality().getName());
+            tooltip.addPara(String.format("Initial Quality: %s", augment.getInitialQuality().getName()), smallPad, Misc.getGrayColor(),
+                            augment.getInitialQuality().getColor(), augment.getInitialQuality().getName());
         }
 
         if (expanded) {
@@ -65,13 +70,16 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
             }
 
-            if (!(augmentQuality == AugmentQuality.DESTROYED) && !isNull(augment.getPrimaryStatMods()) && !augment.getPrimaryStatMods().isEmpty()) {
-                tooltip.addSectionHeading("Primary Stat Modification Info", augment.getPrimarySlot().getColor(), Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
+            if (!(augmentQuality == AugmentQuality.DESTROYED) && !isNull(augment.getPrimaryStatMods()) && !augment.getPrimaryStatMods()
+                                                                                                                  .isEmpty()) {
+                tooltip.addSectionHeading("Primary Stat Modification Info", augment.getPrimarySlot().getColor(),
+                                          Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
                 tooltip.addSpacer(smallPad);
                 augment.generateStatDescription(tooltip, true, smallPad);
             }
 
-            if (!(augmentQuality == AugmentQuality.DESTROYED) && !isNull(augment.getSecondaryStatMods()) && !augment.getSecondaryStatMods().isEmpty()) {
+            if (!(augmentQuality == AugmentQuality.DESTROYED) && !isNull(augment.getSecondaryStatMods()) && !augment.getSecondaryStatMods()
+                                                                                                                    .isEmpty()) {
                 StringBuilder secondarySlotStringBuilder = new StringBuilder("Compatible with: ");
                 List<String> hlStrings = new ArrayList<>();
                 hlStrings.add("Compatible with:");
@@ -80,40 +88,33 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
                 for (Iterator<SlotCategory> iterator = augment.getSecondarySlots().iterator(); iterator.hasNext(); ) {
                     SlotCategory secondarySlot = iterator.next();
-                    secondarySlotStringBuilder.append(secondarySlot.toString());
-                    hlStrings.add(secondarySlot.toString());
+                    secondarySlotStringBuilder.append(secondarySlot.getName());
+                    hlStrings.add(secondarySlot.getName());
                     hlColors.add(secondarySlot.getColor());
                     if (iterator.hasNext()) {
                         secondarySlotStringBuilder.append(", ");
                     }
                 }
 
-                tooltip.addSectionHeading("Secondary Stat Modification Info", augment.getPrimarySlot().getColor(), Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
+                tooltip.addSectionHeading("Secondary Stat Modification Info", augment.getPrimarySlot().getColor(),
+                                          Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
                 tooltip.addSpacer(smallPad);
+
                 augment.generateStatDescription(tooltip, false, smallPad);
-                tooltip.addPara(secondarySlotStringBuilder.toString(), largePad, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
+
+                tooltip.addPara(secondarySlotStringBuilder.toString(), largePad, hlColors.toArray(new Color[0]),
+                                hlStrings.toArray(new String[0]));
             }
         } else {
-            if (!(transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.SUBMARKET_STORAGE) || transferHandler.getSubmarketTradedWith().getSpecId().equals(Submarkets.LOCAL_RESOURCES))) {
+            if (!(transferHandler.getSubmarketTradedWith()
+                                 .getSpecId()
+                                 .equals(Submarkets.SUBMARKET_STORAGE) || transferHandler.getSubmarketTradedWith()
+                                                                                         .getSpecId()
+                                                                                         .equals(Submarkets.LOCAL_RESOURCES))) {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
             }
             tooltip.addPara("Expand to see detailed modification info.", Misc.getGrayColor(), largePad);
         }
-    }
-
-    private void createTechInfo(TooltipMakerAPI tooltip, float largePad, float smallPad) {
-        AugmentApplier augment = getAugmentItemData().getAugment();
-
-        String manufacturerName = isNull(augment.getManufacturer()) ? "Unknown" : augment.getManufacturer();
-        FactionAPI faction = Global.getSector().getFaction(manufacturerName.toLowerCase());
-        Color manufacturerColor = VoidTecUtils.getManufacturerColor(manufacturerName);
-        if (!isNull(faction)) {
-            manufacturerName = Misc.ucFirst(faction.getDisplayNameWithArticleWithoutArticle());
-        }
-
-        tooltip.addPara("Manufacturer: %s", largePad, Misc.getGrayColor(), manufacturerColor, manufacturerName);
-        tooltip.addPara(String.format("Quality: %s", augment.getAugmentQuality().getName()), smallPad, Misc.getGrayColor(), augment.getAugmentQuality().getColor(), augment.getAugmentQuality().getName());
-        tooltip.addPara("Type: %s", smallPad, Misc.getGrayColor(), augment.getPrimarySlot().getColor(), augment.getPrimarySlot().toString());
     }
 
     @Override
@@ -127,11 +128,6 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
     }
 
     @Override
-    public String getDesignType() {
-        return super.getDesignType();
-    }
-
-    @Override
     public int getPrice(MarketAPI market, SubmarketAPI submarket) {
         float modifier = getAugmentItemData().getAugment().getAugmentQuality().getModifier();
         int modifiedPrice = Math.round(spec.getBasePrice() * modifier * modifier);
@@ -139,8 +135,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
     }
 
     @Override
-    public void render(float x, float y, float w, float h, float alphaMult, float glowMult,
-                       SpecialItemRendererAPI renderer) {
+    public void render(float x, float y, float w, float h, float alphaMult, float glowMult, SpecialItemRendererAPI renderer) {
         AugmentApplier augment = getAugmentItemData().getAugment();
         ColorShifter colorShifter = getAugmentItemData().getColorShifter();
         MalfunctionEffect malfunctionEffect = getAugmentItemData().getMalfunctionEffect();
@@ -149,7 +144,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
         SpriteAPI glow = Global.getSettings().getSprite(VT_Icons.AUGMENT_ITEM_ICON_GLOW);
         Color glowColor = augment.getPrimarySlot().getColor();
 
-        if (Settings.iconFlicker) {
+        if (VT_Settings.iconFlicker) {
             if (!isNull(colorShifter)) {
                 glowColor = colorShifter.shiftColor(0.5f);
             } else if (!isNull(malfunctionEffect)) {
@@ -168,6 +163,27 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
         glow.setColor(glowColor);
         glow.renderAtCenter(0f, 0f);
+    }
+
+    @Override
+    public String getDesignType() {
+        return super.getDesignType();
+    }
+
+    private void createTechInfo(TooltipMakerAPI tooltip, float largePad, float smallPad) {
+        AugmentApplier augment = getAugmentItemData().getAugment();
+
+        String manufacturerName = isNull(augment.getManufacturer()) ? "Unknown" : augment.getManufacturer();
+        FactionAPI faction = Global.getSector().getFaction(manufacturerName.toLowerCase());
+        Color manufacturerColor = VoidTecUtils.getManufacturerColor(manufacturerName);
+        if (!isNull(faction)) {
+            manufacturerName = Misc.ucFirst(faction.getDisplayNameWithArticleWithoutArticle());
+        }
+
+        tooltip.addPara("Manufacturer: %s", largePad, Misc.getGrayColor(), manufacturerColor, manufacturerName);
+        tooltip.addPara(String.format("Quality: %s", augment.getAugmentQuality().getName()), smallPad, Misc.getGrayColor(),
+                        augment.getAugmentQuality().getColor(), augment.getAugmentQuality().getName());
+        tooltip.addPara("Type: %s", smallPad, Misc.getGrayColor(), augment.getPrimarySlot().getColor(), augment.getPrimarySlot().getName());
     }
 
     public AugmentItemData getAugmentItemData() {

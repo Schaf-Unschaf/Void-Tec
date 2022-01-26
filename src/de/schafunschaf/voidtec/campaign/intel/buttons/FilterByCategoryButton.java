@@ -9,6 +9,7 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @RequiredArgsConstructor
 public class FilterByCategoryButton extends EmptySlotButton {
+
     private final SlotCategory selectedSlot;
 
     @Override

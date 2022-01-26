@@ -1,14 +1,15 @@
 package de.schafunschaf.voidtec.campaign.items.augments;
 
 import com.fs.starfarer.api.campaign.SpecialItemData;
+import de.schafunschaf.voidtec.helper.ColorShifter;
+import de.schafunschaf.voidtec.helper.MalfunctionEffect;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
-import de.schafunschaf.voidtec.util.ColorShifter;
-import de.schafunschaf.voidtec.util.MalfunctionEffect;
 import lombok.Getter;
 
 @Getter
 public class AugmentItemData extends SpecialItemData {
+
     private final AugmentApplier augment;
     private MalfunctionEffect malfunctionEffect;
     private ColorShifter colorShifter;

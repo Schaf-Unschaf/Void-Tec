@@ -3,10 +3,12 @@ package de.schafunschaf.voidtec;
 import com.fs.starfarer.api.Global;
 
 public class VT_Icons {
+
     public static final String LOCKED_SLOT_ICON = Global.getSettings().getSpriteName("misc", "voidTec_hullmod_lockedSlot");
     public static final String EMPTY_SLOT_ICON = Global.getSettings().getSpriteName("misc", "voidTec_hullmod_emptySlot");
     public static final String UNIVERSAL_SLOT_ICON = Global.getSettings().getSpriteName("misc", "voidTec_hullmod_universalSlot");
     public static final String WEAPON_SLOT_ICON = Global.getSettings().getSpriteName("misc", "voidTec_hullmod_weaponSlot");
+    public static final String FLIGHT_DECK_SLOT_ICON = Global.getSettings().getSpriteName("misc", "voidTec_hullmod_flightDeckSlot");
     public static final String STRUCTURE_SLOT_ICON = Global.getSettings().getSpriteName("misc", "voidTec_hullmod_structureSlot");
     public static final String SHIELD_SLOT_ICON = Global.getSettings().getSpriteName("misc", "voidTec_hullmod_shieldSlot");
     public static final String REACTOR_SLOT_ICON = Global.getSettings().getSpriteName("misc", "voidTec_hullmod_reactorSlot");

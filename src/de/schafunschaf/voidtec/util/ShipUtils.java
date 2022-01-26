@@ -5,6 +5,7 @@ import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class ShipUtils {
+
     public static String generateShipNameWithClass(FleetMemberAPI ship) {
         if (isNull(ship)) {
             return "NO SHIP FOR NAME AND CLASS";

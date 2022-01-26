@@ -7,6 +7,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import de.schafunschaf.voidtec.campaign.intel.buttons.IntelButton;
 
 public class BaseIntel extends BaseIntelPlugin {
+
     @Override
     public boolean doesButtonHaveConfirmDialog(Object buttonId) {
         if (buttonId instanceof IntelButton) {

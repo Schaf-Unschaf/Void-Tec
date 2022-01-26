@@ -4,7 +4,7 @@ import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import lombok.Getter;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
@@ -12,6 +12,7 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @Getter
 public class AugmentSlot {
+
     private final HullModManager hullmodManager;
     private final SlotCategory slotCategory;
     private AugmentApplier slottedAugment;
@@ -30,22 +31,32 @@ public class AugmentSlot {
         this.isUnlocked = unlocked;
     }
 
-    public AugmentSlot(HullModManager hullmodManager, List<SlotCategory> excludeList, Random random, boolean unlocked) {
+    public AugmentSlot(HullModManager hullmodManager, Map<SlotCategory, Integer> allowedCategories, Random random, boolean unlocked) {
         this.hullmodManager = hullmodManager;
-        this.slotCategory = SlotCategory.getRandomCategory(random, excludeList);
+        this.slotCategory = SlotCategory.getRandomCategory(random, allowedCategories);
         this.isUnlocked = unlocked;
     }
 
-    public void apply(MutableShipStatsAPI stats, String id, Random random, AugmentQuality quality) {
+    public void applyToShip(MutableShipStatsAPI stats, String id) {
         if (isNull(slottedAugment)) {
             return;
         }
 
-        slottedAugment.apply(stats, id, random, quality, isPrimary);
+        long randomSeed = (long) stats.getFleetMember().getId().hashCode() + slottedAugment.hashCode();
+        Random random = new Random(randomSeed);
+
+        slottedAugment.applyToShip(stats, id, random, isPrimary);
     }
 
-    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width,
-                                boolean isItemTooltip) {
+    public void applyToFighter(MutableShipStatsAPI stats, String id) {
+        if (isNull(slottedAugment)) {
+            return;
+        }
+
+        slottedAugment.applyToFighter(stats, id, isPrimary);
+    }
+
+    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, boolean isItemTooltip) {
         if (isNull(slottedAugment)) {
             return;
         }

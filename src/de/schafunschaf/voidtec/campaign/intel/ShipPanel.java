@@ -4,21 +4,22 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.VT_Settings;
 import de.schafunschaf.voidtec.campaign.intel.buttons.*;
-import de.schafunschaf.voidtec.helper.ButtonUtils;
-import de.schafunschaf.voidtec.helper.VoidTecUtils;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.*;
 import de.schafunschaf.voidtec.scripts.combat.hullmods.VoidTecEngineeringSuite;
+import de.schafunschaf.voidtec.util.ButtonUtils;
+import de.schafunschaf.voidtec.util.VoidTecUtils;
 
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static de.schafunschaf.voidtec.Settings.*;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class ShipPanel {
+
     private static final float PANEL_HEADER_HEIGHT = 21f;
     private static final int NUM_MAX_COLUMNS = 4;
     private static final int NUM_MAX_ROWS = 5;
@@ -77,7 +78,7 @@ public class ShipPanel {
     }
 
     private static void generateShipForPanel(TooltipMakerAPI shipElement, final FleetMemberAPI ship) {
-        float labelButtonWidth = AUGMENT_BUTTON_SIZE * MAX_SLOTS + AUGMENT_BUTTON_PADDING * (MAX_SLOTS - 1);
+        float labelButtonWidth = AUGMENT_BUTTON_SIZE * VT_Settings.MAX_SLOTS + AUGMENT_BUTTON_PADDING * (VT_Settings.MAX_SLOTS - 1);
 
         float hullSizeMult = Misc.getSizeNum(ship.getHullSpec().getHullSize());
 
@@ -102,7 +103,7 @@ public class ShipPanel {
 
         if (hasVESAI) {
             AugmentSlot specialSlot = hullmodManager.getSpecialSlot();
-            ButtonAPI specialSlotButton = createAugmentSlotButton(shipElement, ship, specialSlot, AUGMENT_BUTTON_SIZE);
+            ButtonAPI specialSlotButton = createAugmentSlotButton(shipElement, ship, specialSlot);
             specialSlotButton.getPosition().belowLeft(textComponent, 3f);
             String specialButtonText = specialSlot.isEmpty() ? "Special Slot Empty" : specialSlot.getSlottedAugment().getName();
             Color textColor = specialSlot.isEmpty() ? Misc.getGrayColor() : specialSlot.getSlottedAugment().getAugmentQuality().getColor();
@@ -111,7 +112,7 @@ public class ShipPanel {
             UIComponentAPI lastCreatedButton = null;
 
             for (final AugmentSlot augmentSlot : hullmodManager.getSlotsForDisplay()) {
-                ButtonAPI augmentSlotButton = createAugmentSlotButton(shipElement, ship, augmentSlot, AUGMENT_BUTTON_SIZE);
+                ButtonAPI augmentSlotButton = createAugmentSlotButton(shipElement, ship, augmentSlot);
 
                 if (isNull(lastCreatedButton)) {
                     augmentSlotButton.getPosition().belowLeft(specialSlotButton, 3f);
@@ -123,16 +124,19 @@ public class ShipPanel {
             }
 
         } else {
-            boolean spEnabled = hullmodInstallationWithSP;
+            boolean spEnabled = VT_Settings.hullmodInstallationWithSP;
             boolean canPerformInstallation = VoidTecUtils.isPlayerDockedAtSpaceport() && VoidTecUtils.canPayForInstallation(hullSizeMult);
             Color hlColor = spEnabled ? Misc.getStoryOptionColor() : Misc.getHighlightColor();
-            String highlight = spEnabled ? String.format("%s SP", installCostSP) : Misc.getDGSCredits(installCostCredits * hullSizeMult);
+            String highlight = spEnabled
+                               ? String.format("%s SP", VT_Settings.installCostSP)
+                               : Misc.getDGSCredits(VT_Settings.installCostCredits * hullSizeMult);
             shipElement.addPara("Installation cost: %s", 3f, Misc.getGrayColor(), hlColor, highlight);
 
             Color base = spEnabled ? Misc.getStoryBrightColor() : Misc.getBrightPlayerColor();
             Color bg = spEnabled ? Misc.getStoryDarkColor() : Misc.getDarkPlayerColor();
 
-            ButtonUtils.addLabeledButton(shipElement, labelButtonWidth, AUGMENT_BUTTON_SIZE, 6f, base, bg, CutStyle.C2_MENU, new InstallHullmodButton(ship)).setEnabled(canPerformInstallation);
+            ButtonUtils.addLabeledButton(shipElement, labelButtonWidth, AUGMENT_BUTTON_SIZE, 6f, base, bg, CutStyle.C2_MENU,
+                                         new InstallHullmodButton(ship)).setEnabled(canPerformInstallation);
         }
 
         shipElement.addButton("", null, SHIP_ELEMENT_WIDTH, 0f, 0f);
@@ -141,11 +145,11 @@ public class ShipPanel {
     }
 
     private static ButtonAPI createAugmentSlotButton(final TooltipMakerAPI uiElement, final FleetMemberAPI ship,
-                                                     final AugmentSlot augmentSlot, float buttonSize) {
+                                                     final AugmentSlot augmentSlot) {
         HullModManager hullmodManager = augmentSlot.getHullmodManager();
         final AugmentApplier slottedAugment = augmentSlot.getSlottedAugment();
         final SlotCategory slotCategory = augmentSlot.getSlotCategory();
-        int unlockedSlots = hullmodManager.getUnlockedSlotsNum();
+        int unlockedSlots = hullmodManager.getUnlockedSlots().size();
 
         boolean isUnlocked = augmentSlot.isUnlocked();
         boolean hasAugmentSelected = !isNull(AugmentManagerIntel.getSelectedAugmentInCargo());
@@ -156,23 +160,30 @@ public class ShipPanel {
         Color buttonColor = new Color(25, 25, 25);
         Color buttonTextColor = Misc.getGrayColor();
 
-        int installCost = installCostCredits * unlockedSlots;
-        final boolean canUnlockWithCredits = unlockedSlots < maxNumSlotsForCreditUnlock;
+        int installCost = VT_Settings.installCostCredits * unlockedSlots;
+        final boolean canUnlockWithCredits = unlockedSlots < VT_Settings.maxNumSlotsForCreditUnlock;
 
         if (canUnlockWithCredits) {
-            if (VoidTecUtils.isPlayerDockedAtSpaceport() && Global.getSector().getPlayerFleet().getCargo().getCredits().get() >= installCost) {
+            if (VoidTecUtils.isPlayerDockedAtSpaceport() && Global.getSector()
+                                                                  .getPlayerFleet()
+                                                                  .getCargo()
+                                                                  .getCredits()
+                                                                  .get() >= installCost) {
                 buttonTextColor = Misc.getHighlightColor();
                 buttonColor = Misc.scaleColor(Misc.getDarkHighlightColor(), 0.3f);
             }
         } else {
-            if (VoidTecUtils.isPlayerDockedAtSpaceport() && Global.getSector().getPlayerStats().getStoryPoints() >= installCostSP) {
+            if (VoidTecUtils.isPlayerDockedAtSpaceport() && Global.getSector()
+                                                                  .getPlayerStats()
+                                                                  .getStoryPoints() >= VT_Settings.installCostSP) {
                 buttonTextColor = Misc.getStoryOptionColor();
                 buttonColor = Misc.scaleColor(Misc.getStoryDarkColor(), 0.5f);
             }
         }
 
         if (hasAugmentSelected) {
-            if (isEmpty && isUnlocked && hullmodManager.isAugmentCompatible(augmentSlot, AugmentManagerIntel.getSelectedAugmentInCargo().getAugment())) {
+            if (isEmpty && isUnlocked && hullmodManager.isAugmentCompatible(augmentSlot,
+                                                                            AugmentManagerIntel.getSelectedAugmentInCargo().getAugment())) {
                 buttonColor = slotCategory.getColor();
                 if (VoidTecUtils.isPlayerDockedAtSpaceport()) {
                     intelButton = new InstallAugmentButton(augmentSlot);
@@ -201,24 +212,30 @@ public class ShipPanel {
             }
         }
 
-        ButtonAPI augmentButton = ButtonUtils.addAugmentButton(uiElement, buttonSize, 0f, buttonTextColor, buttonColor, intelButton);
+        ButtonAPI augmentButton = ButtonUtils.addAugmentButton(uiElement, AUGMENT_BUTTON_SIZE, 0f, buttonTextColor, buttonColor,
+                                                               intelButton);
 
         if (!isEmpty) {
             uiElement.addTooltipToPrevious(new BaseTooltipCreator() {
                 @Override
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                    slottedAugment.generateTooltip(ship.getStats(), VoidTecEngineeringSuite.HULL_MOD_ID, tooltip, getTooltipWidth(this), slotCategory, augmentSlot.isPrimary(), false);
+                    slottedAugment.generateTooltip(ship.getStats(), VoidTecEngineeringSuite.HULL_MOD_ID, tooltip, getTooltipWidth(this),
+                                                   slotCategory, augmentSlot.isPrimary(), false);
                 }
             }, TooltipMakerAPI.TooltipLocation.BELOW);
 
         } else if (canUnlockSlot) {
-            final String unlockCost = canUnlockWithCredits ? Misc.getDGSCredits(installCost) : String.format("%s SP", installCostSP);
+            final String unlockCost = canUnlockWithCredits
+                                      ? Misc.getDGSCredits(installCost)
+                                      : String.format("%s SP", VT_Settings.installCostSP);
             final String unlockSlotText = String.format("Locked slot\n" + "Cost to unlock: %s", unlockCost);
             final String needSpaceportText = "Need Spaceport for modification";
 
             final Color hlColor = canUnlockWithCredits ? Misc.getHighlightColor() : Misc.getStoryOptionColor();
 
-            final float stringWidth = VoidTecUtils.isPlayerDockedAtSpaceport() ? uiElement.computeStringWidth(unlockSlotText) : uiElement.computeStringWidth(needSpaceportText);
+            final float stringWidth = VoidTecUtils.isPlayerDockedAtSpaceport()
+                                      ? uiElement.computeStringWidth(unlockSlotText)
+                                      : uiElement.computeStringWidth(needSpaceportText);
             uiElement.addTooltipToPrevious(new BaseTooltipCreator() {
                 @Override
                 public float getTooltipWidth(Object tooltipParam) {
@@ -237,7 +254,9 @@ public class ShipPanel {
         } else {
             final String emptySlotText = String.format("Empty %s slot", slotCategory);
             final String needSpaceportText = "Need Spaceport for modification";
-            final float stringWidth = VoidTecUtils.isPlayerDockedAtSpaceport() ? uiElement.computeStringWidth(emptySlotText) : uiElement.computeStringWidth(needSpaceportText);
+            final float stringWidth = VoidTecUtils.isPlayerDockedAtSpaceport()
+                                      ? uiElement.computeStringWidth(emptySlotText)
+                                      : uiElement.computeStringWidth(needSpaceportText);
             uiElement.addTooltipToPrevious(new BaseTooltipCreator() {
                 @Override
                 public float getTooltipWidth(Object tooltipParam) {

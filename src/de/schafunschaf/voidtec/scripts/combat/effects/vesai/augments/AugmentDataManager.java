@@ -10,6 +10,7 @@ import java.util.*;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class AugmentDataManager {
+
     private static final Map<String, AugmentData> AUGMENT_DATA_MAP = new HashMap<>();
 
     public static BaseAugment getAugment(String augmentID, AugmentQuality augmentQuality) {
@@ -24,8 +25,8 @@ public class AugmentDataManager {
         return getRandomAugment(null, null, null, random);
     }
 
-    public static BaseAugment getRandomAugment(SlotCategory slotCategory, AugmentQuality augmentQuality,
-                                               FactionAPI faction, Random random) {
+    public static BaseAugment getRandomAugment(SlotCategory slotCategory, AugmentQuality augmentQuality, FactionAPI faction,
+                                               Random random) {
         if (isNull(random)) {
             random = new Random();
         }
@@ -43,7 +44,7 @@ public class AugmentDataManager {
         if (!isNull(slotCategory)) {
             for (AugmentData augmentData : augmentDataCollection) {
                 factionMult = !isNull(faction) && augmentData.getManufacturer().equals(faction.getId()) ? 10f : 1f;
-                if (!isNull(augmentData.getPrimarySlot()) && augmentData.getPrimarySlot().equals(slotCategory)) {
+                if (augmentData.getPrimarySlot().equals(slotCategory)) {
                     if (Arrays.asList(augmentData.augmentQualityRange).contains(augmentQuality.name())) {
                         picker.add(augmentData, augmentData.getRarity() * factionMult);
                     }
@@ -55,11 +56,9 @@ public class AugmentDataManager {
             }
         } else {
             for (AugmentData augmentData : augmentDataCollection) {
-                if (!isNull(augmentData.getPrimarySlot())) {
-                    factionMult = !isNull(faction) && augmentData.getManufacturer().equals(faction.getId()) ? 10f : 1f;
-                    if (Arrays.asList(augmentData.augmentQualityRange).contains(augmentQuality.name())) {
-                        picker.add(augmentData, augmentData.getRarity() * factionMult);
-                    }
+                factionMult = !isNull(faction) && augmentData.getManufacturer().equals(faction.getId()) ? 10f : 1f;
+                if (Arrays.asList(augmentData.augmentQualityRange).contains(augmentQuality.name())) {
+                    picker.add(augmentData, augmentData.getRarity() * factionMult);
                 }
             }
         }
@@ -67,8 +66,7 @@ public class AugmentDataManager {
         return createAugmentFromData(picker.pick(), augmentQuality, random);
     }
 
-    private static BaseAugment createAugmentFromData(AugmentData augmentData, AugmentQuality augmentQuality,
-                                                     Random random) {
+    private static BaseAugment createAugmentFromData(AugmentData augmentData, AugmentQuality augmentQuality, Random random) {
         return isNull(augmentData) ? null : new BaseAugment(augmentData, augmentQuality, random);
     }
 }

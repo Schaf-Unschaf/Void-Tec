@@ -9,12 +9,11 @@ import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.Settings;
 import de.schafunschaf.voidtec.VT_Icons;
+import de.schafunschaf.voidtec.VT_Settings;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.BaseAugment;
 import de.schafunschaf.voidtec.util.ShipUtils;
-import lombok.Getter;
 import lombok.extern.log4j.Log4j;
 
 import java.awt.Color;
@@ -25,29 +24,34 @@ import static de.schafunschaf.voidtec.VT_Colors.VT_GREY_COLOR;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @Log4j
-@Getter
 public class HullModManager {
+
     private final List<AugmentSlot> shipAugmentSlots = new ArrayList<>();
 
     public HullModManager(FleetMemberAPI fleetMember) {
         generateSlotsForShip(fleetMember);
     }
 
-    public void applySlotEffects(MutableShipStatsAPI stats, String id, Random random) {
+    public void applySlotEffects(MutableShipStatsAPI stats, String id) {
         for (AugmentSlot augmentSlot : shipAugmentSlots) {
-            augmentSlot.apply(stats, id, random, null);
+            augmentSlot.applyToShip(stats, id);
         }
     }
 
-    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width,
-                                boolean isItemTooltip) {
+    public void applyFighterEffects(ShipAPI fighter, String id) {
+        for (AugmentSlot flightDeckSlot : getFlightDeckSlots()) {
+            flightDeckSlot.applyToFighter(fighter.getMutableStats(), id);
+        }
+    }
+
+    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, boolean isItemTooltip) {
         String shipName = stats.getFleetMember().getShipName();
         int maxSlots = shipAugmentSlots.size();
         Color highlightColor = Misc.getHighlightColor();
-        tooltip.addPara("The %s is equipped with a special device, allowing her to install up to %s so called '%s'.\n"
-                                + "Each Augment can only be installed once in the device and it's impossible to reuse them afterwards.",
-                        10f, new Color[]{Misc.getBasePlayerColor(), highlightColor,
-                                         highlightColor}, shipName, String.valueOf(maxSlots), "Augments");
+        tooltip.addPara(
+                "The %s is equipped with a special device, allowing her to install up to %s so called '%s'.\n" + "Each Augment can only be installed once in the device and it's impossible to reuse them afterwards.",
+                10f, new Color[]{Misc.getBasePlayerColor(), highlightColor, highlightColor}, shipName, String.valueOf(maxSlots),
+                "Augments");
 
         tooltip.addSpacer(10f);
 
@@ -87,8 +91,8 @@ public class HullModManager {
         if (numLockedSlots > 0) {
             tooltip.addSpacer(10f);
             TooltipMakerAPI imageWithText = tooltip.beginImageWithText(VT_Icons.LOCKED_SLOT_ICON, 32f);
-            imageWithText.addPara(String.format("%s Augment slots are still locked", numLockedSlots), 0f,
-                                  VT_GREY_COLOR, Misc.getHighlightColor(), String.valueOf(numLockedSlots));
+            imageWithText.addPara(String.format("%s Augment slots are still locked", numLockedSlots), 0f, VT_GREY_COLOR,
+                                  Misc.getHighlightColor(), String.valueOf(numLockedSlots));
             imageWithText.addPara("Type: Unknown", 3f, VT_GREY_COLOR, "Unknown");
             tooltip.addImageWithText(0f);
         }
@@ -97,19 +101,17 @@ public class HullModManager {
             tooltip.addPara("Available Build-In Slots: %s/%s", 10f, Misc.getTextColor(), Misc.getHighlightColor(),
                             String.valueOf(currentBuiltInMods), String.valueOf(maxBuiltInMods));
         } else {
-            tooltip.addPara("Available Build-In Slots: %s", 10f, Misc.getTextColor(),
-                            Misc.getNegativeHighlightColor(), "NONE");
+            tooltip.addPara("Available Build-In Slots: %s", 10f, Misc.getTextColor(), Misc.getNegativeHighlightColor(), "NONE");
         }
-        tooltip.addPara("HINT: Some %s Augments can grant additional slots for building in hullmods", 3f,
-                        Misc.getGrayColor(), SlotCategory.SPECIAL.getColor(), SlotCategory.SPECIAL.name());
+        tooltip.addPara("HINT: Some %s Augments can grant additional slots for building in hullmods", 3f, Misc.getGrayColor(),
+                        SlotCategory.SPECIAL.getColor(), SlotCategory.SPECIAL.name());
     }
 
     private void addEmptySlotDesc(TooltipMakerAPI tooltip, float width, AugmentSlot augmentSlot) {
         tooltip.addButton("", null, VT_GREY_COLOR, VT_GREY_COLOR, width, 0f, 3f);
         tooltip.addPara("Empty Augment Slot", VT_GREY_COLOR, 3f);
         TooltipMakerAPI imageWithText = tooltip.beginImageWithText(VT_Icons.EMPTY_SLOT_ICON, 40f);
-        imageWithText.addPara("Type: %s", 3f, augmentSlot.getSlotCategory().color,
-                              augmentSlot.getSlotCategory().toString());
+        imageWithText.addPara("Type: %s", 3f, augmentSlot.getSlotCategory().color, augmentSlot.getSlotCategory().toString());
         tooltip.addImageWithText(3f);
         tooltip.addButton("", null, VT_GREY_COLOR, VT_GREY_COLOR, width, 0f, 3f);
     }
@@ -142,10 +144,6 @@ public class HullModManager {
         return augment.getSecondarySlots().contains(slotCategory);
     }
 
-    public int getUnlockedSlotsNum() {
-        return getEmptySlots(true).size();
-    }
-
     private boolean hasSameAugmentSlotted(AugmentApplier augment) {
         for (AugmentSlot augmentSlot : getFilledSlots()) {
             if (augmentSlot.getSlottedAugment().getAugmentID().equals(augment.getAugmentID())) {
@@ -164,6 +162,29 @@ public class HullModManager {
         }
 
         return null;
+    }
+
+    public List<AugmentSlot> getFlightDeckSlots() {
+        List<AugmentSlot> flightDeckSlots = new ArrayList<>();
+        for (AugmentSlot augmentSlot : shipAugmentSlots) {
+            if (augmentSlot.getSlotCategory() == SlotCategory.FLIGHT_DECK) {
+                flightDeckSlots.add(augmentSlot);
+            }
+        }
+
+        return flightDeckSlots;
+    }
+
+    public List<AugmentSlot> getUnlockedSlots() {
+        List<AugmentSlot> unlockedSlots = new ArrayList<>();
+
+        for (AugmentSlot augmentSlot : shipAugmentSlots) {
+            if (augmentSlot.isUnlocked()) {
+                unlockedSlots.add(augmentSlot);
+            }
+        }
+
+        return unlockedSlots;
     }
 
     public List<AugmentSlot> getEmptySlots(boolean onlyUnlocked) {
@@ -271,15 +292,19 @@ public class HullModManager {
     }
 
     public void generateSlotsForShip(FleetMemberAPI fleetMember) {
-        if (Settings.sheepDebug) {
+        if (VT_Settings.sheepDebug) {
             log.info(String.format("Generating slots for %s", ShipUtils.generateShipNameWithClass(fleetMember)));
         }
 
         Random random = new Random(fleetMember.getId().hashCode());
         HullSize hullSize = fleetMember.getVariant().getHullSize();
+        boolean isPhase = fleetMember.isPhaseShip();
+        int numFlightDecks = fleetMember.getNumFlightDecks();
+        boolean isCarrier = numFlightDecks > 0;
         int maxSlots = 6;
         int numSlots = 0;
-        if (Settings.randomSlotAmount) {
+
+        if (VT_Settings.randomSlotAmount) {
             numSlots = random.nextInt(maxSlots) + 1;
         } else {
             switch (hullSize) {
@@ -299,22 +324,34 @@ public class HullModManager {
         }
 
         shipAugmentSlots.add(new AugmentSlot(this, SlotCategory.SPECIAL, true));
-        if (Settings.sheepDebug) {
+        if (VT_Settings.sheepDebug) {
             log.info(String.format("Slot: %s (unlocked: %s)", shipAugmentSlots.get(0).getSlotCategory().name(), true));
+        }
+
+        Map<SlotCategory, Integer> categoryPoolWithWeighting = new HashMap<>();
+        for (SlotCategory allowedCategory : SlotCategory.getAllowedCategories()) {
+            if (isPhase && allowedCategory == SlotCategory.SHIELD) {
+                continue;
+            }
+            if (isCarrier && allowedCategory == SlotCategory.FLIGHT_DECK) {
+                categoryPoolWithWeighting.put(allowedCategory, allowedCategory.getWeighting() + numFlightDecks);
+                continue;
+            }
+
+            categoryPoolWithWeighting.put(allowedCategory, allowedCategory.getWeighting());
         }
 
         for (int i = 0; i < maxSlots; i++) {
             boolean isUnlocked = i < numSlots;
-            shipAugmentSlots.add(new AugmentSlot(this, random, isUnlocked));
-            if (Settings.sheepDebug) {
-                log.info(String.format("Slot: %s (unlocked: %s)",
-                                       shipAugmentSlots.get(i + 1).getSlotCategory().name(), isUnlocked));
+            shipAugmentSlots.add(new AugmentSlot(this, categoryPoolWithWeighting, random, isUnlocked));
+            if (VT_Settings.sheepDebug) {
+                log.info(String.format("Slot: %s (unlocked: %s)", shipAugmentSlots.get(i + 1).getSlotCategory().name(), isUnlocked));
             }
         }
     }
 
     public void fillUnlockedSlots(FactionAPI preferredFaction, String[] qualityRange, Random random) {
-        if (Settings.sheepDebug) {
+        if (VT_Settings.sheepDebug) {
             log.info("Generating random augments");
         }
         if (isNull(random)) {
@@ -325,15 +362,13 @@ public class HullModManager {
             SlotCategory slotCategory = shipAugmentSlot.getSlotCategory();
             AugmentQuality augmentQuality = AugmentQuality.getRandomQualityInRange(qualityRange, random, false);
 
-            BaseAugment augment = AugmentDataManager.getRandomAugment(slotCategory, augmentQuality, preferredFaction,
-                                                                      random);
+            BaseAugment augment = AugmentDataManager.getRandomAugment(slotCategory, augmentQuality, preferredFaction, random);
             boolean success = installAugment(shipAugmentSlot, augment);
 
-            if (Settings.sheepDebug) {
+            if (VT_Settings.sheepDebug) {
                 log.info(String.format("Slot: %s - Augment: %s - Quality: %s - Success: %s", slotCategory.name(),
                                        isNull(augment) ? "NULL" : augment.getAugmentID(),
-                                       isNull(augment) ? "NULL" : augment.getAugmentQuality().name(),
-                                       success));
+                                       isNull(augment) ? "NULL" : augment.getAugmentQuality().name(), success));
             }
         }
     }

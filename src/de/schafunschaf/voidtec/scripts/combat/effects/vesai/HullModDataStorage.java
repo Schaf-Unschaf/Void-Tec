@@ -20,6 +20,7 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNullOrEmpty;
 @Getter
 @NoArgsConstructor
 public class HullModDataStorage {
+
     public static final String KEY = "$voidTec_hullModStorageManager";
     private final Map<String, HullModManager> dataStorage = new HashMap<>();
 

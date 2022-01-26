@@ -1,6 +1,7 @@
 package de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers;
 
 public class VT_StatModKeys {
+
     public static final String ARMOR_HEALTH = "armor_health";
     public static final String ENGINE_HEALTH = "engine_health";
     public static final String ENGINE_REPAIR = "engine_repair";

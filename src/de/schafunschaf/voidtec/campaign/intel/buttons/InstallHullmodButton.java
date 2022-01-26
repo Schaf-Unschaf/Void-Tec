@@ -6,17 +6,18 @@ import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.helper.VoidTecUtils;
 import de.schafunschaf.voidtec.scripts.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.util.FormattingTools;
+import de.schafunschaf.voidtec.util.VoidTecUtils;
 import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;
 
-import static de.schafunschaf.voidtec.Settings.*;
+import static de.schafunschaf.voidtec.VT_Settings.*;
 
 @RequiredArgsConstructor
 public class InstallHullmodButton extends EmptySlotButton {
+
     private final FleetMemberAPI fleetMember;
 
     @Override
@@ -45,7 +46,8 @@ public class InstallHullmodButton extends EmptySlotButton {
         }
 
         tooltip.addPara("Do you want to install the VoidTec Engineering Suite on your ship?", 0f);
-        tooltip.addPara(String.format("This will cost you %s and remove all installed permanent hullmods.", installCost), 3f, hlColor, installCost);
+        tooltip.addPara(String.format("This will cost you %s and remove all installed permanent hullmods.", installCost), 3f, hlColor,
+                        installCost);
     }
 
     @Override

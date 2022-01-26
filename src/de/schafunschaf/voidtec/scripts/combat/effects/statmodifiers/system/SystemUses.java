@@ -6,17 +6,29 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatModValue;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
+import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
 import de.schafunschaf.voidtec.util.ComparisonTools;
 
 import java.awt.Color;
 import java.util.Random;
 
 public class SystemUses extends BaseStatMod {
+
+    public SystemUses(String statID) {
+        super(statID);
+    }
+
     @Override
-    public void apply(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue,
-                      Random random, AugmentQuality quality) {
-        stats.getSystemUsesBonus().modifyFlat(id, Math.round(generateModValue(statModValue, random, quality)));
+    public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random,
+                            AugmentApplier parentAugment) {
+        if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
+            parentAugment.updateFighterStatValue(id + "_" + statID,
+                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+        } else {
+            stats.getSystemUsesBonus()
+                 .modifyFlat(id, Math.round(generateModValue(statModValue, random, parentAugment.getAugmentQuality())));
+        }
     }
 
     @Override
@@ -25,39 +37,46 @@ public class SystemUses extends BaseStatMod {
     }
 
     @Override
-    public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor) {
+    public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
+                                     AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getSystemUsesBonus().getFlatBonus(id);
-        if (ComparisonTools.isNull(statMod)) {
-            return;
-        }
 
         String description = "System charge amount %s by %s";
+        if (ComparisonTools.isNull(statMod)) {
+            Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
+            if (!ComparisonTools.isNull(fighterStatValue)) {
+                description = "(Fighter) " + description;
+                statMod = new MutableStat.StatMod(id + "_" + statID, null, fighterStatValue);
+            } else {
+                return;
+            }
+        }
         generateTooltip(tooltip, statMod, description, bulletColor, false);
     }
 
     @Override
-    protected void generateTooltip(TooltipMakerAPI tooltip, MutableStat.StatMod statMod, String description,
-                                   Color bulletColor, boolean flipColors) {
-        float value = statMod.value;
-        boolean isPositive = value >= 1f;
-        String bullet = "•";
-        String incDec = isPositive ? "increased" : "decreased";
-        if (flipColors) {
-            isPositive = !isPositive;
-        }
-        Color hlColor = isPositive ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor();
-        tooltip.addPara("%s " + description, 0f, new Color[]{bulletColor, hlColor,
-                                                             hlColor}, bullet, incDec, String.valueOf(Math.abs(Math.round(value))));
-    }
-
-    @Override
-    public void generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float avgModValue) {
-        boolean isPositive = avgModValue >= 0;
+    public void generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
+        boolean isPositive = minValue >= 0;
         String incDec = isPositive ? "Increases" : "Decreases";
         String hlString = "maximum amount";
         String hlString2 = "system ability charges";
         String description = String.format("the %s of the ships %s", hlString, hlString2);
 
-        generateStatDescription(tooltip, description, incDec, bulletColor, isPositive, hlString, hlString2);
+        generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, false, hlString, hlString2);
+    }
+
+    @Override
+    protected void generateTooltip(TooltipMakerAPI tooltip, MutableStat.StatMod statMod, String description, Color bulletColor,
+                                   boolean flipColors) {
+        setBulletMode(tooltip, bulletColor);
+        float value = statMod.value;
+        boolean isPositive = value >= 1f;
+        String incDec = isPositive ? "increased" : "decreased";
+        if (flipColors) {
+            isPositive = !isPositive;
+        }
+        Color hlColor = isPositive ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor();
+        tooltip.addPara(description, 0f, new Color[]{bulletColor, hlColor, hlColor}, incDec, String.valueOf(Math.abs(Math.round(value))));
+        unindent(tooltip);
     }
 }

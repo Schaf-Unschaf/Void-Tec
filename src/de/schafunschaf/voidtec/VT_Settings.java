@@ -1,6 +1,10 @@
 package de.schafunschaf.voidtec;
 
-public class Settings {
+import lombok.Getter;
+
+@Getter
+public class VT_Settings {
+
     public static final int MAX_SLOTS = 6;
     public static boolean sheepDebug = false;
     public static boolean randomSlotAmount = false;

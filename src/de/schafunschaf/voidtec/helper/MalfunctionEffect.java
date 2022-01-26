@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.util;
+package de.schafunschaf.voidtec.helper;
 
 import com.fs.starfarer.api.util.Misc;
 
@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.util.Random;
 
 public class MalfunctionEffect {
+
     private final float breathingLength;
     private final float maxTimeAtFull;
     private final int flickerChance;
@@ -30,8 +31,7 @@ public class MalfunctionEffect {
      * @param maxNumFlickers  maximum number of malfunction flickers
      * @param speedModifier   modifies the speed of the breathing and flickering
      */
-    public MalfunctionEffect(float breathingLength, float maxTimeAtFull, int flickerChance, int maxNumFlickers,
-                             float speedModifier) {
+    public MalfunctionEffect(float breathingLength, float maxTimeAtFull, int flickerChance, int maxNumFlickers, float speedModifier) {
         this.breathingLength = breathingLength;
         this.maxTimeAtFull = maxTimeAtFull;
         this.flickerChance = flickerChance;

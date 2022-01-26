@@ -14,11 +14,12 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 @Getter
 @AllArgsConstructor
 public enum LootCategory {
-    PIRATE(new String[]{AugmentQuality.DAMAGED.name(), AugmentQuality.COMMON.name()}), CIVILIAN(new String[]{
-            AugmentQuality.DAMAGED.name(), AugmentQuality.MILITARY.name()}), MILITARY(new String[]{
-            AugmentQuality.COMMON.name(), AugmentQuality.MILITARY.name()}), SPECIAL(new String[]{
-            AugmentQuality.MILITARY.name(), AugmentQuality.EXPERIMENTAL.name()}), REMNANT(new String[]{
-            AugmentQuality.REMNANT.name()}), DOMAIN(new String[]{AugmentQuality.DOMAIN.name()});
+    PIRATE(new String[]{AugmentQuality.DAMAGED.name(), AugmentQuality.COMMON.name()}),
+    CIVILIAN(new String[]{AugmentQuality.DAMAGED.name(), AugmentQuality.MILITARY.name()}),
+    MILITARY(new String[]{AugmentQuality.COMMON.name(), AugmentQuality.MILITARY.name()}),
+    SPECIAL(new String[]{AugmentQuality.MILITARY.name(), AugmentQuality.EXPERIMENTAL.name()}),
+    REMNANT(new String[]{AugmentQuality.REMNANT.name()}),
+    DOMAIN(new String[]{AugmentQuality.DOMAIN.name()});
 
     public static final String VT_FLEET_LOOT_CATEGORY_KEY = "$vt_lootCategory";
     public static final LootCategory[] values = values();

@@ -10,6 +10,7 @@ import java.awt.Robot;
 import java.awt.event.KeyEvent;
 
 public class VT_DialogHelperOpenStorage implements EveryFrameScript {
+
     private final AugmentChestPlugin augmentChestPlugin;
     private final Robot robot;
     private boolean success = false;

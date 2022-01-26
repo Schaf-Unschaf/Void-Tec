@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.util;
+package de.schafunschaf.voidtec.helper;
 
 import lombok.Getter;
 
@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 @Getter
 public class TextWithHighlights {
+
     private static final Pattern highlightPattern = Pattern.compile("==.*?==", Pattern.MULTILINE);
     private final String originalString;
     private final String displayString;

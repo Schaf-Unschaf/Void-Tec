@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class FormattingTools {
+
     public static String singularOrPlural(int number, String wordAsSingular) {
         return (number == 1) ? wordAsSingular : wordAsSingular + "s";
     }
@@ -17,21 +18,6 @@ public class FormattingTools {
         vowels.add('o');
         vowels.add('u');
         return vowels.contains(name.toLowerCase(Locale.ROOT).charAt(0)) ? "an" : "a";
-    }
-
-    public static int roundWholeNumber(int number, int numPlaces) {
-        double pow = Math.pow(10, numPlaces);
-        return (int) (Math.round(number / pow) * pow);
-    }
-
-    public static float roundWholeNumber(float number, int numPlaces) {
-        double pow = Math.pow(10, numPlaces);
-        return (float) (Math.round(number / pow) * pow);
-    }
-
-    public static double roundWholeNumber(double number, int numPlaces) {
-        double pow = Math.pow(10, numPlaces);
-        return (Math.round(number / pow) * pow);
     }
 
     public static String capitalizeFirst(String string) {

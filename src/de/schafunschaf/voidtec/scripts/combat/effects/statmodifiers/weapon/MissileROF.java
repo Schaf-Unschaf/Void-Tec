@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.resistance;
+package de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.weapon;
 
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.MutableStat;
@@ -12,9 +12,9 @@ import de.schafunschaf.voidtec.util.ComparisonTools;
 import java.awt.Color;
 import java.util.Random;
 
-public class ExplosiveShieldDamageTaken extends BaseStatMod {
+public class MissileROF extends BaseStatMod {
 
-    public ExplosiveShieldDamageTaken(String statID) {
+    public MissileROF(String statID) {
         super(statID);
     }
 
@@ -23,24 +23,23 @@ public class ExplosiveShieldDamageTaken extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 -generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
         } else {
-            stats.getHighExplosiveShieldDamageTakenMult()
-                 .modifyPercent(id, -generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getMissileRoFMult().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
         }
     }
 
     @Override
     public void remove(MutableShipStatsAPI stats, String id) {
-        stats.getHighExplosiveShieldDamageTakenMult().unmodify(id);
+        stats.getMissileRoFMult().unmodify(id);
     }
 
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getHighExplosiveShieldDamageTakenMult().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getMissileRoFMult().getPercentStatMod(id);
 
-        String description = "Explosive damage taken by shields %s by %s";
+        String description = "Missile rate of fire %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {
@@ -50,24 +49,22 @@ public class ExplosiveShieldDamageTaken extends BaseStatMod {
                 return;
             }
         }
-        generateTooltip(tooltip, statMod, description, bulletColor, true);
+        generateTooltip(tooltip, statMod, description, bulletColor, false);
     }
 
     @Override
     public void generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
-        boolean isPositive = minValue <= 0;
-        String incDec = isPositive ? "Reduces" : "Increases";
-        String hlString1 = "damage taken";
-        String hlString2 = "explosive";
-        String hlString3 = "shields";
-        String description = String.format("the %s from all %s weapons on %s", hlString1, hlString2, hlString3);
+        boolean isPositive = minValue >= 0;
+        String incDec = isPositive ? "Raises" : "Lowers";
+        String hlString1 = "rate of fire";
+        String hlString2 = "missile weapons";
+        String description = String.format("the %s speed of all %s", hlString1, hlString2);
 
-        generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, true, hlString1, hlString2,
-                                hlString3);
+        generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, true, hlString1, hlString2);
     }
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getHighExplosiveShieldDamageTakenMult().modifyPercent(id, value);
+        stats.getMissileRoFMult().modifyPercent(id, value);
     }
 }

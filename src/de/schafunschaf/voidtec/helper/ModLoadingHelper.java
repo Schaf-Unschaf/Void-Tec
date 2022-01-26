@@ -4,7 +4,8 @@ import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatProvider
 import lombok.extern.log4j.Log4j;
 
 @Log4j
-public class ModLoadingUtils {
+public class ModLoadingHelper {
+
     public static void initManagerAndPlugins() {
 
     }

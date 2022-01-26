@@ -7,6 +7,7 @@ import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class SelectAugmentButton extends EmptySlotButton {
+
     private final AugmentCargoWrapper augment;
     private final boolean isSelected;
 

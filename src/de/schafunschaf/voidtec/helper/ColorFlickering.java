@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.util;
+package de.schafunschaf.voidtec.helper;
 
 import com.fs.starfarer.api.util.Misc;
 
@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.util.Random;
 
 public class ColorFlickering {
+
     private final float minIntensity;
     private final float maxIntensity;
     private final int maxFramesBeforeRestart;
@@ -23,9 +24,9 @@ public class ColorFlickering {
     private int flickerSpeed;
     private int numOfFlickers;
 
-    public ColorFlickering(float minIntensity, float maxIntensity, int maxFramesBeforeRestart,
-                           int minFramesBeforeRestart, int maxFramesBetweenFlicker, int maxNumOfFlickers,
-                           int maxFlickerSpeed, int minFlickerSpeed, int maxSpeedAfterLastFlicker) {
+    public ColorFlickering(float minIntensity, float maxIntensity, int maxFramesBeforeRestart, int minFramesBeforeRestart,
+                           int maxFramesBetweenFlicker, int maxNumOfFlickers, int maxFlickerSpeed, int minFlickerSpeed,
+                           int maxSpeedAfterLastFlicker) {
         this.minIntensity = minIntensity * 100f;
         this.maxIntensity = maxIntensity * 100f;
         this.maxFramesBeforeRestart = maxFramesBeforeRestart;
@@ -36,7 +37,8 @@ public class ColorFlickering {
         this.minFlickerSpeed = minFlickerSpeed;
         this.maxSpeedAfterLastFlicker = maxSpeedAfterLastFlicker;
 
-        this.framesBetweenRestart = new Random().nextInt(Math.max(maxFramesBeforeRestart + 1 - minFramesBeforeRestart, 1)) + minFramesBeforeRestart;
+        this.framesBetweenRestart = new Random().nextInt(
+                Math.max(maxFramesBeforeRestart + 1 - minFramesBeforeRestart, 1)) + minFramesBeforeRestart;
         this.currentIntensity = this.maxIntensity;
     }
 
@@ -60,7 +62,9 @@ public class ColorFlickering {
                         currentIntensity = minIntensity;
                         pausedBetween = false;
                         numOfFlickers--;
-                        flickerSpeed = new Random().nextInt(Math.max((numOfFlickers == 0 ? maxSpeedAfterLastFlicker : maxFlickerSpeed) + 1 - minFlickerSpeed, 1)) + minFlickerSpeed;
+                        flickerSpeed = new Random().nextInt(
+                                Math.max((numOfFlickers == 0 ? maxSpeedAfterLastFlicker : maxFlickerSpeed) + 1 - minFlickerSpeed,
+                                         1)) + minFlickerSpeed;
                     }
                 } else if (currentIntensity >= maxIntensity) { // light recovered after flicker?
                     pausedBetween = true;
@@ -79,7 +83,8 @@ public class ColorFlickering {
             isFlickeringNow = true;
             numOfFlickers = new Random().nextInt(maxNumOfFlickers);
             flickerSpeed = new Random().nextInt(Math.max(maxFlickerSpeed + 1 - minFlickerSpeed, 1)) + minFlickerSpeed;
-            framesBetweenRestart = new Random().nextInt(Math.max(maxFramesBeforeRestart + 1 - minFramesBeforeRestart, 1)) + minFramesBeforeRestart;
+            framesBetweenRestart = new Random().nextInt(
+                    Math.max(maxFramesBeforeRestart + 1 - minFramesBeforeRestart, 1)) + minFramesBeforeRestart;
         }
     }
 }

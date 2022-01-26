@@ -5,23 +5,23 @@ import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.VT_Strings;
+import de.schafunschaf.voidtec.helper.TextWithHighlights;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatApplier;
 import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatModValue;
 import de.schafunschaf.voidtec.scripts.combat.effects.vesai.*;
-import de.schafunschaf.voidtec.util.TextWithHighlights;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.awt.Color;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @Getter
 @NoArgsConstructor
 public class BaseAugment implements AugmentApplier {
+
     protected String augmentID;
     protected String manufacturer;
     protected String name;
@@ -38,6 +38,7 @@ public class BaseAugment implements AugmentApplier {
     protected CombatScriptRunner combatScript;
     protected AugmentQuality initialQuality;
     private AugmentSlot installedSlot;
+    private Map<String, Float> appliedFighterValues;
 
     public BaseAugment(AugmentData augmentData, AugmentQuality augmentQuality, Random random) {
         this.augmentID = augmentData.getAugmentID();
@@ -51,37 +52,18 @@ public class BaseAugment implements AugmentApplier {
         this.secondarySlots = augmentData.getSecondarySlots();
         this.secondaryStatMods = augmentData.getSecondaryStatMods();
         this.secondaryStatValues = augmentData.getSecondaryStatValues();
-        this.augmentQuality = isNull(augmentQuality) ? AugmentQuality.getRandomQualityInRange(augmentData.getAugmentQualityRange(), random, augmentData.isEqualQualityRoll()) : augmentQuality;
+        this.augmentQuality = isNull(augmentQuality)
+                              ? AugmentQuality.getRandomQualityInRange(augmentData.getAugmentQualityRange(), random,
+                                                                       augmentData.isEqualQualityRoll())
+                              : augmentQuality;
         this.initialQuality = augmentQuality;
         this.combatScriptDescription = augmentData.getCombatScriptDescription();
         this.combatScript = augmentData.getCombatScript();
-    }
-
-    public BaseAugment(String augmentID, String manufacturer, String name, TextWithHighlights description, int rarity,
-                       SlotCategory primarySlot, List<BaseStatMod> primaryStatMods,
-                       List<StatModValue<Float, Float, Boolean>> primaryStatValues, List<SlotCategory> secondarySlots,
-                       List<BaseStatMod> secondaryStatMods,
-                       List<StatModValue<Float, Float, Boolean>> secondaryStatValues, AugmentQuality augmentQuality,
-                       TextWithHighlights combatScriptDescription, CombatScriptRunner combatScript) {
-        this.augmentID = augmentID;
-        this.manufacturer = manufacturer;
-        this.name = name;
-        this.description = description;
-        this.rarity = rarity;
-        this.primarySlot = primarySlot;
-        this.primaryStatMods = primaryStatMods;
-        this.primaryStatValues = primaryStatValues;
-        this.secondarySlots = secondarySlots;
-        this.secondaryStatMods = secondaryStatMods;
-        this.secondaryStatValues = secondaryStatValues;
-        this.augmentQuality = augmentQuality;
-        this.initialQuality = augmentQuality;
-        this.combatScriptDescription = combatScriptDescription;
-        this.combatScript = combatScript;
+        this.appliedFighterValues = new HashMap<>();
     }
 
     @Override
-    public void apply(MutableShipStatsAPI stats, String id, Random random, AugmentQuality quality, boolean isPrimary) {
+    public void applyToShip(MutableShipStatsAPI stats, String id, Random random, boolean isPrimary) {
         if (augmentQuality == AugmentQuality.DESTROYED) {
             return;
         }
@@ -91,13 +73,27 @@ public class BaseAugment implements AugmentApplier {
 
         for (int i = 0; i < statMods.size(); i++) {
             StatApplier statApplier = statMods.get(i);
-            statApplier.apply(stats, id + "_" + getAugmentID(), statModValues.get(i), random, getAugmentQuality());
+            statApplier.applyToShip(stats, id + "_" + getAugmentID(), statModValues.get(i), random, this);
         }
     }
 
     @Override
-    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width,
-                                SlotCategory slotCategory, boolean isPrimary, boolean isItemTooltip) {
+    public void applyToFighter(MutableShipStatsAPI stats, String id, boolean isPrimary) {
+        if (augmentQuality == AugmentQuality.DESTROYED) {
+            return;
+        }
+
+        List<BaseStatMod> statMods = isPrimary ? getPrimaryStatMods() : getSecondaryStatMods();
+
+        for (StatApplier statApplier : statMods) {
+            float fighterStatValue = getFighterStatValue(id + "_" + augmentID + "_" + statApplier.getStatID());
+            statApplier.applyToFighter(stats, id, fighterStatValue);
+        }
+    }
+
+    @Override
+    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory,
+                                boolean isPrimary, boolean isItemTooltip) {
         tooltip.addButton("", null, getAugmentQuality().getColor(), getAugmentQuality().getColor(), width, 0f, 3f);
         tooltip.addPara(String.format("%s (%s)", getName(), getAugmentQuality().getName()), getAugmentQuality().getColor(), 3f);
         if (isItemTooltip || slotCategory == SlotCategory.SPECIAL) {
@@ -118,7 +114,7 @@ public class BaseAugment implements AugmentApplier {
                 imageWithText.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), 0f);
             } else {
                 for (StatApplier statApplier : statMods) {
-                    statApplier.generateTooltipEntry(stats, id + "_" + getAugmentID(), imageWithText, bulletColor);
+                    statApplier.generateTooltipEntry(stats, id + "_" + getAugmentID(), imageWithText, bulletColor, this);
                 }
             }
 
@@ -126,7 +122,8 @@ public class BaseAugment implements AugmentApplier {
         }
 
         if (!isNull(combatScriptDescription) && !combatScriptDescription.getDisplayString().isEmpty()) {
-            tooltip.addPara(getCombatScriptDescription().getDisplayString(), 3f, Misc.getHighlightColor(), getCombatScriptDescription().getHighlights());
+            tooltip.addPara(getCombatScriptDescription().getDisplayString(), 3f, Misc.getHighlightColor(),
+                            getCombatScriptDescription().getHighlights());
         }
 
         tooltip.addButton("", null, getAugmentQuality().getColor(), getAugmentQuality().getColor(), width, 0f, 3f);
@@ -153,8 +150,11 @@ public class BaseAugment implements AugmentApplier {
 
         for (int i = 0; i < statMods.size(); i++) {
             StatApplier statApplier = statMods.get(i);
-            float avgModValue = statModValues.get(i).maxValue - statModValues.get(i).minValue;
-            statApplier.generateStatDescription(tooltip, bulletColor, avgModValue);
+            StatModValue<Float, Float, Boolean> statModValue = statModValues.get(i);
+            float mult = statModValue.getsModified ? augmentQuality.getModifier() : 1f;
+            float minValue = statModValue.minValue * mult;
+            float maxValue = statModValue.maxValue * mult;
+            statApplier.generateStatDescription(tooltip, bulletColor, minValue, maxValue);
         }
     }
 
@@ -191,5 +191,32 @@ public class BaseAugment implements AugmentApplier {
     @Override
     public void removeAugment() {
         installedSlot = null;
+    }
+
+    @Override
+    public void updateFighterStatValue(String id, float value) {
+        appliedFighterValues.put(id, value);
+    }
+
+    @Override
+    public Float getFighterStatValue(String id) {
+        return appliedFighterValues.get(id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(augmentID, augmentQuality);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        BaseAugment that = (BaseAugment) o;
+        return augmentID.equals(that.augmentID) && augmentQuality == that.augmentQuality;
     }
 }

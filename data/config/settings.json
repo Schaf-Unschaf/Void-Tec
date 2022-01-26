@@ -9,6 +9,7 @@
       "voidTec_hullmod_emptySlot": "graphics/hullmods/vt_empty_slot.png",
       "voidTec_hullmod_universalSlot": "graphics/hullmods/vt_universal_slot.png",
       "voidTec_hullmod_weaponSlot": "graphics/hullmods/vt_weapon_slot.png",
+      "voidTec_hullmod_flightDeckSlot": "graphics/hullmods/vt_flight_deck_slot.png",
       "voidTec_hullmod_structureSlot": "graphics/hullmods/vt_structure_slot.png",
       "voidTec_hullmod_shieldSlot": "graphics/hullmods/vt_shield_slot.png",
       "voidTec_hullmod_reactorSlot": "graphics/hullmods/vt_reactor_slot.png",

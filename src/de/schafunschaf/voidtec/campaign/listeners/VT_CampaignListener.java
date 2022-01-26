@@ -6,7 +6,7 @@ import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.Settings;
+import de.schafunschaf.voidtec.VT_Settings;
 import de.schafunschaf.voidtec.campaign.LootCategory;
 import de.schafunschaf.voidtec.campaign.ids.VT_Items;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
@@ -60,7 +60,7 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
                 }
 
                 Random random = new Random(fleetMember.getId().hashCode() * 1337L);
-                if (random.nextInt(100) + 1 <= Settings.aiHullmodChance) {
+                if (random.nextInt(100) + 1 <= VT_Settings.aiHullmodChance) {
                     ShipVariantAPI variant = fleetMember.getVariant();
                     if (!variant.hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID)) {
                         variant.addPermaMod(VoidTecEngineeringSuite.HULL_MOD_ID);
@@ -73,13 +73,6 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
         }
     }
 
-    private boolean canInstallVESAI(SectorEntityToken interactionTarget) {
-        boolean hasSpaceport = interactionTarget.getMarket().hasSpaceport();
-        boolean isNotHostile = interactionTarget.getFaction().getRelationshipLevel(Factions.PLAYER).isAtWorst(RepLevel.SUSPICIOUS);
-
-        return hasSpaceport && isNotHostile;
-    }
-
     @Override
     public void reportEncounterLootGenerated(FleetEncounterContextPlugin plugin, CargoAPI loot) {
         Random random = new Random(Misc.getSalvageSeed(plugin.getBattle().getNonPlayerCombined()));
@@ -88,6 +81,13 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
         casualties.addAll(plugin.getWinnerData().getOwnCasualties());
 
         loot.addAll(prepareAugmentsForSalvage(getUnrecoverableShips(casualties), random));
+    }
+
+    private boolean canInstallVESAI(SectorEntityToken interactionTarget) {
+        boolean hasSpaceport = interactionTarget.getMarket().hasSpaceport();
+        boolean isNotHostile = interactionTarget.getFaction().getRelationshipLevel(Factions.PLAYER).isAtWorst(RepLevel.SUSPICIOUS);
+
+        return hasSpaceport && isNotHostile;
     }
 
     private List<FleetMemberData> getUnrecoverableShips(List<FleetMemberData> casualties) {
@@ -108,12 +108,13 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
             if (casualty.getMember().getVariant().hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID)) {
                 HullModManager hullModManager = HullModDataStorage.getInstance().getHullModManager(casualty.getMember().getId());
                 for (AugmentSlot filledSlot : hullModManager.getFilledSlots()) {
-                    if (salvageRandom.nextInt(100) + 1 <= Settings.recoverChance) {
+                    if (salvageRandom.nextInt(100) + 1 <= VT_Settings.recoverChance) {
                         AugmentApplier slottedAugment = filledSlot.getSlottedAugment();
                         filledSlot.removeAugment();
-                        if (salvageRandom.nextInt(100) + 1 <= Settings.damageChance) {
+                        if (salvageRandom.nextInt(100) + 1 <= VT_Settings.damageChance) {
                             int numLevelsDamaged = salvageRandom.nextInt(3) + 1;
-                            augmentLoot.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, slottedAugment.damageAugment(numLevelsDamaged)), 1f);
+                            augmentLoot.addSpecial(
+                                    new AugmentItemData(VT_Items.AUGMENT_ITEM, null, slottedAugment.damageAugment(numLevelsDamaged)), 1f);
                         } else {
                             augmentLoot.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, slottedAugment), 1f);
                         }

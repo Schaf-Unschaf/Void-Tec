@@ -5,6 +5,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CoreUITabId;
 
 public class VT_DialogHelperLeaveStorage implements EveryFrameScript {
+
     private boolean success = false;
 
     @Override

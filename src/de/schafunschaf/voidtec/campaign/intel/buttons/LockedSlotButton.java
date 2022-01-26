@@ -10,15 +10,16 @@ import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;
 
-import static de.schafunschaf.voidtec.Settings.*;
+import static de.schafunschaf.voidtec.VT_Settings.*;
 
 @RequiredArgsConstructor
 public class LockedSlotButton extends EmptySlotButton {
+
     private final AugmentSlot augmentSlot;
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
-        int unlockedSlots = augmentSlot.getHullmodManager().getUnlockedSlotsNum();
+        int unlockedSlots = augmentSlot.getHullmodManager().getUnlockedSlots().size();
         int installCost = installCostCredits * unlockedSlots;
 
         if (unlockedSlots <= maxNumSlotsForCreditUnlock) {
@@ -32,7 +33,7 @@ public class LockedSlotButton extends EmptySlotButton {
 
     @Override
     public void createConfirmationPrompt(TooltipMakerAPI tooltip) {
-        int unlockedSlots = augmentSlot.getHullmodManager().getUnlockedSlotsNum();
+        int unlockedSlots = augmentSlot.getHullmodManager().getUnlockedSlots().size();
         int installCost = installCostCredits * unlockedSlots;
 
         String installCostString = Misc.getDGSCredits(installCost);

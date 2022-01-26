@@ -12,6 +12,7 @@ import lombok.Setter;
 import java.awt.Color;
 
 public class AugmentManagerIntel extends BaseIntel {
+
     public static final String STACK_SOURCE = "augmentManagerIntel";
 
     @Getter
@@ -23,22 +24,14 @@ public class AugmentManagerIntel extends BaseIntel {
     private float titleSize = 0f;
     //    private float shipListSize = 0f;
     private float shipListWidth = 0f;
-//    private float cargoListSize = 0f;
-
-    @Override
-    public void createLargeDescription(CustomPanelAPI panel, float width, float height) {
-        addTitlePanel(panel, width, height);
-        addWelcomeText(panel, width, height);
-        addTabs(panel, width, height);
-        shipListWidth = ShipPanel.addShipListPanel(panel, height, titleSize + 10f);
-        CargoPanel.addAugmentsInCargoPanel(panel, width - shipListWidth, height, titleSize + 10f);
-    }
+    //    private float cargoListSize = 0f;
 
     private void addTitlePanel(CustomPanelAPI panel, float width, float height) {
         TooltipMakerAPI uiElement = panel.createUIElement(width, height, false);
         LabelAPI sectionHeading = uiElement.addSectionHeading("", Misc.getDarkPlayerColor(), Misc.getDarkPlayerColor(), Alignment.MID, 0f);
         titleSize = sectionHeading.getPosition().getHeight();
-        uiElement.addPara("VESAI - VoidTec Engineering Suite Augmentation Interface", 0f, Misc.getBrightPlayerColor(), Misc.getHighlightColor(), "VESAI", "V", "E", "S", "A", "I").setAlignment(Alignment.MID);
+        uiElement.addPara("VESAI - VoidTec Engineering Suite Augmentation Interface", 0f, Misc.getBrightPlayerColor(),
+                          Misc.getHighlightColor(), "VESAI", "V", "E", "S", "A", "I").setAlignment(Alignment.MID);
         PositionAPI textPosition = uiElement.getPrev().getPosition();
         textPosition.setYAlignOffset(textPosition.getHeight() + 2f);
 
@@ -54,33 +47,9 @@ public class AugmentManagerIntel extends BaseIntel {
     }
 
     @Override
-    public Color getTitleColor(ListInfoMode mode) {
-        return VT_Colors.VT_COLOR_MAIN;
-    }
-
-    @Override
-    protected String getName() {
-        return "VESAI";
-    }
-
-    @Override
-    public String getIcon() {
-        return Global.getSettings().getSpriteName("intel", "vt_vesai_icon");
-    }
-
-    @Override
-    public boolean hasLargeDescription() {
-        return true;
-    }
-
-    @Override
-    public boolean hasSmallDescription() {
-        return false;
-    }
-
-    @Override
-    public boolean isImportant() {
-        return true;
+    public void notifyPlayerAboutToOpenIntelScreen() {
+        selectedAugmentInCargo = null;
+        activeCategoryFilter = null;
     }
 
     @Override
@@ -94,13 +63,46 @@ public class AugmentManagerIntel extends BaseIntel {
     }
 
     @Override
-    public void notifyPlayerAboutToOpenIntelScreen() {
-        selectedAugmentInCargo = null;
-        activeCategoryFilter = null;
+    protected String getName() {
+        return "VESAI";
+    }
+
+    @Override
+    public boolean hasSmallDescription() {
+        return false;
+    }
+
+    @Override
+    public boolean hasLargeDescription() {
+        return true;
+    }
+
+    @Override
+    public void createLargeDescription(CustomPanelAPI panel, float width, float height) {
+        addTitlePanel(panel, width, height);
+        addWelcomeText(panel, width, height);
+        addTabs(panel, width, height);
+        shipListWidth = ShipPanel.addShipListPanel(panel, height, titleSize + 10f);
+        CargoPanel.addAugmentsInCargoPanel(panel, width - shipListWidth, height, titleSize + 10f);
+    }
+
+    @Override
+    public String getIcon() {
+        return Global.getSettings().getSpriteName("intel", "vt_vesai_icon");
+    }
+
+    @Override
+    public boolean isImportant() {
+        return true;
     }
 
     @Override
     public void reportPlayerClickedOn() {
         super.reportPlayerClickedOn();
+    }
+
+    @Override
+    public Color getTitleColor(ListInfoMode mode) {
+        return VT_Colors.VT_COLOR_MAIN;
     }
 }

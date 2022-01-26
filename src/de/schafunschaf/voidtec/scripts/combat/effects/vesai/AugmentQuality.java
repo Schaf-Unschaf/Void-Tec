@@ -14,7 +14,14 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 @Getter
 @AllArgsConstructor
 public enum AugmentQuality {
-    DESTROYED("Destroyed", 0f, new Color(255, 0, 0), 30f), DAMAGED("Damaged", 0.6f, new Color(200, 50, 0), 100f), COMMON("Common", 1f, new Color(200, 200, 200), 70f), MILITARY("Military", 1.2f, new Color(0, 180, 50), 45f), EXPERIMENTAL("Experimental", 1.5f, new Color(0, 150, 255), 20f), REMNANT("Remnant", 1.7f, new Color(70, 255, 235), 5f), DOMAIN("Domain", 2f, new Color(255, 120, 0), 1f), UNIQUE("Unique", 1f, new Color(200, 0, 255), 0f);
+    DESTROYED("Destroyed", 0f, new Color(255, 0, 0), 30f),
+    DAMAGED("Damaged", 0.6f, new Color(200, 50, 0), 100f),
+    COMMON("Common", 1f, new Color(200, 200, 200), 70f),
+    MILITARY("Military", 1.2f, new Color(0, 180, 50), 45f),
+    EXPERIMENTAL("Experimental", 1.5f, new Color(0, 150, 255), 20f),
+    REMNANT("Remnant", 1.7f, new Color(70, 255, 235), 5f),
+    DOMAIN("Domain", 2f, new Color(255, 120, 0), 1f),
+    UNIQUE("Unique", 1f, new Color(200, 0, 255), 0f);
 
     public static final AugmentQuality[] values = values();
     public static final String[] allowedValues = getAllowedQualitiesArray();
@@ -37,12 +44,10 @@ public enum AugmentQuality {
     }
 
     private static String[] getAllowedQualitiesArray() {
-        return new String[]{DAMAGED.name(), COMMON.name(), MILITARY.name(), EXPERIMENTAL.name(), REMNANT.name(),
-                            DOMAIN.name()};
+        return new String[]{DAMAGED.name(), COMMON.name(), MILITARY.name(), EXPERIMENTAL.name(), REMNANT.name(), DOMAIN.name()};
     }
 
-    public static AugmentQuality getRandomQuality(Random random, List<AugmentQuality> allowedQualities,
-                                                  boolean ignoreWeighting) {
+    public static AugmentQuality getRandomQuality(Random random, List<AugmentQuality> allowedQualities, boolean ignoreWeighting) {
         if (isNull(random)) {
             random = new Random();
         }
@@ -95,8 +100,7 @@ public enum AugmentQuality {
         return getRandomQuality(random, augmentQualityList, ignoreWeighting);
     }
 
-    public static AugmentQuality getRandomQualityInRange(String[] qualityStrings, Random random,
-                                                         boolean ignoreWeighting) {
+    public static AugmentQuality getRandomQualityInRange(String[] qualityStrings, Random random, boolean ignoreWeighting) {
         if (isNull(qualityStrings)) {
             return getRandomQuality(random, ignoreWeighting);
         }
