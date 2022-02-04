@@ -11,15 +11,15 @@ import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.VT_Icons;
-import de.schafunschaf.voidtec.VT_Settings;
-import de.schafunschaf.voidtec.VT_Strings;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
+import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.helper.ColorShifter;
 import de.schafunschaf.voidtec.helper.MalfunctionEffect;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
+import de.schafunschaf.voidtec.ids.VT_Icons;
+import de.schafunschaf.voidtec.ids.VT_Settings;
+import de.schafunschaf.voidtec.ids.VT_Strings;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import lombok.Getter;
 
@@ -53,16 +53,13 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                         augment.getDescription().getHighlights());
         if (augmentQuality == AugmentQuality.DESTROYED) {
             tooltip.addSectionHeading("NON-FUNCTIONAL AUGMENT DETECTED", augmentQuality.getColor(),
-                                      Misc.scaleColor(augmentQuality.getColor(), 0.5f), Alignment.MID, largePad);
-            tooltip.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), 0f);
-            tooltip.addPara(String.format("Initial Quality: %s", augment.getInitialQuality().getName()), smallPad, Misc.getGrayColor(),
-                            augment.getInitialQuality().getColor(), augment.getInitialQuality().getName());
+                                      Misc.scaleColor(augmentQuality.getColor(), 0.4f), Alignment.MID, largePad);
+            tooltip.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), smallPad);
         } else if (augmentQuality != augment.getInitialQuality()) {
-            tooltip.addSectionHeading("DAMAGED AUGMENT DETECTED", Misc.getHighlightColor(), Misc.getDarkHighlightColor(), Alignment.MID,
+            tooltip.addSectionHeading("DAMAGED AUGMENT DETECTED", Misc.getHighlightColor(), Misc.scaleColor(Misc.getGrayColor(), 0.4f),
+                                      Alignment.MID,
                                       largePad);
-            tooltip.addPara(VT_Strings.VT_DAMAGED_AUGMENT_DESC, Misc.getGrayColor(), 0f);
-            tooltip.addPara(String.format("Initial Quality: %s", augment.getInitialQuality().getName()), smallPad, Misc.getGrayColor(),
-                            augment.getInitialQuality().getColor(), augment.getInitialQuality().getName());
+            tooltip.addPara(VT_Strings.VT_DAMAGED_AUGMENT_DESC, Misc.getGrayColor(), smallPad);
         }
 
         if (expanded) {
@@ -75,7 +72,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                 tooltip.addSectionHeading("Primary Stat Modification Info", augment.getPrimarySlot().getColor(),
                                           Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
                 tooltip.addSpacer(smallPad);
-                augment.generateStatDescription(tooltip, true, smallPad);
+                augment.generateStatDescription(tooltip, smallPad, true);
             }
 
             if (!(augmentQuality == AugmentQuality.DESTROYED) && !isNull(augment.getSecondaryStatMods()) && !augment.getSecondaryStatMods()
@@ -100,7 +97,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                                           Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
                 tooltip.addSpacer(smallPad);
 
-                augment.generateStatDescription(tooltip, false, smallPad);
+                augment.generateStatDescription(tooltip, smallPad, false);
 
                 tooltip.addPara(secondarySlotStringBuilder.toString(), largePad, hlColors.toArray(new Color[0]),
                                 hlStrings.toArray(new String[0]));
@@ -180,9 +177,24 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
             manufacturerName = Misc.ucFirst(faction.getDisplayNameWithArticleWithoutArticle());
         }
 
+        String qualityDescription = String.format("Quality: %s", augment.getAugmentQuality().getName());
+        List<Color> hlColors = new ArrayList<>();
+        List<String> hlStrings = new ArrayList<>();
+        hlColors.add(Misc.getGrayColor());
+        hlColors.add(augment.getAugmentQuality().getColor());
+        hlStrings.add("Quality:");
+        hlStrings.add(augment.getAugmentQuality().getName());
+
+        boolean isDamaged = augment.getAugmentQuality() != augment.getInitialQuality()
+                && augment.getInitialQuality() != AugmentQuality.DESTROYED;
+        if (isDamaged) {
+            qualityDescription += String.format(" (%s)", augment.getInitialQuality().getName());
+            hlColors.add(augment.getInitialQuality().getColor());
+            hlStrings.add(augment.getInitialQuality().getName());
+        }
+
         tooltip.addPara("Manufacturer: %s", largePad, Misc.getGrayColor(), manufacturerColor, manufacturerName);
-        tooltip.addPara(String.format("Quality: %s", augment.getAugmentQuality().getName()), smallPad, Misc.getGrayColor(),
-                        augment.getAugmentQuality().getColor(), augment.getAugmentQuality().getName());
+        tooltip.addPara(qualityDescription, smallPad, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
         tooltip.addPara("Type: %s", smallPad, Misc.getGrayColor(), augment.getPrimarySlot().getColor(), augment.getPrimarySlot().getName());
     }
 

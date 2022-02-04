@@ -1,31 +1,32 @@
 package de.schafunschaf.voidtec.helper;
 
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.durability.*;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.engine.*;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.flux.*;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.logistic.*;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.projectile.*;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.resistance.*;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.sensor.AutofireAccuracy;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.sensor.SensorProfile;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.sensor.SensorStrength;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.sensor.SightRadius;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.shield.*;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.special.SModSlot;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.system.SystemCooldown;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.system.SystemRegen;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.system.SystemUses;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.weapon.*;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.BaseStatMod;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.durability.*;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.engine.*;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.flux.*;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.logistic.*;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.projectile.*;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.resistance.*;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.sensor.AutofireAccuracy;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.sensor.SensorProfile;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.sensor.SensorStrength;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.sensor.SightRadius;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.shield.*;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.special.SModSlot;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.special.TimeMult;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.system.SystemCooldown;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.system.SystemRegen;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.system.SystemUses;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.weapon.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.VT_StatModKeys.*;
+import static de.schafunschaf.voidtec.ids.VT_StatModKeys.*;
 
 public class StatLoader {
 
-    public static Map<String, BaseStatMod> getAllStatMods() {
+    public static Map<String, BaseStatMod> initStatMods() {
         Map<String, BaseStatMod> map = new HashMap<>();
 
         map.put(ARMOR_HEALTH, new ArmorBonus(ARMOR_HEALTH));
@@ -92,6 +93,7 @@ public class StatLoader {
         map.put(SHIELD_UPKEEP, new ShieldUpkeep(SHIELD_UPKEEP));
 
         map.put(MOD_SLOT, new SModSlot(MOD_SLOT));
+        map.put(TIME_MULT, new TimeMult(TIME_MULT));
 
         map.put(SYSTEM_COOLDOWN, new SystemCooldown(SYSTEM_COOLDOWN));
         map.put(SYSTEM_REGEN, new SystemRegen(SYSTEM_REGEN));
@@ -104,7 +106,7 @@ public class StatLoader {
         map.put(MISSILE_ECCM, new MissileECCM(MISSILE_ECCM));
         map.put(MISSILE_GUIDANCE, new MissileGuidance(MISSILE_GUIDANCE));
         map.put(MISSILE_HEALTH, new MissileHealth(MISSILE_HEALTH));
-        map.put(MISSILE_RELOAD, new MissileROF(MISSILE_RELOAD));
+        map.put(MISSILE_ROF, new MissileROF(MISSILE_ROF));
         map.put(WEAPON_RECOIL, new WeaponRecoil(WEAPON_RECOIL));
         map.put(WEAPON_TURN, new WeaponTurnRate(WEAPON_TURN));
 

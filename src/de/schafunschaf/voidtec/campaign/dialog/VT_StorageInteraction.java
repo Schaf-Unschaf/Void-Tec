@@ -5,9 +5,9 @@ import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
-import de.schafunschaf.voidtec.VT_Strings;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestPlugin;
 import de.schafunschaf.voidtec.campaign.listeners.VT_AugmentChestStorageListener;
+import de.schafunschaf.voidtec.ids.VT_Strings;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 
 import java.util.Map;

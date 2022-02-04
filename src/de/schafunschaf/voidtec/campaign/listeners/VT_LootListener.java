@@ -9,13 +9,13 @@ import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.impl.campaign.ids.Entities;
 import com.fs.starfarer.api.impl.campaign.ids.IndEvo_ids;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.VT_Settings;
-import de.schafunschaf.voidtec.campaign.ids.VT_Items;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.AugmentDataManager;
+import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
+import de.schafunschaf.voidtec.ids.VT_Items;
+import de.schafunschaf.voidtec.ids.VT_Settings;
 
 import java.util.Random;
 
@@ -46,7 +46,7 @@ public class VT_LootListener implements ShowLootListener {
                                    salvageRandom);
                     addLootToCargo(loot, 2, SlotCategory.ENGINE,
                                    new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 1, salvageRandom);
-                    addLootToCargo(loot, 2, SlotCategory.LOGISTIC,
+                    addLootToCargo(loot, 2, SlotCategory.SYSTEM,
                                    new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 1, salvageRandom);
                     addLootToCargo(loot, 1, SlotCategory.SHIELD,
                                    new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 1, salvageRandom);
@@ -54,7 +54,7 @@ public class VT_LootListener implements ShowLootListener {
                 case Entities.EQUIPMENT_CACHE_SMALL:
                     addLootToCargo(loot, 3, null, new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 1,
                                    salvageRandom);
-                    addLootToCargo(loot, 2, SlotCategory.LOGISTIC,
+                    addLootToCargo(loot, 2, SlotCategory.SYSTEM,
                                    new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 1, salvageRandom);
                     return;
 
@@ -130,7 +130,7 @@ public class VT_LootListener implements ShowLootListener {
                     return;
 
                 case Entities.STATION_MINING:
-                    addLootToCargo(loot, 5, SlotCategory.LOGISTIC,
+                    addLootToCargo(loot, 5, SlotCategory.SYSTEM,
                                    new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 1, salvageRandom);
                     addLootToCargo(loot, 5, SlotCategory.STRUCTURE,
                                    new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 1, salvageRandom);
@@ -152,7 +152,7 @@ public class VT_LootListener implements ShowLootListener {
                 case Entities.ORBITAL_HABITAT:
                     addLootToCargo(loot, 5, SlotCategory.REACTOR,
                                    new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 1, salvageRandom);
-                    addLootToCargo(loot, 5, SlotCategory.LOGISTIC,
+                    addLootToCargo(loot, 5, SlotCategory.SYSTEM,
                                    new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 1, salvageRandom);
                     addLootToCargo(loot, 5, SlotCategory.ENGINE,
                                    new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 1, salvageRandom);

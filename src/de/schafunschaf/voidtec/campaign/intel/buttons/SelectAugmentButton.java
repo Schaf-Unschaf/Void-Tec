@@ -3,30 +3,18 @@ package de.schafunschaf.voidtec.campaign.intel.buttons;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
+import lombok.RequiredArgsConstructor;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
-public class SelectAugmentButton extends EmptySlotButton {
+@RequiredArgsConstructor
+public class SelectAugmentButton extends DefaultButton {
 
     private final AugmentCargoWrapper augment;
-    private final boolean isSelected;
-
-    public SelectAugmentButton(AugmentCargoWrapper augment) {
-        this.augment = augment;
-        this.isSelected = isSelected();
-    }
-
-    private boolean isSelected() {
-        if (isNull(AugmentManagerIntel.getSelectedAugmentInCargo())) {
-            return false;
-        }
-
-        return augment.getAugment() == AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
-    }
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
-        if (isSelected) {
+        if (isSelected()) {
             AugmentManagerIntel.setSelectedAugmentInCargo(null);
         } else {
             AugmentManagerIntel.setSelectedAugmentInCargo(augment);
@@ -35,6 +23,15 @@ public class SelectAugmentButton extends EmptySlotButton {
 
     @Override
     public String getName() {
-        return isSelected ? "Selected" : "Select";
+        float numAugments = augment.getAugmentCargoStack().getSize();
+        return String.valueOf(isSelected() ? "+" : ((int) numAugments));
+    }
+
+    private boolean isSelected() {
+        if (isNull(AugmentManagerIntel.getSelectedAugmentInCargo())) {
+            return false;
+        }
+
+        return augment.getAugment() == AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
     }
 }

@@ -6,10 +6,10 @@ import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
-import de.schafunschaf.voidtec.campaign.ids.VT_Items;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestData;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
+import de.schafunschaf.voidtec.ids.VT_Items;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +19,8 @@ import java.util.List;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class CargoUtils {
+
+    public static boolean sortDescending = true;
 
     public static List<AugmentCargoWrapper> getAugmentsInCargo() {
         CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
@@ -46,9 +48,13 @@ public class CargoUtils {
         Collections.sort(augmentCargoWrappers, new Comparator<AugmentCargoWrapper>() {
             @Override
             public int compare(AugmentCargoWrapper o1, AugmentCargoWrapper o2) {
-                int compareQualityResult = o2.getAugment().getAugmentQuality().compareTo(o1.getAugment().getAugmentQuality());
+                int compareQualityResult = sortDescending
+                                           ? o2.getAugment().getAugmentQuality().compareTo(o1.getAugment().getAugmentQuality())
+                                           : o1.getAugment().getAugmentQuality().compareTo(o2.getAugment().getAugmentQuality());
                 if (compareQualityResult == 0) {
-                    return o1.getAugment().getName().compareTo(o2.getAugment().getName());
+                    return sortDescending
+                           ? o1.getAugment().getName().compareTo(o2.getAugment().getName())
+                           : o2.getAugment().getName().compareTo(o1.getAugment().getName());
                 } else {
                     return compareQualityResult;
                 }

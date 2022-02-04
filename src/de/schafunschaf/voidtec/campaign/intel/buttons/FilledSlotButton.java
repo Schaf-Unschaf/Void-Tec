@@ -1,24 +1,33 @@
 package de.schafunschaf.voidtec.campaign.intel.buttons;
 
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.ui.BaseTooltipCreator;
+import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentSlot;
+import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
+import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
+import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
+import de.schafunschaf.voidtec.util.ButtonUtils;
 import de.schafunschaf.voidtec.util.FormattingTools;
 import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;
 
-import static de.schafunschaf.voidtec.VT_Settings.removalCostSP;
+import static de.schafunschaf.voidtec.ids.VT_Settings.removalCostSP;
+import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @RequiredArgsConstructor
-public class FilledSlotButton extends EmptySlotButton {
+public class FilledSlotButton extends DefaultButton {
 
-    private final AugmentSlot augmentSlot;
+    private final AugmentApplier augment;
+    private final FleetMemberAPI fleetMember;
 
     @Override
     public void createConfirmationPrompt(TooltipMakerAPI tooltip) {
-        AugmentApplier slottedAugment = augmentSlot.getSlottedAugment();
+        AugmentApplier slottedAugment = augment;
 
         String bullet = "• ";
         String removalCost = String.format("%s Story " + FormattingTools.singularOrPlural(removalCostSP, "Point"), removalCostSP);
@@ -30,7 +39,7 @@ public class FilledSlotButton extends EmptySlotButton {
 
     @Override
     public boolean doesButtonHaveConfirmDialog() {
-        return true;
+        return false;
     }
 
     @Override
@@ -41,5 +50,44 @@ public class FilledSlotButton extends EmptySlotButton {
     @Override
     public String getCancelText() {
         return "Cancel";
+    }
+
+    @Override
+    public ButtonAPI createButton(TooltipMakerAPI uiElement, float width, float height) {
+        SlotCategory slotCategory = augment.getInstalledSlot().getSlotCategory();
+        Color slotColor = slotCategory.getColor();
+        float scaleFactor;
+
+        AugmentCargoWrapper selectedAugment = AugmentManagerIntel.getSelectedAugmentInCargo();
+        SlotCategory activeCategoryFilter = AugmentManagerIntel.getActiveCategoryFilter();
+        boolean isFiltered = activeCategoryFilter == slotCategory;
+
+        if (!isNull(selectedAugment)) {
+            scaleFactor = 0.1f;
+        } else if (!isNull(activeCategoryFilter)) {
+            scaleFactor = isFiltered ? 0.5f : 0.1f; // No Augment selected but with filter. Will highlight prim and sec slots
+        } else {
+            scaleFactor = 1f; // No Augment selected and no filter
+        }
+
+        Color buttonColor = Misc.scaleColorOnly(slotColor, scaleFactor);
+
+        ButtonAPI button = ButtonUtils.addAugmentButton(uiElement, height, 0f, buttonColor, buttonColor,
+                                                        this);
+
+        addTooltip(uiElement, slotCategory);
+
+        return button;
+    }
+
+    @Override
+    protected void addTooltip(TooltipMakerAPI uiElement, final SlotCategory slotCategory) {
+        uiElement.addTooltipToPrevious(new BaseTooltipCreator() {
+            @Override
+            public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
+                augment.generateTooltip(fleetMember.getStats(), VoidTecEngineeringSuite.HULL_MOD_ID, tooltip, getTooltipWidth(this),
+                                        slotCategory, false);
+            }
+        }, TooltipMakerAPI.TooltipLocation.BELOW);
     }
 }

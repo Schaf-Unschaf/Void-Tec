@@ -1,25 +1,40 @@
 package de.schafunschaf.voidtec.campaign.intel.buttons;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.ui.BaseTooltipCreator;
+import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentSlot;
+import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
+import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
+import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
+import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
+import de.schafunschaf.voidtec.ids.VT_Settings;
+import de.schafunschaf.voidtec.util.ButtonUtils;
 import de.schafunschaf.voidtec.util.FormattingTools;
-import lombok.RequiredArgsConstructor;
+import de.schafunschaf.voidtec.util.VoidTecUtils;
 
 import java.awt.Color;
 
-import static de.schafunschaf.voidtec.VT_Settings.*;
+import static de.schafunschaf.voidtec.ids.VT_Settings.*;
+import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
-@RequiredArgsConstructor
-public class LockedSlotButton extends EmptySlotButton {
+public class LockedSlotButton extends DefaultButton {
 
     private final AugmentSlot augmentSlot;
+    private final int unlockedSlots;
+    private final boolean canUnlockWithCredits;
+
+    public LockedSlotButton(AugmentSlot augmentSlot) {
+        this.augmentSlot = augmentSlot;
+        this.unlockedSlots = augmentSlot.getHullmodManager().getUnlockedSlots().size();
+        this.canUnlockWithCredits = unlockedSlots < VT_Settings.maxNumSlotsForCreditUnlock;
+    }
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
-        int unlockedSlots = augmentSlot.getHullmodManager().getUnlockedSlots().size();
+        assert augmentSlot != null;
         int installCost = installCostCredits * unlockedSlots;
 
         if (unlockedSlots <= maxNumSlotsForCreditUnlock) {
@@ -33,7 +48,7 @@ public class LockedSlotButton extends EmptySlotButton {
 
     @Override
     public void createConfirmationPrompt(TooltipMakerAPI tooltip) {
-        int unlockedSlots = augmentSlot.getHullmodManager().getUnlockedSlots().size();
+        assert augmentSlot != null;
         int installCost = installCostCredits * unlockedSlots;
 
         String installCostString = Misc.getDGSCredits(installCost);
@@ -49,7 +64,7 @@ public class LockedSlotButton extends EmptySlotButton {
 
     @Override
     public boolean doesButtonHaveConfirmDialog() {
-        return true;
+        return canUnlockSlot();
     }
 
     @Override
@@ -65,5 +80,83 @@ public class LockedSlotButton extends EmptySlotButton {
     @Override
     public String getName() {
         return "+";
+    }
+
+    @Override
+    public ButtonAPI createButton(TooltipMakerAPI uiElement, float width, float height) {
+        SlotCategory slotCategory = augmentSlot.getSlotCategory();
+        Color buttonTextColor = Misc.getHighlightColor();
+        Color buttonColor = Misc.scaleColor(Misc.getDarkHighlightColor(), 0.3f);
+
+        if (!canUnlockWithCredits) {
+            buttonTextColor = Misc.getStoryOptionColor();
+            buttonColor = Misc.scaleColor(Misc.getStoryDarkColor(), 0.5f);
+        }
+
+        AugmentCargoWrapper selectedAugment = AugmentManagerIntel.getSelectedAugmentInCargo();
+        SlotCategory activeCategoryFilter = AugmentManagerIntel.getActiveCategoryFilter();
+
+        if (!isNull(selectedAugment) || !isNull(activeCategoryFilter)) {
+            buttonTextColor.darker();
+            buttonColor.darker();
+        }
+
+        uiElement.setButtonFontVictor14();
+        ButtonAPI button = ButtonUtils.addAugmentButton(uiElement, height, 0f, buttonTextColor, buttonColor,
+                                                        this);
+
+        button.setEnabled(canUnlockSlot());
+
+        addTooltip(uiElement, slotCategory);
+
+        return button;
+    }
+
+    @Override
+    protected void addTooltip(TooltipMakerAPI uiElement, SlotCategory slotCategory) {
+        final boolean playerDockedAtSpaceport = VoidTecUtils.isPlayerDockedAtSpaceport();
+        boolean canUnlockWithCredits = unlockedSlots < VT_Settings.maxNumSlotsForCreditUnlock;
+        int installCost = VT_Settings.installCostCredits * unlockedSlots;
+
+        final String unlockCost = canUnlockWithCredits
+                                  ? Misc.getDGSCredits(installCost)
+                                  : String.format("%s SP", VT_Settings.installCostSP);
+        final String unlockSlotText = String.format("Locked slot\n" + "Cost to unlock: %s", unlockCost);
+        final String needSpaceportText = "Need Spaceport for modification";
+
+        final Color hlColor = canUnlockWithCredits ? Misc.getHighlightColor() : Misc.getStoryOptionColor();
+
+        final float stringWidth = playerDockedAtSpaceport
+                                  ? uiElement.computeStringWidth(unlockSlotText)
+                                  : uiElement.computeStringWidth(needSpaceportText);
+        uiElement.addTooltipToPrevious(new BaseTooltipCreator() {
+            @Override
+            public float getTooltipWidth(Object tooltipParam) {
+                return stringWidth;
+            }
+
+            @Override
+            public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
+                tooltip.addPara(unlockSlotText, 0f, hlColor, unlockCost);
+                if (!playerDockedAtSpaceport) {
+                    tooltip.addPara(needSpaceportText, Misc.getGrayColor(), 3f);
+                }
+            }
+        }, TooltipMakerAPI.TooltipLocation.BELOW);
+    }
+
+    private boolean canUnlockSlot() {
+        boolean canUnlockWithCredits = unlockedSlots < VT_Settings.maxNumSlotsForCreditUnlock;
+
+        if (VoidTecUtils.isPlayerDockedAtSpaceport()) {
+            if (canUnlockWithCredits) {
+                int installCost = VT_Settings.installCostCredits * unlockedSlots;
+                return Global.getSector().getPlayerFleet().getCargo().getCredits().get() >= installCost;
+            }
+
+            return Global.getSector().getPlayerStats().getStoryPoints() >= VT_Settings.installCostSP;
+        }
+
+        return false;
     }
 }

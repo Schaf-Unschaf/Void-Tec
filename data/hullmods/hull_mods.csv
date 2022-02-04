@@ -1,2 +1,2 @@
 name,id,tier,rarity,tech/manufacturer,tags,uiTags,base value,unlocked,hidden,hiddenEverywhere,cost_frigate,cost_dest,cost_cruiser,cost_capital,script,desc,short,sprite
-VoidTec Engineering Suite,voidTec_engineeringSuite,,,VoidTec,,,,,TRUE,,0,0,0,0,de.schafunschaf.voidtec.scripts.combat.hullmods.VoidTecEngineeringSuite,,,graphics/hullmods/vt_engineering_suite.png
+VoidTec Engineering Suite,voidTec_engineeringSuite,,,VoidTec,,,,,TRUE,,0,0,0,0,de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite,,,graphics/hullmods/vt_engineering_suite.png

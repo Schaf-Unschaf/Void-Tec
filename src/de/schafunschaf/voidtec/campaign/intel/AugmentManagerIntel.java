@@ -1,50 +1,30 @@
 package de.schafunschaf.voidtec.campaign.intel;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.ui.*;
-import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.VT_Colors;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
+import de.schafunschaf.voidtec.campaign.intel.buttons.TitlePanel;
+import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
+import de.schafunschaf.voidtec.ids.VT_Colors;
+import de.schafunschaf.voidtec.util.CargoUtils;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.Color;
+import java.util.List;
 
 public class AugmentManagerIntel extends BaseIntel {
 
     public static final String STACK_SOURCE = "augmentManagerIntel";
 
     @Getter
+    private static List<AugmentCargoWrapper> augmentsInCargo;
+    @Getter
     @Setter
     private static AugmentCargoWrapper selectedAugmentInCargo;
     @Getter
     @Setter
     private static SlotCategory activeCategoryFilter;
-    private float titleSize = 0f;
-    //    private float shipListSize = 0f;
-    private float shipListWidth = 0f;
-    //    private float cargoListSize = 0f;
-
-    private void addTitlePanel(CustomPanelAPI panel, float width, float height) {
-        TooltipMakerAPI uiElement = panel.createUIElement(width, height, false);
-        LabelAPI sectionHeading = uiElement.addSectionHeading("", Misc.getDarkPlayerColor(), Misc.getDarkPlayerColor(), Alignment.MID, 0f);
-        titleSize = sectionHeading.getPosition().getHeight();
-        uiElement.addPara("VESAI - VoidTec Engineering Suite Augmentation Interface", 0f, Misc.getBrightPlayerColor(),
-                          Misc.getHighlightColor(), "VESAI", "V", "E", "S", "A", "I").setAlignment(Alignment.MID);
-        PositionAPI textPosition = uiElement.getPrev().getPosition();
-        textPosition.setYAlignOffset(textPosition.getHeight() + 2f);
-
-        panel.addUIElement(uiElement);
-    }
-
-    private void addWelcomeText(CustomPanelAPI panel, float width, float height) {
-
-    }
-
-    private void addTabs(CustomPanelAPI panel, float width, float height) {
-
-    }
 
     @Override
     public void notifyPlayerAboutToOpenIntelScreen() {
@@ -79,16 +59,18 @@ public class AugmentManagerIntel extends BaseIntel {
 
     @Override
     public void createLargeDescription(CustomPanelAPI panel, float width, float height) {
-        addTitlePanel(panel, width, height);
-        addWelcomeText(panel, width, height);
-        addTabs(panel, width, height);
-        shipListWidth = ShipPanel.addShipListPanel(panel, height, titleSize + 10f);
-        CargoPanel.addAugmentsInCargoPanel(panel, width - shipListWidth, height, titleSize + 10f);
+        augmentsInCargo = CargoUtils.getAugmentsInCargo();
+
+        new TitlePanel().displayPanel(panel, width, height, 0f);
+        DisplayablePanel shipPanel = new ShipPanel();
+        shipPanel.displayPanel(panel, width, height, 20 + 4f);
+        new CargoPanel().displayPanel(panel, width - shipPanel.getPanelWidth(), height, 20 + 10f);
+        new InfoPanel().displayPanel(panel, shipPanel.getPanelWidth(), height, shipPanel.getPanelHeight() + 24f);
     }
 
     @Override
     public String getIcon() {
-        return Global.getSettings().getSpriteName("intel", "vt_vesai_icon");
+        return Global.getSettings().getSpriteName("intel", "voidTec_hullmod_icon");
     }
 
     @Override
@@ -105,4 +87,6 @@ public class AugmentManagerIntel extends BaseIntel {
     public Color getTitleColor(ListInfoMode mode) {
         return VT_Colors.VT_COLOR_MAIN;
     }
+
+
 }

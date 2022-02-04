@@ -1,14 +1,14 @@
 package de.schafunschaf.voidtec.helper;
 
 import com.fs.starfarer.api.Global;
+import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentData;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatProvider;
 import de.schafunschaf.voidtec.plugins.VoidTecPlugin;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.BaseStatMod;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatModValue;
-import de.schafunschaf.voidtec.scripts.combat.effects.statmodifiers.StatProvider;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.AugmentData;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.augments.AugmentDataManager;
 import lombok.extern.log4j.Log4j;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,31 +44,31 @@ public class AugmentDataLoader {
                 }
 
                 String primaryStatModString = row.optString("primaryStatMods");
-                List<BaseStatMod> primaryStatMods = null;
+                List<StatApplier> primaryStatMods = new ArrayList<>();
                 if (!primaryStatModString.isEmpty()) {
                     primaryStatMods = getStatModsFromString(primaryStatModString);
                 }
 
                 String primaryStatModValueString = row.optString("primaryStatValues");
-                List<StatModValue<Float, Float, Boolean>> primaryStatValues = null;
+                List<StatModValue<Float, Float, Boolean>> primaryStatValues = new ArrayList<>();
                 if (!primaryStatModValueString.isEmpty()) {
                     primaryStatValues = getStatValuesFromString(primaryStatModValueString);
                 }
 
                 String secondarySlotString = row.optString("secondarySlots");
-                List<SlotCategory> secondarySlots = null;
+                List<SlotCategory> secondarySlots = new ArrayList<>();
                 if (!secondarySlotString.isEmpty()) {
                     secondarySlots = getSlotsFromString(secondarySlotString);
                 }
 
                 String secondaryStatModString = row.optString("secondaryStatMods");
-                List<BaseStatMod> secondaryStatMods = null;
+                List<StatApplier> secondaryStatMods = new ArrayList<>();
                 if (!secondaryStatModString.isEmpty()) {
                     secondaryStatMods = getStatModsFromString(secondaryStatModString);
                 }
 
                 String secondaryStatModValueString = row.optString("secondaryStatValues");
-                List<StatModValue<Float, Float, Boolean>> secondaryStatValues = null;
+                List<StatModValue<Float, Float, Boolean>> secondaryStatValues = new ArrayList<>();
                 if (!secondaryStatModValueString.isEmpty()) {
                     secondaryStatValues = getStatValuesFromString(secondaryStatModValueString);
                 }
@@ -100,11 +100,11 @@ public class AugmentDataLoader {
         }
     }
 
-    private static List<BaseStatMod> getStatModsFromString(String primaryStatModString) {
-        List<BaseStatMod> statMods = new ArrayList<>();
+    private static List<StatApplier> getStatModsFromString(String primaryStatModString) {
+        List<StatApplier> statMods = new ArrayList<>();
 
         for (String statModAsString : primaryStatModString.split("\\s*(,\\s*)+")) {
-            BaseStatMod statMod = StatProvider.getStatMod(statModAsString.toLowerCase().trim());
+            StatApplier statMod = StatProvider.getStatMod(statModAsString.toLowerCase().trim());
             if (!isNull(statMod)) {
                 statMods.add(statMod);
             }
@@ -139,7 +139,7 @@ public class AugmentDataLoader {
 
     private static StatModValue<Float, Float, Boolean> getStatModValueDataFromString(String statModValueString) {
         String[] data = statModValueString.split("\\s*(,\\s*)+");
-        return new StatModValue<>(Float.valueOf(data[0].trim()), Float.valueOf(data[1].trim()), Boolean.valueOf(data[2].trim()));
+        return new StatModValue<>(Float.valueOf(data[0]), Float.valueOf(data[1]), Boolean.valueOf(data[2].trim()));
     }
 }
 

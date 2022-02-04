@@ -28,4 +28,8 @@ public class MathUtils {
         BigDecimal bigDecimal = new BigDecimal(number);
         return bigDecimal.setScale(numDecimals, RoundingMode.HALF_UP).floatValue();
     }
+
+    public static float clamp(float value, float min, float max) {
+        return Math.min(Math.max(value, min), max);
+    }
 }

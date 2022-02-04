@@ -2,13 +2,13 @@ package de.schafunschaf.voidtec.campaign.intel.buttons;
 
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.SlotCategory;
+import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import lombok.RequiredArgsConstructor;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @RequiredArgsConstructor
-public class FilterByCategoryButton extends EmptySlotButton {
+public class FilterByCategoryButton extends DefaultButton {
 
     private final SlotCategory selectedSlot;
 

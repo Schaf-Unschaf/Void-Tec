@@ -5,7 +5,7 @@ import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

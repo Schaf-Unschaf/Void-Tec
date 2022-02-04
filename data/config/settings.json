@@ -4,17 +4,17 @@
   },
 
   "graphics": {
-    "misc": {
+    "voidTecSlots": {
       "voidTec_hullmod_lockedSlot": "graphics/hullmods/vt_locked_slot.png",
       "voidTec_hullmod_emptySlot": "graphics/hullmods/vt_empty_slot.png",
-      "voidTec_hullmod_universalSlot": "graphics/hullmods/vt_universal_slot.png",
+      "voidTec_hullmod_cosmeticSlot": "graphics/hullmods/vt_cosmetic_slot.png",
       "voidTec_hullmod_weaponSlot": "graphics/hullmods/vt_weapon_slot.png",
       "voidTec_hullmod_flightDeckSlot": "graphics/hullmods/vt_flight_deck_slot.png",
       "voidTec_hullmod_structureSlot": "graphics/hullmods/vt_structure_slot.png",
       "voidTec_hullmod_shieldSlot": "graphics/hullmods/vt_shield_slot.png",
       "voidTec_hullmod_reactorSlot": "graphics/hullmods/vt_reactor_slot.png",
       "voidTec_hullmod_engineSlot": "graphics/hullmods/vt_engine_slot.png",
-      "voidTec_hullmod_logisticSlot": "graphics/hullmods/vt_logistic_slot.png",
+      "voidTec_hullmod_systemSlot": "graphics/hullmods/vt_system_slot.png",
       "voidTec_hullmod_specialSlot": "graphics/hullmods/vt_special_slot.png",
       "voidTec_item_augmentChip": "graphics/icons/cargo/vt_augment_chip.png",
       "voidTec_item_augmentChip_cover": "graphics/icons/cargo/vt_augment_chip_cover.png",
@@ -23,7 +23,10 @@
       "voidTec_item_storageChest_glow": "graphics/icons/cargo/vt_storage_chest_glow.png"
     },
     "intel": {
-      "vt_vesai_icon": "graphics/icons/intel/vt_vesai_icon.png"
+      "voidTec_hullmod_icon": "graphics/icons/intel/vt_vesai_icon.png"
+    },
+    "voidTecFX": {
+      "voidTec_statFX_test": "graphics/hud/holo_target.png"
     }
   }
 }

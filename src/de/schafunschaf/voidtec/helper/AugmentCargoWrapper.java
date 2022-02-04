@@ -2,7 +2,7 @@ package de.schafunschaf.voidtec.helper;
 
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import lombok.Getter;
 

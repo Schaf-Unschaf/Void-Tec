@@ -6,15 +6,15 @@ import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.campaign.ids.VT_Items;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.ids.VT_Items;
 
 import java.awt.Color;
 import java.util.List;
 
-import static de.schafunschaf.voidtec.VT_Settings.*;
+import static de.schafunschaf.voidtec.ids.VT_Settings.*;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class VoidTecUtils {

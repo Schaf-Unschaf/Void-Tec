@@ -1,10 +1,10 @@
 package de.schafunschaf.voidtec.campaign.items.augments;
 
 import com.fs.starfarer.api.campaign.SpecialItemData;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.helper.ColorShifter;
 import de.schafunschaf.voidtec.helper.MalfunctionEffect;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentApplier;
-import de.schafunschaf.voidtec.scripts.combat.effects.vesai.AugmentQuality;
 import lombok.Getter;
 
 @Getter

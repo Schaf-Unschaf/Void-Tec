@@ -20,6 +20,16 @@ public class ButtonUtils {
         return button;
     }
 
+    public static ButtonAPI addCheckboxButton(TooltipMakerAPI info, float width, float height, float padding, Color textColor,
+                                              Color borderColor, Color hlColor, IntelButton intelButton) {
+        ButtonAPI button = info.addAreaCheckbox(intelButton.getName(), intelButton, hlColor, borderColor, textColor, width, height,
+                                                padding);
+        if (intelButton.getShortcut() > 0) {
+            button.setShortcut(intelButton.getShortcut(), false);
+        }
+        return button;
+    }
+
     public static ButtonAPI addAugmentButton(TooltipMakerAPI info, float size, float padding, Color textColor, Color bgColor,
                                              IntelButton intelButton) {
         ButtonAPI button = info.addButton(intelButton.getName(), intelButton, textColor, bgColor, Alignment.MID, CutStyle.ALL, size, size,
