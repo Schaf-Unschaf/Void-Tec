@@ -11,6 +11,7 @@ import de.schafunschaf.voidtec.combat.scripts.fx.AugmentationEffect;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.HullModDataStorage;
 import de.schafunschaf.voidtec.combat.vesai.HullModManager;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.ids.VT_Colors;
 
 import java.awt.Color;
@@ -56,7 +57,10 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
         }
 
         for (AugmentSlot uniqueSlot : hullmodManager.getUniqueSlots()) {
-            uniqueSlot.getSlottedAugment().runCustomScript(ship, amount);
+            AugmentApplier slottedAugment = uniqueSlot.getSlottedAugment();
+            if (!isNull(slottedAugment)) {
+                slottedAugment.runCustomScript(ship, amount);
+            }
         }
 
         hullmodManager.getShipStatEffectManager().runScripts(ship, amount);

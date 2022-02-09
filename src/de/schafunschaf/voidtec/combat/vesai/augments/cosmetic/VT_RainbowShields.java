@@ -10,7 +10,6 @@ import de.schafunschaf.voidtec.helper.TextWithHighlights;
 import de.schafunschaf.voidtec.ids.VT_Augments;
 
 import java.awt.Color;
-import java.util.Random;
 
 public class VT_RainbowShields extends AugmentData {
 
@@ -19,22 +18,19 @@ public class VT_RainbowShields extends AugmentData {
         this.manufacturer = "VoidTec";
         this.name = "Rainbow Shields";
         this.description = new TextWithHighlights(
-                "Bored of always looking at that static and dull shield matrix in front of you? Try the all new '==Rainbow Crystal " +
-                        "Matrix==' for your ship and kiss those " +
-                        "boring visuals goodbye!");
+                "Bored of always looking at that static and dull barrier in front of your ship? Try the all new " +
+                        "'==Rainbow Crystal Shield Matrix==' and kiss those boring visuals goodbye!");
         this.rarity = 10;
-        this.primarySlot = SlotCategory.SPECIAL;
+        this.primarySlot = SlotCategory.COSMETIC;
         this.augmentQualityRange = new String[]{AugmentQuality.UNIQUE.name()};
         this.combatScriptDescription = new TextWithHighlights("Makes your shield change color over time.");
         this.combatScript = new CombatScriptRunner() {
-            private final Random random = new Random();
-            private final Color startColor = new Color(random.nextFloat(), random.nextFloat(), random.nextFloat());
-            private final ColorShifter colorShifter = new ColorShifter(startColor);
+            private final ColorShifter colorShifter = new ColorShifter(null);
 
             @Override
             public void run(ShipAPI ship, float amount, Object data) {
-                Color shiftColor = colorShifter.shiftColor(0.25f);
-                ship.getShield().setInnerColor(shiftColor);
+                Color shiftColor = colorShifter.shiftColor(0.4f);
+                ship.getShield().setInnerColor(shiftColor.darker().darker());
                 ship.getShield().setRingColor(shiftColor);
             }
         };

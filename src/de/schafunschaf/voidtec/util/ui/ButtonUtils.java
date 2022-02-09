@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.util;
+package de.schafunschaf.voidtec.util.ui;
 
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;

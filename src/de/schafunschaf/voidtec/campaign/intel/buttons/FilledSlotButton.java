@@ -10,7 +10,7 @@ import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
-import de.schafunschaf.voidtec.util.ButtonUtils;
+import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import de.schafunschaf.voidtec.util.FormattingTools;
 import lombok.RequiredArgsConstructor;
 
@@ -86,7 +86,7 @@ public class FilledSlotButton extends DefaultButton {
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                 augment.generateTooltip(fleetMember.getStats(), VoidTecEngineeringSuite.HULL_MOD_ID, tooltip, getTooltipWidth(this),
-                                        slotCategory, false);
+                                        slotCategory, false, null);
             }
         }, TooltipMakerAPI.TooltipLocation.BELOW);
     }

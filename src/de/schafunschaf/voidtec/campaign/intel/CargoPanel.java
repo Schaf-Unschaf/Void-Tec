@@ -10,8 +10,9 @@ import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
+import de.schafunschaf.voidtec.helper.RainbowString;
 import de.schafunschaf.voidtec.ids.VT_Icons;
-import de.schafunschaf.voidtec.util.ButtonUtils;
+import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import lombok.Getter;
 
 import java.awt.Color;
@@ -25,6 +26,7 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNullOrEmpty;
 public class CargoPanel implements DisplayablePanel {
 
     public static boolean showDestroyedAugments = false;
+    public static boolean showOnlyRepairable = false;
 
     private float panelWidth;
     private float panelHeight;
@@ -36,6 +38,7 @@ public class CargoPanel implements DisplayablePanel {
         float buttonHeight = 30f;
         float filterButtonSize = 24f;
         float itemSpacing = 3f;
+        float listSpacing = 64f;
 
         TooltipMakerAPI headerElement = panel.createUIElement(width - 3f, 0f, false);
         headerElement.addSectionHeading("Available Augments", Misc.getBrightPlayerColor(), Misc.getDarkPlayerColor(), Alignment.MID, 0f);
@@ -109,6 +112,10 @@ public class CargoPanel implements DisplayablePanel {
                 continue;
             }
 
+            if (showOnlyRepairable && !augmentInStack.isRepairable()) {
+                continue;
+            }
+
             if (!showDestroyedAugments && augmentInStack.getAugmentQuality() == AugmentQuality.DESTROYED) {
                 continue;
             }
@@ -126,7 +133,7 @@ public class CargoPanel implements DisplayablePanel {
             uiElement.addCustom(customPanelAPI, i == 0 ? itemSpacing + 10f : itemSpacing);
         }
 
-        panel.addUIElement(uiElement).inTR(0f, padding + headerHeight + 60f - 6f);
+        panel.addUIElement(uiElement).inTR(0f, padding + headerHeight + listSpacing);
     }
 
     private boolean matchesFilter(AugmentApplier augment) {
@@ -187,8 +194,14 @@ public class CargoPanel implements DisplayablePanel {
         }, TooltipMakerAPI.TooltipLocation.LEFT);
 
         TooltipMakerAPI imageWithText = cargoElement.beginImageWithText(VT_Icons.AUGMENT_ITEM_ICON, iconSize);
-        imageWithText.addPara(cargoElement.shortenString(augment.getName(), width - buttonWidth - iconSize - 2f - itemSpacing * 2),
-                              augment.getAugmentQuality().getColor(), 3f).getPosition().setXAlignOffset(-6f);
+        if (augment.getName().toLowerCase().contains("rainbow")) {
+            RainbowString rainbowString = new RainbowString(augment.getName(), Color.RED, 20);
+            imageWithText.addPara(rainbowString.getConvertedString(), 3f, rainbowString.getHlColors(), rainbowString.getHlStrings());
+        } else {
+            imageWithText.addPara(cargoElement.shortenString(augment.getName(), width - buttonWidth - iconSize - 2f - itemSpacing * 2),
+                                  augment.getAugmentQuality().getColor(), 3f);
+        }
+        imageWithText.getPrev().getPosition().setXAlignOffset(-6f);
         cargoElement.addImageWithText(-itemSpacing);
         cargoElement.addTooltipToPrevious(new BaseTooltipCreator() {
             @Override

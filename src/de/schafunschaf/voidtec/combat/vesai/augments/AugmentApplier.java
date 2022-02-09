@@ -8,6 +8,7 @@ import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
 import de.schafunschaf.voidtec.helper.TextWithHighlights;
 
+import java.awt.Color;
 import java.util.List;
 import java.util.Random;
 
@@ -18,9 +19,9 @@ public interface AugmentApplier {
     void applyToFighter(MutableShipStatsAPI stats, String id);
 
     void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory,
-                         boolean isItemTooltip);
+                         boolean isItemTooltip, Color bulletColorOverride);
 
-    void generateStatDescription(TooltipMakerAPI tooltip, float padding, Boolean isPrimary);
+    void generateStatDescription(TooltipMakerAPI tooltip, float padding, Boolean isPrimary, Color bulletColorOverride);
 
     void runCustomScript(ShipAPI ship, float amount);
 
@@ -47,6 +48,10 @@ public interface AugmentApplier {
     TextWithHighlights getCombatScriptDescription();
 
     List<StatApplier> getActiveStatMods();
+
+    boolean isRepairable();
+
+    boolean isDestroyed();
 
     AugmentApplier damageAugment(int numLevelsDamaged);
 

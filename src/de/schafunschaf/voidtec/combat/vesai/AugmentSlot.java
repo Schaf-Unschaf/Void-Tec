@@ -63,7 +63,7 @@ public class AugmentSlot {
             return;
         }
 
-        slottedAugment.generateTooltip(stats, id, tooltip, width, slotCategory, isItemTooltip);
+        slottedAugment.generateTooltip(stats, id, tooltip, width, slotCategory, isItemTooltip, null);
     }
 
     public void unlockSlot() {

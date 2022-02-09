@@ -4,12 +4,15 @@ import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.campaign.intel.CargoPanel;
 import de.schafunschaf.voidtec.campaign.intel.InfoPanel;
 
 public class DetailsTabButton extends DefaultButton {
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
+        CargoPanel.showDestroyedAugments = false;
+        CargoPanel.showOnlyRepairable = false;
         InfoPanel.setSelectedTab(InfoPanel.InfoTabs.DETAILS);
     }
 

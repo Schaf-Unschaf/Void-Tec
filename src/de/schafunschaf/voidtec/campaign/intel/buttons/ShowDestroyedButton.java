@@ -5,7 +5,7 @@ import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.CargoPanel;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
-import de.schafunschaf.voidtec.util.ButtonUtils;
+import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 
 import java.awt.Color;
 

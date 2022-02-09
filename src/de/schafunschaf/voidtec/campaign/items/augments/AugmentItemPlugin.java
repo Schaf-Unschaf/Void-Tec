@@ -9,6 +9,7 @@ import com.fs.starfarer.api.campaign.impl.items.BaseSpecialItemPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
@@ -17,6 +18,7 @@ import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.helper.ColorShifter;
 import de.schafunschaf.voidtec.helper.MalfunctionEffect;
+import de.schafunschaf.voidtec.helper.RainbowString;
 import de.schafunschaf.voidtec.ids.VT_Icons;
 import de.schafunschaf.voidtec.ids.VT_Settings;
 import de.schafunschaf.voidtec.ids.VT_Strings;
@@ -41,13 +43,17 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
         AugmentApplier augment = getAugmentItemData().getAugment();
         AugmentQuality augmentQuality = augment.getAugmentQuality();
 
-        if (stackSource.equals(AugmentManagerIntel.STACK_SOURCE)) {
-            tooltip.addTitle(String.format("%sx %s", ((int) stack.getSize()), getName()));
+        if (augment.getName().toLowerCase().contains("rainbow")) {
+            RainbowString rainbowString = new RainbowString(augment.getName(), Color.RED, 20);
+            tooltip.setParaFont(Fonts.ORBITRON_12);
+            tooltip.addPara(rainbowString.getConvertedString() + "- " + super.getName(), 0f, rainbowString.getHlColors(),
+                            rainbowString.getHlStrings());
+            tooltip.setParaFont(Fonts.DEFAULT_SMALL);
         } else {
             tooltip.addTitle(getName());
         }
 
-        createTechInfo(tooltip, largePad, smallPad);
+        addTechInfo(tooltip, largePad, smallPad);
 
         tooltip.addPara(augment.getDescription().getDisplayString(), largePad, Misc.getHighlightColor(),
                         augment.getDescription().getHighlights());
@@ -72,7 +78,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                 tooltip.addSectionHeading("Primary Stat Modification Info", augment.getPrimarySlot().getColor(),
                                           Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
                 tooltip.addSpacer(smallPad);
-                augment.generateStatDescription(tooltip, smallPad, true);
+                augment.generateStatDescription(tooltip, smallPad, true, null);
             }
 
             if (!(augmentQuality == AugmentQuality.DESTROYED) && !isNull(augment.getSecondaryStatMods()) && !augment.getSecondaryStatMods()
@@ -97,7 +103,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                                           Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
                 tooltip.addSpacer(smallPad);
 
-                augment.generateStatDescription(tooltip, smallPad, false);
+                augment.generateStatDescription(tooltip, smallPad, false, null);
 
                 tooltip.addPara(secondarySlotStringBuilder.toString(), largePad, hlColors.toArray(new Color[0]),
                                 hlStrings.toArray(new String[0]));
@@ -167,7 +173,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
         return super.getDesignType();
     }
 
-    private void createTechInfo(TooltipMakerAPI tooltip, float largePad, float smallPad) {
+    public void addTechInfo(TooltipMakerAPI tooltip, float padding, float paraPadding) {
         AugmentApplier augment = getAugmentItemData().getAugment();
 
         String manufacturerName = isNull(augment.getManufacturer()) ? "Unknown" : augment.getManufacturer();
@@ -193,9 +199,9 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
             hlStrings.add(augment.getInitialQuality().getName());
         }
 
-        tooltip.addPara("Manufacturer: %s", largePad, Misc.getGrayColor(), manufacturerColor, manufacturerName);
-        tooltip.addPara(qualityDescription, smallPad, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
-        tooltip.addPara("Type: %s", smallPad, Misc.getGrayColor(), augment.getPrimarySlot().getColor(), augment.getPrimarySlot().getName());
+        tooltip.addPara("Manufacturer: %s", padding, Misc.getGrayColor(), manufacturerColor, manufacturerName);
+        tooltip.addPara(qualityDescription, paraPadding, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
+        tooltip.addPara("Type: %s", paraPadding, Misc.getGrayColor(), augment.getPrimarySlot().getColor(), augment.getPrimarySlot().getName());
     }
 
     public AugmentItemData getAugmentItemData() {

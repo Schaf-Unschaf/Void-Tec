@@ -1,10 +1,12 @@
 package de.schafunschaf.voidtec.campaign.intel;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.buttons.*;
+import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.HullModDataStorage;
 import de.schafunschaf.voidtec.combat.vesai.HullModManager;
@@ -15,12 +17,18 @@ import lombok.Getter;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class ShipPanel implements DisplayablePanel {
+
+    public static boolean displayWithHullmod = true;
+    public static boolean displayWithoutHullmod = true;
+    public static List<ShipAPI.HullSize> displayHullSizes = new ArrayList<>(
+            Arrays.asList(ShipAPI.HullSize.FRIGATE, ShipAPI.HullSize.DESTROYER, ShipAPI.HullSize.CRUISER, ShipAPI.HullSize.CAPITAL_SHIP));
 
     private final float panelHeaderHeight = 21f;
     private final int numMaxColumns = 4;
@@ -44,14 +52,25 @@ public class ShipPanel implements DisplayablePanel {
 
     @Override
     public void displayPanel(CustomPanelAPI panel, float width, float height, float padding) {
-        List<FleetMemberAPI> playerShips = Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy();
+        List<FleetMemberAPI> playerShips = filterShips();
+        int currentFleetSize = Global.getSector().getPlayerFleet().getNumShips();
+        int hiddenShips = currentFleetSize - playerShips.size();
+        int maxShipsInFleet = Global.getSettings().getMaxShipsInFleet();
+        String fleetSizeString = String.format("%s/%s Ships", currentFleetSize, maxShipsInFleet);
+        String filteredString = String.format(" (%s filtered out)", hiddenShips);
+
+        if (hiddenShips > 0) {
+            fleetSizeString += filteredString;
+        }
 
         float sumXPadding = 0f;
         float yPadding = 0f;
 
         int shipsDone = 0;
         TooltipMakerAPI headerElement = panel.createUIElement(panelWidth, height - panelHeaderHeight, false);
-        headerElement.addSectionHeading("Fleet Overview", Misc.getBrightPlayerColor(), Misc.getDarkPlayerColor(), Alignment.MID, 0f);
+        headerElement.addSectionHeading(String.format("Fleet Overview - %s", fleetSizeString), Misc.getBrightPlayerColor(),
+                                        Misc.getDarkPlayerColor(), Alignment.MID, 0f);
+        addFilterButtons(headerElement);
         panel.addUIElement(headerElement).inTL(0f, panelHeaderHeight);
 
         TooltipMakerAPI fleetDisplayElement = panel.createUIElement(panelWidth, panelHeight, true);
@@ -82,6 +101,36 @@ public class ShipPanel implements DisplayablePanel {
 
         panel.addUIElement(fleetDisplayElement).inTL(0f, padding + panelHeaderHeight);
 
+    }
+
+    private void addFilterButtons(TooltipMakerAPI tooltip) {
+        float filterButtonWidth = 40f;
+        float hmButtonWidth = 55f;
+        float buttonHeight = 18f;
+        float buttonSpacing = 5f;
+
+        UIComponentAPI prev = tooltip.getPrev();
+
+        ButtonAPI lastButton = new FilterWithHullmodButton().createButton(tooltip, hmButtonWidth, buttonHeight);
+        lastButton.getPosition().rightOfTop(prev, -lastButton.getPosition().getWidth() + buttonSpacing);
+
+        ButtonAPI nextButton = new FilterWithoutHullmodButton().createButton(tooltip, hmButtonWidth, buttonHeight);
+        nextButton.getPosition().rightOfTop(lastButton, -nextButton.getPosition().getWidth() - hmButtonWidth - buttonSpacing);
+        lastButton = nextButton;
+
+        ShipAPI.HullSize[] hullSizeFilters = {ShipAPI.HullSize.CAPITAL_SHIP, ShipAPI.HullSize.CRUISER,
+                                              ShipAPI.HullSize.DESTROYER, ShipAPI.HullSize.FRIGATE};
+
+        boolean isFirst = true;
+        for (ShipAPI.HullSize hullSize : hullSizeFilters) {
+            float prevButtonWidth = isFirst ? hmButtonWidth : filterButtonWidth;
+
+            nextButton = new FilterHullSizeButton(hullSize).createButton(tooltip, filterButtonWidth,
+                                                                         buttonHeight);
+            nextButton.getPosition().rightOfTop(lastButton, -nextButton.getPosition().getWidth() - prevButtonWidth - buttonSpacing);
+            lastButton = nextButton;
+            isFirst = false;
+        }
     }
 
     private void generateShipForPanel(TooltipMakerAPI shipElement, final FleetMemberAPI ship) {
@@ -174,5 +223,21 @@ public class ShipPanel implements DisplayablePanel {
         }
 
         return intelButton.createButton(uiElement, augmentButtonSize, augmentButtonSize);
+    }
+
+    private List<FleetMemberAPI> filterShips() {
+        List<FleetMemberAPI> playerShips = Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy();
+        List<FleetMemberAPI> filteredList = new ArrayList<>();
+
+        for (FleetMemberAPI fleetMember : playerShips) {
+            if (displayHullSizes.contains(fleetMember.getHullSpec().getHullSize())) {
+                boolean hasHullmod = fleetMember.getVariant().hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID);
+                if (displayWithHullmod && hasHullmod || displayWithoutHullmod && !hasHullmod) {
+                    filteredList.add(fleetMember);
+                }
+            }
+        }
+
+        return filteredList;
     }
 }

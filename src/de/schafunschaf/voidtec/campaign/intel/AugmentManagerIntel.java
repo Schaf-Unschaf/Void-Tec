@@ -61,11 +61,13 @@ public class AugmentManagerIntel extends BaseIntel {
     public void createLargeDescription(CustomPanelAPI panel, float width, float height) {
         augmentsInCargo = CargoUtils.getAugmentsInCargo();
 
-        new TitlePanel().displayPanel(panel, width, height, 0f);
+        TitlePanel titlePanel = new TitlePanel();
+        titlePanel.displayPanel(panel, width, height, 0f);
         DisplayablePanel shipPanel = new ShipPanel();
-        shipPanel.displayPanel(panel, width, height, 20 + 4f);
-        new CargoPanel().displayPanel(panel, width - shipPanel.getPanelWidth(), height, 20 + 10f);
-        new InfoPanel().displayPanel(panel, shipPanel.getPanelWidth(), height, shipPanel.getPanelHeight() + 24f);
+        shipPanel.displayPanel(panel, width, height, titlePanel.getPanelHeight() + 3f);
+        new CargoPanel().displayPanel(panel, width - shipPanel.getPanelWidth(), height, titlePanel.getPanelHeight());
+        new InfoPanel().displayPanel(panel, shipPanel.getPanelWidth(), 192f,
+                                     shipPanel.getPanelHeight() + titlePanel.getPanelHeight() * 2 + 3f);
     }
 
     @Override

@@ -9,6 +9,7 @@ import de.schafunschaf.voidtec.combat.vesai.CombatScriptRunner;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
+import de.schafunschaf.voidtec.helper.RainbowString;
 import de.schafunschaf.voidtec.helper.TextWithHighlights;
 import de.schafunschaf.voidtec.ids.VT_Strings;
 import lombok.Getter;
@@ -96,9 +97,16 @@ public class BaseAugment implements AugmentApplier {
 
     @Override
     public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory,
-                                boolean isItemTooltip) {
+                                boolean isItemTooltip, Color bulletColorOverride) {
         tooltip.addButton("", null, getAugmentQuality().getColor(), getAugmentQuality().getColor(), width, 0f, 3f);
-        tooltip.addPara(String.format("%s (%s)", getName(), getAugmentQuality().getName()), getAugmentQuality().getColor(), 3f);
+
+        if (getName().toLowerCase().contains("rainbow")) {
+            RainbowString rainbowString = new RainbowString(getName(), Color.RED, 20);
+            tooltip.addPara(rainbowString.getConvertedString(), 3f, rainbowString.getHlColors(), rainbowString.getHlStrings());
+        } else {
+            tooltip.addPara(String.format("%s (%s)", getName(), getAugmentQuality().getName()), getAugmentQuality().getColor(), 3f);
+        }
+
         if (isItemTooltip || slotCategory == SlotCategory.SPECIAL || slotCategory == SlotCategory.COSMETIC) {
             tooltip.addPara(getDescription().getDisplayString(), 3f, Misc.getHighlightColor(), getDescription().getHighlights());
         }
@@ -106,9 +114,9 @@ public class BaseAugment implements AugmentApplier {
 
         List<StatApplier> statMods = isInPrimarySlot() ? getPrimaryStatMods() : getSecondaryStatMods();
         if (!isNull(statMods) && !statMods.isEmpty()) {
-            Color bulletColor = primarySlot.getColor();
+            Color bulletColor = isNull(bulletColorOverride) ? primarySlot.getColor() : bulletColorOverride;
 
-            if (!isNull(installedSlot)) {
+            if (isNull(bulletColorOverride) && !isNull(installedSlot)) {
                 bulletColor = installedSlot.getSlotCategory().getColor();
             }
 
@@ -133,7 +141,7 @@ public class BaseAugment implements AugmentApplier {
     }
 
     @Override
-    public void generateStatDescription(TooltipMakerAPI tooltip, float padding, Boolean isPrimary) {
+    public void generateStatDescription(TooltipMakerAPI tooltip, float padding, Boolean isPrimary, Color bulletColorOverride) {
         if (augmentQuality == AugmentQuality.DESTROYED) {
             tooltip.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), 0f);
             return;
@@ -147,9 +155,9 @@ public class BaseAugment implements AugmentApplier {
         }
 
         List<StatModValue<Float, Float, Boolean>> statModValues = inPrimarySlot ? getPrimaryStatValues() : getSecondaryStatValues();
-        Color bulletColor = primarySlot.getColor();
+        Color bulletColor = isNull(bulletColorOverride) ? primarySlot.getColor() : bulletColorOverride;
 
-        if (!isNull(installedSlot)) {
+        if (isNull(bulletColorOverride) && !isNull(installedSlot)) {
             bulletColor = installedSlot.getSlotCategory().getColor();
         }
 
@@ -175,6 +183,16 @@ public class BaseAugment implements AugmentApplier {
     @Override
     public List<StatApplier> getActiveStatMods() {
         return isInPrimarySlot() ? primaryStatMods : secondaryStatMods;
+    }
+
+    @Override
+    public boolean isRepairable() {
+        return !isDestroyed() && augmentQuality != initialQuality;
+    }
+
+    @Override
+    public boolean isDestroyed() {
+        return augmentQuality == AugmentQuality.DESTROYED;
     }
 
     @Override

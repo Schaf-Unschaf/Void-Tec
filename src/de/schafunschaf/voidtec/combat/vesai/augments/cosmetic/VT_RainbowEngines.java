@@ -11,7 +11,6 @@ import de.schafunschaf.voidtec.helper.TextWithHighlights;
 import de.schafunschaf.voidtec.ids.VT_Augments;
 
 import java.awt.Color;
-import java.util.Random;
 
 public class VT_RainbowEngines extends AugmentData {
 
@@ -26,13 +25,11 @@ public class VT_RainbowEngines extends AugmentData {
         this.augmentQualityRange = new String[]{AugmentQuality.UNIQUE.name()};
         this.combatScriptDescription = new TextWithHighlights("Makes your engine flames change color over time.");
         this.combatScript = new CombatScriptRunner() {
-            private final Random random = new Random();
-            private final Color startColor = new Color(random.nextFloat(), random.nextFloat(), random.nextFloat());
-            private final ColorShifter colorShifter = new ColorShifter(startColor);
+            private final ColorShifter colorShifter = new ColorShifter(null);
 
             @Override
             public void run(ShipAPI ship, float amount, Object data) {
-                Color shiftColor = colorShifter.shiftColor(0.25f);
+                Color shiftColor = colorShifter.shiftColor(0.4f);
                 ship.getEngineController().fadeToOtherColor(augmentID, shiftColor, Misc.scaleColor(shiftColor, 0.3f), 1f, 1f);
             }
         };

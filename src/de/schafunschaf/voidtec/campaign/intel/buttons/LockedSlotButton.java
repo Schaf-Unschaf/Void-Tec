@@ -11,7 +11,7 @@ import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Settings;
-import de.schafunschaf.voidtec.util.ButtonUtils;
+import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import de.schafunschaf.voidtec.util.FormattingTools;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 
@@ -34,13 +34,11 @@ public class LockedSlotButton extends DefaultButton {
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
-        assert augmentSlot != null;
-        int installCost = installCostCredits * unlockedSlots;
-
-        if (unlockedSlots <= maxNumSlotsForCreditUnlock) {
-            Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(installCost);
-        } else {
+        if (unlockedSlots >= maxNumSlotsForCreditUnlock) {
             Global.getSector().getPlayerStats().addStoryPoints(-installCostSP);
+        } else {
+            int installCost = installCostCredits * unlockedSlots;
+            Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(installCost);
         }
 
         augmentSlot.unlockSlot();
