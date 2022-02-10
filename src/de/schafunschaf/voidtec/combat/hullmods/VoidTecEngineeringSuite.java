@@ -37,7 +37,6 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
 
         if (isNull(hullmodManager)) {
             hullmodManager = new HullModManager(fleetMember);
-            hullModDataStorage.storeShipID(fleetMember.getId(), hullmodManager);
         }
 
         hullmodManager.applySlotEffects(stats, id);

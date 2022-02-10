@@ -1,7 +1,6 @@
 package de.schafunschaf.voidtec.combat.vesai;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
@@ -10,7 +9,6 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
-import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.ids.VT_Icons;
 import de.schafunschaf.voidtec.ids.VT_Settings;
@@ -36,6 +34,7 @@ public class HullModManager {
 
     public HullModManager(FleetMemberAPI fleetMember) {
         this.fleetMemberID = fleetMember.getId();
+        HullModDataStorage.getInstance().storeShipID(fleetMemberID, this);
         generateSlotsForShip(fleetMember);
     }
 
@@ -360,29 +359,6 @@ public class HullModManager {
             shipAugmentSlots.add(new AugmentSlot(this, categoryPoolWithWeighting, random, isUnlocked));
             if (VT_Settings.sheepDebug) {
                 log.info(String.format("Slot: %s (unlocked: %s)", shipAugmentSlots.get(i + 1).getSlotCategory().name(), isUnlocked));
-            }
-        }
-    }
-
-    public void fillUnlockedSlots(FactionAPI preferredFaction, String[] qualityRange, Random random) {
-        if (VT_Settings.sheepDebug) {
-            log.info("Generating random augments");
-        }
-        if (isNull(random)) {
-            random = new Random();
-        }
-
-        for (AugmentSlot shipAugmentSlot : getEmptySlots()) {
-            SlotCategory slotCategory = shipAugmentSlot.getSlotCategory();
-            AugmentQuality augmentQuality = AugmentQuality.getRandomQualityInRange(qualityRange, random, false);
-
-            AugmentApplier augment = AugmentDataManager.getRandomAugment(slotCategory, augmentQuality, preferredFaction, random);
-            boolean success = installAugment(shipAugmentSlot, augment);
-
-            if (VT_Settings.sheepDebug) {
-                log.info(String.format("Slot: %s - Augment: %s - Quality: %s - Success: %s", slotCategory.name(),
-                                       isNull(augment) ? "NULL" : augment.getAugmentID(),
-                                       isNull(augment) ? "NULL" : augment.getAugmentQuality().name(), success));
             }
         }
     }

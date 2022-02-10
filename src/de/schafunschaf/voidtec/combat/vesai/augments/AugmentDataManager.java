@@ -3,6 +3,9 @@ package de.schafunschaf.voidtec.combat.vesai.augments;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
+import de.schafunschaf.voidtec.combat.vesai.augments.cosmetic.VT_RainbowEngines;
+import de.schafunschaf.voidtec.combat.vesai.augments.cosmetic.VT_RainbowShields;
+import de.schafunschaf.voidtec.ids.VT_Augments;
 
 import java.util.*;
 
@@ -18,6 +21,11 @@ public class AugmentDataManager {
 
     public static void storeAugmentData(String augmentID, AugmentData augment) {
         AUGMENT_DATA_MAP.put(augmentID, augment);
+    }
+
+    public static void initCustomAugments() {
+        AugmentDataManager.storeAugmentData(VT_Augments.VT_RAINBOW_ENGINES, new VT_RainbowEngines());
+        AugmentDataManager.storeAugmentData(VT_Augments.VT_RAINBOW_SHIELDS, new VT_RainbowShields());
     }
 
     public static AugmentApplier getRandomAugment(Random random) {

@@ -42,7 +42,7 @@ public class AugmentationEffect {
                 float colorFactor = activeTrackerValue < halfDuration ? activeTrackerValue : ACTIVE_DURATION - activeTrackerValue;
                 colorFactor = MathUtils.clamp(colorFactor, 0f, 1f);
 
-                ship.setJitterUnder(source, Misc.scaleColor(jitterColor, colorFactor), 1f, 3, 10f);
+                ship.setJitterUnder(source, Misc.scaleColor(jitterColor, colorFactor), 1f, 4, 15f);
 
                 stat.modifyFlat(ACTIVE_TRACKER, activeTrackerValue + amount);
             } else {

@@ -2,16 +2,14 @@ package de.schafunschaf.voidtec.campaign.intel.buttons;
 
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.campaign.intel.DisplayablePanel;
 import lombok.Getter;
 
 @Getter
-public class TitlePanel implements DisplayablePanel {
+public class TitlePanel {
 
     private float panelHeight;
     private float panelWidth;
 
-    @Override
     public void displayPanel(CustomPanelAPI panel, float width, float height, float padding) {
         TooltipMakerAPI uiElement = panel.createUIElement(width, height, false);
         LabelAPI sectionHeading = uiElement.addSectionHeading("", Misc.getDarkPlayerColor(), Misc.getDarkPlayerColor(), Alignment.MID, 0f);

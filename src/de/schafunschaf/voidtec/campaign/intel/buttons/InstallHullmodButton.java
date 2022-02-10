@@ -10,9 +10,9 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.ids.VT_Settings;
-import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import de.schafunschaf.voidtec.util.FormattingTools;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
+import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 
 import java.awt.Color;
 

@@ -63,7 +63,7 @@ public class AugmentManagerIntel extends BaseIntel {
 
         TitlePanel titlePanel = new TitlePanel();
         titlePanel.displayPanel(panel, width, height, 0f);
-        DisplayablePanel shipPanel = new ShipPanel();
+        ShipPanel shipPanel = new ShipPanel();
         shipPanel.displayPanel(panel, width, height, titlePanel.getPanelHeight() + 3f);
         new CargoPanel().displayPanel(panel, width - shipPanel.getPanelWidth(), height, titlePanel.getPanelHeight());
         new InfoPanel().displayPanel(panel, shipPanel.getPanelWidth(), 192f,

@@ -13,15 +13,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-public class InfoPanel implements DisplayablePanel {
+public class InfoPanel {
 
     @Setter
     @Getter
     private static InfoTabs selectedTab = InfoTabs.DETAILS;
-    private float panelHeight;
-    private float panelWidth;
 
-    @Override
     public void displayPanel(CustomPanelAPI panel, float width, float height, float padding) {
         float tabHeight = 24f;
         float tabPadding = 10f;
@@ -52,7 +49,6 @@ public class InfoPanel implements DisplayablePanel {
         String playerCreditsText = String.format("Credits: %s", creditValue);
         String storyPoints = String.valueOf(Global.getSector().getPlayerStats().getStoryPoints());
         String playerSPText = String.format("Storypoints: %s", storyPoints);
-        String numDestroyedAugments = String.valueOf(destroyedAugments);
         String numUsableAugments = String.valueOf(usableAugments);
         String augmentsInCargoText = String.format("Augments: %s", numUsableAugments);
 
@@ -155,16 +151,6 @@ public class InfoPanel implements DisplayablePanel {
         }
         boxBodyPanel.addUIElement(boxBodyElement).inTL(0, 0);
         borderBox.createBorderBox().inTL(0f, padding + mediumPad);
-    }
-
-    @Override
-    public float getPanelWidth() {
-        return 0;
-    }
-
-    @Override
-    public float getPanelHeight() {
-        return 0;
     }
 
     public enum InfoTabs {

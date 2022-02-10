@@ -24,7 +24,6 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 public class DetailsTab {
 
     private final TooltipMakerAPI tooltip;
-    private final float parentWidth;
     private final float parentHeight;
     private final float padding;
     private final float augmentPanelWidth;
@@ -32,11 +31,9 @@ public class DetailsTab {
     private final float secondaryPanelWidth;
 
     private final AugmentCargoWrapper selectedAugmentInCargo = AugmentManagerIntel.getSelectedAugmentInCargo();
-    private final boolean augmentSelected = !isNull(selectedAugmentInCargo);
 
     public DetailsTab(TooltipMakerAPI tooltip, float width, float height, float padding) {
         this.tooltip = tooltip;
-        this.parentWidth = width;
         this.parentHeight = height;
         this.padding = padding;
         float panelWidthUnit = width / 10f;

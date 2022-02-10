@@ -23,7 +23,7 @@ import java.util.List;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
-public class ShipPanel implements DisplayablePanel {
+public class ShipPanel {
 
     public static boolean displayWithHullmod = true;
     public static boolean displayWithoutHullmod = true;
@@ -50,7 +50,6 @@ public class ShipPanel implements DisplayablePanel {
         return shipIconSize + 6 * augmentButtonSize + 5 * augmentButtonPadding;
     }
 
-    @Override
     public void displayPanel(CustomPanelAPI panel, float width, float height, float padding) {
         List<FleetMemberAPI> playerShips = filterShips();
         int currentFleetSize = Global.getSector().getPlayerFleet().getNumShips();

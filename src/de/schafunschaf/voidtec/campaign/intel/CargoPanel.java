@@ -23,15 +23,11 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNullOrEmpty;
 
 @Getter
-public class CargoPanel implements DisplayablePanel {
+public class CargoPanel {
 
     public static boolean showDestroyedAugments = false;
     public static boolean showOnlyRepairable = false;
 
-    private float panelWidth;
-    private float panelHeight;
-
-    @Override
     public void displayPanel(CustomPanelAPI panel, float width, float height, float padding) {
         float headerHeight = 21f;
         float sorterHeight = 68f;
@@ -41,7 +37,8 @@ public class CargoPanel implements DisplayablePanel {
         float listSpacing = 64f;
 
         TooltipMakerAPI headerElement = panel.createUIElement(width - 3f, 0f, false);
-        headerElement.addSectionHeading("Available Augments", Misc.getBrightPlayerColor(), Misc.getDarkPlayerColor(), Alignment.MID, 0f);
+        String headerText = showOnlyRepairable ? "Damaged Augments" : "Available Augments";
+        headerElement.addSectionHeading(headerText, Misc.getBrightPlayerColor(), Misc.getDarkPlayerColor(), Alignment.MID, 0f);
         panel.addUIElement(headerElement).inTR(0f, headerHeight);
 
         final TooltipMakerAPI filterElement = panel.createUIElement(width - 3f, 0f, false);

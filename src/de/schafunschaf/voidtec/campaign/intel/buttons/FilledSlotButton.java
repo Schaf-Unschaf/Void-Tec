@@ -10,8 +10,8 @@ import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
-import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import de.schafunschaf.voidtec.util.FormattingTools;
+import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;

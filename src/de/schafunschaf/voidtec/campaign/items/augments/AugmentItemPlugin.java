@@ -201,7 +201,8 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
         tooltip.addPara("Manufacturer: %s", padding, Misc.getGrayColor(), manufacturerColor, manufacturerName);
         tooltip.addPara(qualityDescription, paraPadding, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
-        tooltip.addPara("Type: %s", paraPadding, Misc.getGrayColor(), augment.getPrimarySlot().getColor(), augment.getPrimarySlot().getName());
+        tooltip.addPara("Type: %s", paraPadding, Misc.getGrayColor(), augment.getPrimarySlot().getColor(),
+                        augment.getPrimarySlot().getName());
     }
 
     public AugmentItemData getAugmentItemData() {

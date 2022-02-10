@@ -2,11 +2,8 @@ package de.schafunschaf.voidtec.campaign.listeners;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.*;
-import com.fs.starfarer.api.combat.ShipVariantAPI;
-import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.campaign.LootCategory;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
 import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
@@ -14,6 +11,7 @@ import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.HullModDataStorage;
 import de.schafunschaf.voidtec.combat.vesai.HullModManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.helper.ShipAugmentGenerator;
 import de.schafunschaf.voidtec.ids.VT_Items;
 import de.schafunschaf.voidtec.ids.VT_Settings;
 
@@ -46,30 +44,9 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
             }
         }
 
-        // Give NPC-Fleets augments depending on fleet type and faction
+        // Give NPC-Fleets augments depending on fleet type, ship type and faction
         if (interactionTarget instanceof CampaignFleetAPI && !interactionTarget.isPlayerFleet()) {
-            FleetDataAPI fleetData = ((CampaignFleetAPI) interactionTarget).getFleetData();
-            LootCategory lootCategory = LootCategory.getFleetType(fleetData.getFleet());
-            if (isNull(lootCategory)) {
-                return;
-            }
-
-            for (FleetMemberAPI fleetMember : fleetData.getMembersListCopy()) {
-                if (fleetMember.isStation()) {
-                    continue;
-                }
-
-                Random random = new Random(fleetMember.getId().hashCode() * 1337L);
-                if (random.nextInt(100) + 1 <= VT_Settings.aiHullmodChance) {
-                    ShipVariantAPI variant = fleetMember.getVariant();
-                    if (!variant.hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID)) {
-                        variant.addPermaMod(VoidTecEngineeringSuite.HULL_MOD_ID);
-                        HullModManager hullModManager = new HullModManager(fleetMember);
-                        hullModManager.fillUnlockedSlots(fleetData.getFleet().getFaction(), lootCategory.getQualityRange(), random);
-                        HullModDataStorage.getInstance().storeShipID(fleetMember.getId(), hullModManager);
-                    }
-                }
-            }
+            ShipAugmentGenerator.generateFleetAugments((CampaignFleetAPI) interactionTarget, VT_Settings.aiHullmodChance, null);
         }
     }
 

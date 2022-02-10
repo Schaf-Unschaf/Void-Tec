@@ -11,9 +11,9 @@ import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Settings;
-import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import de.schafunschaf.voidtec.util.FormattingTools;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
+import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 
 import java.awt.Color;
 
