@@ -23,9 +23,10 @@ public class AutofireAccuracy extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getAutofireAimAccuracy().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getAutofireAimAccuracy()
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +38,7 @@ public class AutofireAccuracy extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getAutofireAimAccuracy().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getAutofireAimAccuracy().getMultStatMod(id);
 
         String description = "Autofire accuracy %s by %s";
         if (ComparisonTools.isNull(statMod)) {

@@ -23,9 +23,9 @@ public class FluxDissipation extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getFluxDissipation().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getFluxDissipation().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +37,7 @@ public class FluxDissipation extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getFluxDissipation().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getFluxDissipation().getMultStatMod(id);
 
         String description = "Base flux dissipation %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -64,6 +64,6 @@ public class FluxDissipation extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getFluxDissipation().modifyPercent(id, value);
+        stats.getFluxDissipation().modifyMult(id, value);
     }
 }

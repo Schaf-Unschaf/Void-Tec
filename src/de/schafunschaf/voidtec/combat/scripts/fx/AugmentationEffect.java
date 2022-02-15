@@ -21,8 +21,8 @@ public class AugmentationEffect {
     private static final String INTERVAL_TRACKER = "vt_effectIntervalTracker";
     private static final String ACTIVE_TRACKER = "vt_effectActiveTracker";
     private static final String COLOR_MEMORY = "vt_effectColorMemory";
-    private static final float EFFECT_INTERVAL = 6f;
-    private static final float ACTIVE_DURATION = 3f;
+    private static final float EFFECT_INTERVAL = 4f;
+    private static final float ACTIVE_DURATION = 2f;
 
     public static void run(ShipAPI ship, float amount, Object source) {
         MutableStat stat = ship.getMutableStats().getDynamic().getStat(EFFECT_KEY);
@@ -42,7 +42,7 @@ public class AugmentationEffect {
                 float colorFactor = activeTrackerValue < halfDuration ? activeTrackerValue : ACTIVE_DURATION - activeTrackerValue;
                 colorFactor = MathUtils.clamp(colorFactor, 0f, 1f);
 
-                ship.setJitterUnder(source, Misc.scaleColor(jitterColor, colorFactor), 1f, 4, 15f);
+                ship.setJitterUnder(source, Misc.scaleColor(jitterColor, colorFactor), 1f, 4, 10f);
 
                 stat.modifyFlat(ACTIVE_TRACKER, activeTrackerValue + amount);
             } else {

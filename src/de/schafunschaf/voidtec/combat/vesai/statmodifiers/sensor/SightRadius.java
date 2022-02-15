@@ -23,9 +23,9 @@ public class SightRadius extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getSightRadiusMod().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getSightRadiusMod().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +37,7 @@ public class SightRadius extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getSightRadiusMod().getPercentBonus(id);
+        MutableStat.StatMod statMod = stats.getSightRadiusMod().getMultBonus(id);
 
         String description = "Sight radius %s by %s";
         if (ComparisonTools.isNull(statMod)) {

@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.campaign.intel.buttons;
+package de.schafunschaf.voidtec.campaign.intel.buttons.shippanel;
 
 import com.fs.starfarer.api.ui.BaseTooltipCreator;
 import com.fs.starfarer.api.ui.ButtonAPI;
@@ -6,6 +6,7 @@ import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.ShipPanel;
+import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 

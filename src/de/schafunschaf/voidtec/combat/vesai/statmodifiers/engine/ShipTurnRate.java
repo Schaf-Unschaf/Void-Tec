@@ -25,7 +25,7 @@ public class ShipTurnRate extends BaseStatMod {
             parentAugment.updateFighterStatValue(id + "_" + statID,
                                                  generateModValue(statModValue, random, parentAugment.getAugmentQuality()) * 2);
         } else {
-            stats.getTurnAcceleration().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()) * 2);
+            stats.getTurnAcceleration().modifyMult(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()) * 2);
         }
     }
 
@@ -37,7 +37,7 @@ public class ShipTurnRate extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getTurnAcceleration().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getTurnAcceleration().getMultStatMod(id);
 
         String description = "Ship turn rate %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -64,6 +64,6 @@ public class ShipTurnRate extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getTurnAcceleration().modifyPercent(id, value);
+        stats.getTurnAcceleration().modifyMult(id, value);
     }
 }

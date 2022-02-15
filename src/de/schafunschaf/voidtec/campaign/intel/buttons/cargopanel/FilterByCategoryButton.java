@@ -1,7 +1,8 @@
-package de.schafunschaf.voidtec.campaign.intel.buttons;
+package de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel;
 
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
+import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import lombok.RequiredArgsConstructor;
 

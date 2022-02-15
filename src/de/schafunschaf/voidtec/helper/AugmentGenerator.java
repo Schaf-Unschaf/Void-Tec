@@ -16,7 +16,8 @@ import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.ids.VT_Settings;
-import de.schafunschaf.voidtec.imported.CustomFleetCategories;
+import de.schafunschaf.voidtec.imported.CustomFactionCategories;
+import de.schafunschaf.voidtec.imported.SpecialShips;
 import de.schafunschaf.voidtec.util.ShipUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,36 +29,53 @@ import java.util.Random;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @Log4j
-public class ShipAugmentGenerator {
+public class AugmentGenerator {
 
-    public static GenerationCategory getCategoryForFleet(CampaignFleetAPI fleet) {
+    public static void generateFleetAugments(CampaignFleetAPI fleet, float probability) {
+        Random random = new Random(fleet.getId().hashCode());
+
+        for (FleetMemberAPI fleetMember : fleet.getFleetData().getMembersListCopy()) {
+            if (fleetMember.isStation()) {
+                continue;
+            }
+
+            if (SpecialShips.isSpecialShip(fleetMember)) {
+                generateShipAugments(fleetMember, 1f, SpecialShips.getQualityRange(fleetMember), random);
+                continue;
+            }
+
+            generateShipAugments(fleetMember, probability, getCategoryForFleet(fleet), random);
+        }
+    }
+
+    private static GenerationCategory getCategoryForFleet(CampaignFleetAPI fleet) {
         if (fleet.isPlayerFleet()) {
             return null;
         }
 
         String factionID = fleet.getFaction().getId();
 
-        if (CustomFleetCategories.isIgnoredFaction(factionID)) {
+        if (CustomFactionCategories.isIgnoredFaction(factionID)) {
             return null;
         }
 
-        if (CustomFleetCategories.isDomainFaction(factionID)) {
+        if (CustomFactionCategories.isDomainFaction(factionID)) {
             return GenerationCategory.DOMAIN;
         }
 
-        if (CustomFleetCategories.isRemnantFaction(factionID)) {
+        if (CustomFactionCategories.isRemnantFaction(factionID)) {
             return GenerationCategory.REMNANT;
         }
 
-        if (CustomFleetCategories.isSpecialFaction(factionID)) {
+        if (CustomFactionCategories.isSpecialFaction(factionID)) {
             return GenerationCategory.SPECIAL;
         }
 
-        if (CustomFleetCategories.isCivilianFaction(factionID)) {
+        if (CustomFactionCategories.isCivilianFaction(factionID)) {
             return GenerationCategory.CIVILIAN;
         }
 
-        if (CustomFleetCategories.isOutlawFaction(factionID)) {
+        if (CustomFactionCategories.isOutlawFaction(factionID)) {
             return GenerationCategory.OUTLAW;
         }
 
@@ -70,22 +88,6 @@ public class ShipAugmentGenerator {
         return GenerationCategory.MILITARY;
     }
 
-    public static void generateFleetAugments(CampaignFleetAPI fleet, float probability, GenerationCategory category) {
-        if (isNull(category)) {
-            return;
-        }
-
-        Random random = new Random(fleet.getId().hashCode());
-
-        for (FleetMemberAPI fleetMember : fleet.getFleetData().getMembersListCopy()) {
-            if (fleetMember.isStation()) {
-                continue;
-            }
-
-            generateShipAugments(fleetMember, probability, category, random);
-        }
-    }
-
     public static void generateShipAugments(FleetMemberAPI ship, float probability, GenerationCategory category, Random random) {
         if (isNull(category) || ship.getVariant().hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID)) {
             return;
@@ -95,6 +97,10 @@ public class ShipAugmentGenerator {
             category = GenerationCategory.CIVILIAN;
         }
 
+        generateShipAugments(ship, probability, category.getQualityRange(), random);
+    }
+
+    public static void generateShipAugments(FleetMemberAPI ship, float probability, String[] qualityRange, Random random) {
         int bound = (int) Math.pow(10, BigDecimal.valueOf(probability).scale());
         int scaledProb = (int) (probability * bound);
         if (random.nextInt(bound) <= scaledProb) {
@@ -107,7 +113,7 @@ public class ShipAugmentGenerator {
             ShipVariantAPI variant = ship.getVariant();
             variant.addPermaMod(VoidTecEngineeringSuite.HULL_MOD_ID);
             fillUnlockedSlots(hullModManager, ship, ship.getFleetData().getFleet().getFaction(),
-                              category.getQualityRange(), random);
+                              qualityRange, random);
         }
     }
 
@@ -121,7 +127,11 @@ public class ShipAugmentGenerator {
             random = new Random();
         }
 
-        for (AugmentSlot shipAugmentSlot : hullModManager.getEmptySlots()) {
+        for (AugmentSlot shipAugmentSlot : hullModManager.getUnlockedSlots()) {
+            if (!shipAugmentSlot.isEmpty()) {
+                continue;
+            }
+
             SlotCategory slotCategory = shipAugmentSlot.getSlotCategory();
             AugmentQuality augmentQuality = AugmentQuality.getRandomQualityInRange(qualityRange, random, false);
 
@@ -139,8 +149,8 @@ public class ShipAugmentGenerator {
     @Getter
     @AllArgsConstructor
     public enum GenerationCategory {
-        OUTLAW(new String[]{AugmentQuality.DAMAGED.name(), AugmentQuality.COMMON.name()}),
-        CIVILIAN(new String[]{AugmentQuality.DAMAGED.name(), AugmentQuality.MILITARY.name()}),
+        OUTLAW(new String[]{AugmentQuality.DEGRADED.name(), AugmentQuality.COMMON.name()}),
+        CIVILIAN(new String[]{AugmentQuality.DEGRADED.name(), AugmentQuality.MILITARY.name()}),
         MILITARY(new String[]{AugmentQuality.COMMON.name(), AugmentQuality.MILITARY.name()}),
         SPECIAL(new String[]{AugmentQuality.MILITARY.name(), AugmentQuality.EXPERIMENTAL.name()}),
         REMNANT(new String[]{AugmentQuality.REMNANT.name()}),

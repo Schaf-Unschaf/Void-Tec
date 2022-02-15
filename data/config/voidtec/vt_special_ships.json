@@ -1,0 +1,10 @@
+{
+  "specialHulls": {
+    "ziggurat": ["DOMAIN"],
+    "tesseract": ["REMNANT"]
+  },
+
+  "specialVariants": {
+    "dummyVariantID": ["DESTROYED"]
+  }
+}

@@ -85,9 +85,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                                                                                                                     .isEmpty()) {
                 StringBuilder secondarySlotStringBuilder = new StringBuilder("Compatible with: ");
                 List<String> hlStrings = new ArrayList<>();
-                hlStrings.add("Compatible with:");
                 List<Color> hlColors = new ArrayList<>();
-                hlColors.add(Misc.getGrayColor());
 
                 for (Iterator<SlotCategory> iterator = augment.getSecondarySlots().iterator(); iterator.hasNext(); ) {
                     SlotCategory secondarySlot = iterator.next();
@@ -105,6 +103,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
                 augment.generateStatDescription(tooltip, smallPad, false, null);
 
+                tooltip.setParaFontColor(Misc.getGrayColor());
                 tooltip.addPara(secondarySlotStringBuilder.toString(), largePad, hlColors.toArray(new Color[0]),
                                 hlStrings.toArray(new String[0]));
             }
@@ -116,13 +115,19 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                                                                                          .equals(Submarkets.LOCAL_RESOURCES))) {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
             }
-            tooltip.addPara("Expand to see detailed modification info.", Misc.getGrayColor(), largePad);
+
+            if (augmentQuality != AugmentQuality.DESTROYED
+                    && (!augment.getPrimaryStatMods().isEmpty() || !augment.getSecondaryStatMods().isEmpty())) {
+                tooltip.addPara("Expand to see detailed modification info.", Misc.getGrayColor(), largePad);
+            }
         }
     }
 
     @Override
     public boolean isTooltipExpandable() {
-        return true;
+        AugmentApplier augment = getAugmentItemData().getAugment();
+        return (augment.getAugmentQuality() != AugmentQuality.DESTROYED
+                && (!augment.getPrimaryStatMods().isEmpty() || !augment.getSecondaryStatMods().isEmpty()));
     }
 
     @Override

@@ -2,9 +2,9 @@ package de.schafunschaf.voidtec.campaign.intel;
 
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.campaign.intel.buttons.FilterByCategoryButton;
-import de.schafunschaf.voidtec.campaign.intel.buttons.SelectAugmentButton;
-import de.schafunschaf.voidtec.campaign.intel.buttons.SortOrderButton;
+import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.FilterByCategoryButton;
+import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.SelectAugmentButton;
+import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.SortOrderButton;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemPlugin;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
@@ -103,6 +103,7 @@ public class CargoPanel {
         TooltipMakerAPI uiElement = panel.createUIElement(width, height - padding - headerHeight - sorterHeight, true);
         List<CustomPanelAPI> panelList = new ArrayList<>();
 
+        boolean hasSelectedAugmentInList = false;
         for (AugmentCargoWrapper augmentCargoWrapper : AugmentManagerIntel.getAugmentsInCargo()) {
             final AugmentApplier augmentInStack = augmentCargoWrapper.getAugment();
             if (!(isNull(AugmentManagerIntel.getActiveCategoryFilter()) || matchesFilter(augmentInStack))) {
@@ -123,11 +124,19 @@ public class CargoPanel {
 
             cargoPanel.addUIElement(cargoElement);
             panelList.add(cargoPanel);
+
+            if (!hasSelectedAugmentInList && !isNull(AugmentManagerIntel.getSelectedAugmentInCargo())) {
+                hasSelectedAugmentInList = augmentInStack == AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
+            }
         }
 
         for (int i = 0; i < panelList.size(); i++) {
             CustomPanelAPI customPanelAPI = panelList.get(i);
             uiElement.addCustom(customPanelAPI, i == 0 ? itemSpacing + 10f : itemSpacing);
+        }
+
+        if (!hasSelectedAugmentInList) {
+            AugmentManagerIntel.setSelectedAugmentInCargo(null);
         }
 
         panel.addUIElement(uiElement).inTR(0f, padding + headerHeight + listSpacing);

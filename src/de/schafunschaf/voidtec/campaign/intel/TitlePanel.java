@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.campaign.intel.buttons;
+package de.schafunschaf.voidtec.campaign.intel;
 
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;

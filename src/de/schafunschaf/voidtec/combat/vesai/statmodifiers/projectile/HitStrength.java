@@ -23,9 +23,10 @@ public class HitStrength extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getHitStrengthBonus().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getHitStrengthBonus()
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +38,7 @@ public class HitStrength extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getHitStrengthBonus().getPercentBonus(id);
+        MutableStat.StatMod statMod = stats.getHitStrengthBonus().getMultBonus(id);
 
         String description = "Hit strength calculation against armor %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -64,6 +65,6 @@ public class HitStrength extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getHitStrengthBonus().modifyPercent(id, value);
+        stats.getHitStrengthBonus().modifyMult(id, value);
     }
 }

@@ -23,10 +23,10 @@ public class ShieldMalfunction extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
             stats.getShieldMalfunctionChance()
-                 .modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -38,7 +38,7 @@ public class ShieldMalfunction extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getShieldMalfunctionChance().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getShieldMalfunctionChance().getMultStatMod(id);
 
         String description = "Shield malfunctions %s by %s";
         if (ComparisonTools.isNull(statMod)) {

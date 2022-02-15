@@ -23,9 +23,9 @@ public class ArmorBonus extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getArmorBonus().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getArmorBonus().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +37,7 @@ public class ArmorBonus extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getArmorBonus().getPercentBonus(id);
+        MutableStat.StatMod statMod = stats.getArmorBonus().getMultBonus(id);
         String description = "Base armor strength %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
@@ -63,6 +63,6 @@ public class ArmorBonus extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getArmorBonus().modifyPercent(id, value);
+        stats.getArmorBonus().modifyMult(id, value);
     }
 }

@@ -23,11 +23,13 @@ public class WeaponTurnRate extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getWeaponTurnRateBonus().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getWeaponTurnRateBonus()
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
-        stats.getBeamWeaponTurnRateBonus().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+        stats.getBeamWeaponTurnRateBonus()
+             .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
     }
 
     @Override
@@ -39,7 +41,7 @@ public class WeaponTurnRate extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getWeaponTurnRateBonus().getPercentBonus(id);
+        MutableStat.StatMod statMod = stats.getWeaponTurnRateBonus().getMultBonus(id);
 
         String description = "Weapon turn rate %s by %s";
         if (ComparisonTools.isNull(statMod)) {

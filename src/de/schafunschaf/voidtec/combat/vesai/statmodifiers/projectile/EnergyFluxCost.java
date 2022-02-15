@@ -23,10 +23,10 @@ public class EnergyFluxCost extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
             stats.getEnergyWeaponFluxCostMod()
-                 .modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -38,7 +38,7 @@ public class EnergyFluxCost extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getEnergyWeaponFluxCostMod().getPercentBonus(id);
+        MutableStat.StatMod statMod = stats.getEnergyWeaponFluxCostMod().getMultBonus(id);
 
         String description = "Energy flux cost %s by %s";
         if (ComparisonTools.isNull(statMod)) {

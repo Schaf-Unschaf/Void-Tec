@@ -23,10 +23,10 @@ public class WeaponMalfunction extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
             stats.getWeaponMalfunctionChance()
-                 .modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -38,7 +38,7 @@ public class WeaponMalfunction extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getWeaponMalfunctionChance().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getWeaponMalfunctionChance().getMultStatMod(id);
 
         String description = "Weapon malfunctions %s by %s";
         if (ComparisonTools.isNull(statMod)) {

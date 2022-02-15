@@ -23,10 +23,10 @@ public class WeaponRepair extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
             stats.getCombatWeaponRepairTimeMult()
-                 .modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -65,6 +65,6 @@ public class WeaponRepair extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getCombatWeaponRepairTimeMult().modifyPercent(id, value);
+        stats.getCombatWeaponRepairTimeMult().modifyMult(id, value);
     }
 }

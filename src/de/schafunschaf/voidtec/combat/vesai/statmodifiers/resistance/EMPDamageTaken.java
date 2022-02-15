@@ -23,9 +23,10 @@ public class EMPDamageTaken extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getEmpDamageTakenMult().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getEmpDamageTakenMult()
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +38,7 @@ public class EMPDamageTaken extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getEmpDamageTakenMult().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getEmpDamageTakenMult().getMultStatMod(id);
 
         String description = "EMP damage taken %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -65,6 +66,6 @@ public class EMPDamageTaken extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getEmpDamageTakenMult().modifyPercent(id, value);
+        stats.getEmpDamageTakenMult().modifyMult(id, value);
     }
 }

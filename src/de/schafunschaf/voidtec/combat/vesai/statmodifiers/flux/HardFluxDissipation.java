@@ -23,7 +23,7 @@ public class HardFluxDissipation extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
             stats.getHardFluxDissipationFraction()
                  .modifyFlat(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));

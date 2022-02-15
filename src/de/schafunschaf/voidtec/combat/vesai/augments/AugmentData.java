@@ -1,5 +1,6 @@
 package de.schafunschaf.voidtec.combat.vesai.augments;
 
+import de.schafunschaf.voidtec.combat.vesai.AfterCreationEffect;
 import de.schafunschaf.voidtec.combat.vesai.CombatScriptRunner;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
@@ -7,14 +8,14 @@ import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
 import de.schafunschaf.voidtec.helper.TextWithHighlights;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class AugmentData {
 
     protected String augmentID;
@@ -29,7 +30,9 @@ public class AugmentData {
     protected List<StatApplier> secondaryStatMods = new ArrayList<>();
     protected List<StatModValue<Float, Float, Boolean>> secondaryStatValues = new ArrayList<>();
     protected String[] augmentQualityRange;
-    protected TextWithHighlights combatScriptDescription;
+    protected TextWithHighlights combatScriptDescription = null;
+    protected TextWithHighlights additionalDescription = null;
     protected boolean equalQualityRoll = false;
     protected CombatScriptRunner combatScript = null;
+    protected AfterCreationEffect afterCreationEffect = null;
 }

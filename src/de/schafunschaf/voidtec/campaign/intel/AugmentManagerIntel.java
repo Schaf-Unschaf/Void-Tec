@@ -2,7 +2,6 @@ package de.schafunschaf.voidtec.campaign.intel;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
-import de.schafunschaf.voidtec.campaign.intel.buttons.TitlePanel;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Colors;
@@ -16,6 +15,8 @@ import java.util.List;
 public class AugmentManagerIntel extends BaseIntel {
 
     public static final String STACK_SOURCE = "augmentManagerIntel";
+
+    public CustomPanelAPI panel;
 
     @Getter
     private static List<AugmentCargoWrapper> augmentsInCargo;
@@ -59,6 +60,7 @@ public class AugmentManagerIntel extends BaseIntel {
 
     @Override
     public void createLargeDescription(CustomPanelAPI panel, float width, float height) {
+        this.panel = panel;
         augmentsInCargo = CargoUtils.getAugmentsInCargo();
 
         TitlePanel titlePanel = new TitlePanel();

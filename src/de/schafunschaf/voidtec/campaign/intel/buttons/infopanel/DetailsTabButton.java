@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.campaign.intel.buttons;
+package de.schafunschaf.voidtec.campaign.intel.buttons.infopanel;
 
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
@@ -6,19 +6,20 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.CargoPanel;
 import de.schafunschaf.voidtec.campaign.intel.InfoPanel;
+import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
 
-public class ManufactureTabButton extends DefaultButton {
+public class DetailsTabButton extends DefaultButton {
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
         CargoPanel.showDestroyedAugments = false;
         CargoPanel.showOnlyRepairable = false;
-        InfoPanel.setSelectedTab(InfoPanel.InfoTabs.MANUFACTURE);
+        InfoPanel.setSelectedTab(InfoPanel.InfoTabs.DETAILS);
     }
 
     @Override
     public String getName() {
-        return "Manufacture";
+        return "Details";
     }
 
     @Override
@@ -32,6 +33,6 @@ public class ManufactureTabButton extends DefaultButton {
     }
 
     private boolean isSelected() {
-        return InfoPanel.getSelectedTab() == InfoPanel.InfoTabs.MANUFACTURE;
+        return InfoPanel.getSelectedTab() == InfoPanel.InfoTabs.DETAILS;
     }
 }

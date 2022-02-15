@@ -38,6 +38,12 @@ public class HullModManager {
         generateSlotsForShip(fleetMember);
     }
 
+    public void applyAfterCreation(ShipAPI ship, String id) {
+        for (AugmentSlot augmentSlot : shipAugmentSlots) {
+            augmentSlot.applyAfterCreation(ship, id);
+        }
+    }
+
     public void applySlotEffects(MutableShipStatsAPI stats, String id) {
         shipStatEffectManager.clear();
         for (AugmentSlot augmentSlot : shipAugmentSlots) {

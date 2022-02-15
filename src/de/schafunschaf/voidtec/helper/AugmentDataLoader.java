@@ -6,8 +6,8 @@ import de.schafunschaf.voidtec.combat.vesai.augments.AugmentData;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModProvider;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
-import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatProvider;
 import de.schafunschaf.voidtec.plugins.VoidTecPlugin;
 import lombok.extern.log4j.Log4j;
 import org.json.JSONArray;
@@ -25,7 +25,7 @@ public class AugmentDataLoader {
 
     public static final String AUGMENT_FILE_PATH = "data/config/voidtec/vt_augment_data.csv";
 
-    public static void loadAugmentsFromFiles() {
+    public static void loadAugmentFiles() {
         try {
             JSONArray spreadsheet = Global.getSettings()
                                           .getMergedSpreadsheetDataForMod("augmentID", AUGMENT_FILE_PATH, VoidTecPlugin.MOD_ID);
@@ -86,9 +86,7 @@ public class AugmentDataLoader {
                                                               new TextWithHighlights(row.optString("description")), row.optInt("rarity"),
                                                               SlotCategory.getEnum(row.getString("primarySlot")), primaryStatMods,
                                                               primaryStatValues, secondarySlots, secondaryStatMods, secondaryStatValues,
-                                                              augmentQuality,
-                                                              new TextWithHighlights(row.optString("combatScriptDescription")),
-                                                              row.optBoolean("equalQualityRoll"), null);
+                                                              augmentQuality, null, null, row.optBoolean("equalQualityRoll"), null, null);
 
                     AugmentDataManager.storeAugmentData(augmentID, augmentData);
                 } catch (JSONException error) {
@@ -104,7 +102,7 @@ public class AugmentDataLoader {
         List<StatApplier> statMods = new ArrayList<>();
 
         for (String statModAsString : primaryStatModString.split("\\s*(,\\s*)+")) {
-            StatApplier statMod = StatProvider.getStatMod(statModAsString.toLowerCase().trim());
+            StatApplier statMod = StatModProvider.getStatMod(statModAsString.toLowerCase().trim());
             if (!isNull(statMod)) {
                 statMods.add(statMod);
             }

@@ -23,10 +23,10 @@ public class BallisticFluxCost extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
             stats.getBallisticWeaponFluxCostMod()
-                 .modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -38,7 +38,7 @@ public class BallisticFluxCost extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getBallisticWeaponFluxCostMod().getPercentBonus(id);
+        MutableStat.StatMod statMod = stats.getBallisticWeaponFluxCostMod().getMultBonus(id);
 
         String description = "Ballistic flux cost %s by %s";
         if (ComparisonTools.isNull(statMod)) {

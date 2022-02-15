@@ -6,7 +6,6 @@ import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
-import de.schafunschaf.voidtec.util.MathUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -23,14 +22,14 @@ public abstract class BaseStatMod implements StatApplier {
 
     protected final String statID;
 
-    protected float generateModValue(StatModValue<Float, Float, Boolean> statModValue, Random random, AugmentQuality quality) {
+    protected int generateModValue(StatModValue<Float, Float, Boolean> statModValue, Random random, AugmentQuality quality) {
         float qualityModifier = isNull(quality) ? 1f : quality.getModifier();
         float value;
 
         if (statModValue.minValue >= statModValue.maxValue) {
             value = statModValue.minValue;
         } else {
-            int valueRange = (int) (statModValue.maxValue - statModValue.minValue);
+            int valueRange = Math.round(statModValue.maxValue) - Math.round(statModValue.minValue);
             boolean isPositive = valueRange >= 0;
             value = random.nextInt(Math.abs(valueRange) + 1) + Math.abs(statModValue.minValue);
             if (!isPositive) {
@@ -53,7 +52,7 @@ public abstract class BaseStatMod implements StatApplier {
                                    boolean flipColors, boolean isPercentage) {
         setBulletMode(tooltip, bulletColor);
         String percentageSign = isPercentage ? "%" : "";
-        int value = (int) statMod.value;
+        int value = (int) (100 * statMod.value) - 100;
         boolean isPositive = value >= 0f;
         String incDec = isPositive ? "increased" : "decreased";
 
@@ -71,17 +70,10 @@ public abstract class BaseStatMod implements StatApplier {
                                            float minValue, float maxValue, boolean isPositive, boolean isPercentage, String... highlights) {
         setBulletMode(tooltip, bulletColor);
         String percentageSign = isPercentage ? "%" : "";
-        float roundedMinValue = MathUtils.roundDecimals(Math.abs(minValue), 2);
-        float roundedMaxValue = MathUtils.roundDecimals(Math.abs(maxValue), 2);
-        String minValueString = ((int) Math.abs(roundedMinValue)) + percentageSign;
-        String maxValueString = ((int) Math.abs(roundedMaxValue)) + percentageSign;
-
-        if (roundedMinValue % 1 != 0) {
-            minValueString = roundedMinValue + percentageSign;
-        }
-        if (roundedMaxValue % 1 != 0) {
-            maxValueString = roundedMaxValue + percentageSign;
-        }
+        int roundedMinValue = Math.round(Math.abs(minValue));
+        int roundedMaxValue = Math.round(Math.abs(maxValue));
+        String minValueString = roundedMinValue + percentageSign;
+        String maxValueString = roundedMaxValue + percentageSign;
 
         Color incDecColor = isPositive ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor();
         List<String> hlStrings = new ArrayList<>();

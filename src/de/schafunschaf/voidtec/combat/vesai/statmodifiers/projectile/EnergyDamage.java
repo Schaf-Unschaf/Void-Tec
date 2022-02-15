@@ -23,9 +23,10 @@ public class EnergyDamage extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getEnergyWeaponDamageMult().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getEnergyWeaponDamageMult()
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +38,7 @@ public class EnergyDamage extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getEnergyWeaponDamageMult().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getEnergyWeaponDamageMult().getMultStatMod(id);
 
         String description = "Energy damage %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -65,6 +66,6 @@ public class EnergyDamage extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getEnergyWeaponDamageMult().modifyPercent(id, value);
+        stats.getEnergyWeaponDamageMult().modifyMult(id, value);
     }
 }

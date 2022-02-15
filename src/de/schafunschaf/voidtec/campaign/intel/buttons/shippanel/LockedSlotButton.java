@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.campaign.intel.buttons;
+package de.schafunschaf.voidtec.campaign.intel.buttons.shippanel;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ui.BaseTooltipCreator;
@@ -7,6 +7,7 @@ import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
+import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;

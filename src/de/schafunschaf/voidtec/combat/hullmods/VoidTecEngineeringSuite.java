@@ -24,6 +24,15 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
     public static final String HULL_MOD_ID = "voidTec_engineeringSuite";
 
     @Override
+    public void applyEffectsAfterShipCreation(ShipAPI ship, String id) {
+        HullModManager hullModManager = HullModDataStorage.getInstance().getHullModManager(ship.getFleetMemberId());
+        if (isNull(hullModManager))
+            return;
+
+        hullModManager.applyAfterCreation(ship, id);
+    }
+
+    @Override
     public void applyEffectsBeforeShipCreation(ShipAPI.HullSize hullSize, MutableShipStatsAPI stats, String id) {
         FleetMemberAPI fleetMember = stats.getFleetMember();
         if (isNull(fleetMember)) {
@@ -112,6 +121,16 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
     @Override
     public Color getNameColor() {
         return VT_Colors.VT_COLOR_MAIN;
+    }
+
+    @Override
+    public int getDisplaySortOrder() {
+        return 1;
+    }
+
+    @Override
+    public int getDisplayCategoryIndex() {
+        return 1;
     }
 
     private void disableVanillaSModInstallation(MutableShipStatsAPI stats, String id) {

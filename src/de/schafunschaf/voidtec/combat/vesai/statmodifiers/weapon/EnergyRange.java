@@ -23,9 +23,10 @@ public class EnergyRange extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getEnergyWeaponRangeBonus().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getEnergyWeaponRangeBonus()
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +38,7 @@ public class EnergyRange extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getEnergyWeaponRangeBonus().getPercentBonus(id);
+        MutableStat.StatMod statMod = stats.getEnergyWeaponRangeBonus().getMultBonus(id);
 
         String description = "Energy weapon range %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -65,6 +66,6 @@ public class EnergyRange extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getEnergyWeaponRangeBonus().modifyPercent(id, value);
+        stats.getEnergyWeaponRangeBonus().modifyMult(id, value);
     }
 }

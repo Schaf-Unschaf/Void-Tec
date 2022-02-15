@@ -1,7 +1,8 @@
-package de.schafunschaf.voidtec.campaign.intel.buttons;
+package de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel;
 
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.util.CargoUtils;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;

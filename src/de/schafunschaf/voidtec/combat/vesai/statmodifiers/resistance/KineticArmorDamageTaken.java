@@ -23,10 +23,10 @@ public class KineticArmorDamageTaken extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
             stats.getKineticArmorDamageTakenMult()
-                 .modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -38,7 +38,7 @@ public class KineticArmorDamageTaken extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getKineticArmorDamageTakenMult().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getKineticArmorDamageTakenMult().getMultStatMod(id);
 
         String description = "Kinetic damage taken by armor and hull %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -68,6 +68,6 @@ public class KineticArmorDamageTaken extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getKineticArmorDamageTakenMult().modifyPercent(id, value);
+        stats.getKineticArmorDamageTakenMult().modifyMult(id, value);
     }
 }

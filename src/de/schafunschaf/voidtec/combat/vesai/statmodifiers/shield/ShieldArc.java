@@ -23,9 +23,9 @@ public class ShieldArc extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getShieldArcBonus().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getShieldArcBonus().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +37,7 @@ public class ShieldArc extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getShieldArcBonus().getPercentBonus(id);
+        MutableStat.StatMod statMod = stats.getShieldArcBonus().getMultBonus(id);
 
         String description = "Shield arc %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -64,6 +64,6 @@ public class ShieldArc extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getShieldArcBonus().modifyPercent(id, value);
+        stats.getShieldArcBonus().modifyMult(id, value);
     }
 }

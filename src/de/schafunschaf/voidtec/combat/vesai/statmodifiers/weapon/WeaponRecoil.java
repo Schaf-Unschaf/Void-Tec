@@ -23,12 +23,12 @@ public class WeaponRecoil extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getRecoilDecayMult().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getRecoilDecayMult().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
-        stats.getRecoilPerShotMult().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
-        stats.getMaxRecoilMult().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+        stats.getRecoilPerShotMult().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
+        stats.getMaxRecoilMult().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class WeaponRecoil extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getRecoilDecayMult().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getRecoilDecayMult().getMultStatMod(id);
 
         String description = "Weapon recoil %s by %s";
         if (ComparisonTools.isNull(statMod)) {

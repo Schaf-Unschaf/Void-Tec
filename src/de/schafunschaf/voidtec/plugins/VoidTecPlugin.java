@@ -27,8 +27,8 @@ public class VoidTecPlugin extends BaseModPlugin {
 
     @Override
     public void onApplicationLoad() {
-        ModLoadingHelper.loadAugmentData();
-        ModLoadingHelper.loadFactionData();
+        ModLoadingHelper.initStatMods();
+        ModLoadingHelper.loadExternalData();
 
         AugmentDataManager.initCustomAugments();
     }

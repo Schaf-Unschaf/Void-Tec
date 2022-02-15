@@ -23,9 +23,9 @@ public class FluxCapacity extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getFluxCapacity().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getFluxCapacity().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +37,7 @@ public class FluxCapacity extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getFluxCapacity().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getFluxCapacity().getMultStatMod(id);
 
         String description = "Base flux capacity %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -64,6 +64,6 @@ public class FluxCapacity extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getFluxCapacity().modifyPercent(id, value);
+        stats.getFluxCapacity().modifyMult(id, value);
     }
 }

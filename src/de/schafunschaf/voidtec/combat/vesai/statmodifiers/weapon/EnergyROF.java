@@ -23,9 +23,9 @@ public class EnergyROF extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getEnergyRoFMult().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getEnergyRoFMult().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +37,7 @@ public class EnergyROF extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getEnergyRoFMult().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getEnergyRoFMult().getMultStatMod(id);
 
         String description = "Energy rate of fire %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -65,6 +65,6 @@ public class EnergyROF extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getEnergyRoFMult().modifyPercent(id, value);
+        stats.getEnergyRoFMult().modifyMult(id, value);
     }
 }

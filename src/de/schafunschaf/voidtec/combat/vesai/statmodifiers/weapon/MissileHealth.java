@@ -23,9 +23,10 @@ public class MissileHealth extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getMissileHealthBonus().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getMissileHealthBonus()
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +38,7 @@ public class MissileHealth extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getMissileHealthBonus().getPercentBonus(id);
+        MutableStat.StatMod statMod = stats.getMissileHealthBonus().getMultBonus(id);
 
         String description = "Missile health %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -65,6 +66,6 @@ public class MissileHealth extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getMissileHealthBonus().modifyPercent(id, value);
+        stats.getMissileHealthBonus().modifyMult(id, value);
     }
 }

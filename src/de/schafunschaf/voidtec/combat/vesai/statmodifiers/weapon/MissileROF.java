@@ -23,9 +23,9 @@ public class MissileROF extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getMissileRoFMult().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getMissileRoFMult().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -37,7 +37,7 @@ public class MissileROF extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getMissileRoFMult().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getMissileRoFMult().getMultStatMod(id);
 
         String description = "Missile rate of fire %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -65,6 +65,6 @@ public class MissileROF extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getMissileRoFMult().modifyPercent(id, value);
+        stats.getMissileRoFMult().modifyMult(id, value);
     }
 }

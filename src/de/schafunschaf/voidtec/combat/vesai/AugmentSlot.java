@@ -1,6 +1,7 @@
 package de.schafunschaf.voidtec.combat.vesai;
 
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
+import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import lombok.Getter;
@@ -35,6 +36,14 @@ public class AugmentSlot {
         this.hullmodManager = hullmodManager;
         this.slotCategory = SlotCategory.getRandomCategory(random, allowedCategories);
         this.isUnlocked = unlocked;
+    }
+
+    public void applyAfterCreation(ShipAPI ship, String id) {
+        if (isNull(slottedAugment)) {
+            return;
+        }
+
+        slottedAugment.applyAfterCreation(ship, id);
     }
 
     public void applyToShip(MutableShipStatsAPI stats, String id) {

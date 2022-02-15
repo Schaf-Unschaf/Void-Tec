@@ -4,7 +4,7 @@ import de.schafunschaf.voidtec.helper.StatLoader;
 
 import java.util.Map;
 
-public class StatProvider {
+public class StatModProvider {
 
     private static Map<String, BaseStatMod> statApplierMap;
 

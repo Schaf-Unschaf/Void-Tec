@@ -4,6 +4,7 @@ import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.combat.vesai.AfterCreationEffect;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.CombatScriptRunner;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
@@ -38,6 +39,8 @@ public class BaseAugment implements AugmentApplier {
     protected AugmentQuality augmentQuality;
     protected TextWithHighlights combatScriptDescription;
     protected CombatScriptRunner combatScriptRunner;
+    protected TextWithHighlights additionalDescription;
+    protected AfterCreationEffect afterCreationEffect;
     protected AugmentQuality initialQuality;
     private AugmentSlot installedSlot;
     private Map<String, Float> appliedFighterValues;
@@ -61,7 +64,16 @@ public class BaseAugment implements AugmentApplier {
         this.initialQuality = augmentQuality;
         this.combatScriptDescription = augmentData.getCombatScriptDescription();
         this.combatScriptRunner = augmentData.getCombatScript();
+        this.additionalDescription = augmentData.getAdditionalDescription();
+        this.afterCreationEffect = augmentData.getAfterCreationEffect();
         this.appliedFighterValues = new HashMap<>();
+    }
+
+    @Override
+    public void applyAfterCreation(ShipAPI ship, String id) {
+        if (!isNull(afterCreationEffect)) {
+            afterCreationEffect.applyAfterCreation(ship, id);
+        }
     }
 
     @Override
@@ -132,10 +144,7 @@ public class BaseAugment implements AugmentApplier {
             tooltip.addImageWithText(3f);
         }
 
-        if (!isNull(combatScriptDescription) && !combatScriptDescription.getDisplayString().isEmpty()) {
-            tooltip.addPara(getCombatScriptDescription().getDisplayString(), 3f, Misc.getHighlightColor(),
-                            getCombatScriptDescription().getHighlights());
-        }
+        addAdditionalDescriptions(tooltip);
 
         tooltip.addButton("", null, getAugmentQuality().getColor(), getAugmentQuality().getColor(), width, 0f, 3f);
     }
@@ -151,6 +160,10 @@ public class BaseAugment implements AugmentApplier {
 
         List<StatApplier> statMods = inPrimarySlot ? getPrimaryStatMods() : getSecondaryStatMods();
         if (isNull(statMods) || statMods.isEmpty()) {
+            if (isPrimary) {
+                addAdditionalDescriptions(tooltip);
+            }
+
             return;
         }
 
@@ -168,6 +181,23 @@ public class BaseAugment implements AugmentApplier {
             float minValue = statModValue.minValue * mult;
             float maxValue = statModValue.maxValue * mult;
             statApplier.generateStatDescription(tooltip, bulletColor, minValue, maxValue);
+        }
+
+        if (isPrimary) {
+            tooltip.addSpacer(6f);
+            addAdditionalDescriptions(tooltip);
+        }
+    }
+
+    private void addAdditionalDescriptions(TooltipMakerAPI tooltip) {
+        if (!isNull(combatScriptDescription) && !combatScriptDescription.getDisplayString().isEmpty()) {
+            tooltip.addPara(getCombatScriptDescription().getDisplayString(), 3f, Misc.getHighlightColor(),
+                            getCombatScriptDescription().getHighlights());
+        }
+
+        if (!isNull(additionalDescription) && !additionalDescription.getDisplayString().isEmpty()) {
+            tooltip.addPara(getAdditionalDescription().getDisplayString(), 3f, Misc.getHighlightColor(),
+                            getAdditionalDescription().getHighlights());
         }
     }
 

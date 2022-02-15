@@ -14,6 +14,8 @@ import java.util.Random;
 
 public interface AugmentApplier {
 
+    void applyAfterCreation(ShipAPI ship, String id);
+
     void applyToShip(MutableShipStatsAPI stats, String id, Random random);
 
     void applyToFighter(MutableShipStatsAPI stats, String id);
@@ -46,6 +48,8 @@ public interface AugmentApplier {
     AugmentQuality getInitialQuality();
 
     TextWithHighlights getCombatScriptDescription();
+
+    TextWithHighlights getAdditionalDescription();
 
     List<StatApplier> getActiveStatMods();
 

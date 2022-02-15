@@ -15,7 +15,7 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 @AllArgsConstructor
 public enum AugmentQuality {
     DESTROYED("Destroyed", 0f, new Color(255, 0, 0), 30f),
-    DAMAGED("Damaged", 0.6f, new Color(200, 50, 0), 100f),
+    DEGRADED("Degraded", 0.6f, new Color(200, 50, 0), 100f),
     COMMON("Common", 1f, new Color(200, 200, 200), 70f),
     MILITARY("Military", 1.2f, new Color(0, 180, 50), 45f),
     EXPERIMENTAL("Experimental", 1.5f, new Color(0, 150, 255), 20f),
@@ -33,7 +33,7 @@ public enum AugmentQuality {
     private static List<AugmentQuality> getAllowedQualities() {
         List<AugmentQuality> allowedSet = new ArrayList<>();
 
-        allowedSet.add(DAMAGED);
+        allowedSet.add(DEGRADED);
         allowedSet.add(COMMON);
         allowedSet.add(MILITARY);
         allowedSet.add(EXPERIMENTAL);
@@ -44,7 +44,7 @@ public enum AugmentQuality {
     }
 
     private static String[] getAllowedQualitiesArray() {
-        return new String[]{DAMAGED.name(), COMMON.name(), MILITARY.name(), EXPERIMENTAL.name(), REMNANT.name(), DOMAIN.name()};
+        return new String[]{DEGRADED.name(), COMMON.name(), MILITARY.name(), EXPERIMENTAL.name(), REMNANT.name(), DOMAIN.name()};
     }
 
     public static AugmentQuality getRandomQuality(Random random, List<AugmentQuality> allowedQualities, boolean ignoreWeighting) {

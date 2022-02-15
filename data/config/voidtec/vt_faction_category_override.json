@@ -1,0 +1,27 @@
+{
+  "ignored": [
+    "neutral",
+    "derelict",
+    "player",
+    "poor",
+    "sleeper"
+  ],
+  "outlaw": [
+    "pirates",
+    "luddic_path"
+  ],
+  "civilian": [
+    "luddic_church",
+    "scavengers"
+  ],
+  "experimental": [
+    "lions_guard",
+    "knights_of_ludd"
+  ],
+  "remnant": [
+    "remnant"
+  ],
+  "domain": [
+    "omega"
+  ]
+}

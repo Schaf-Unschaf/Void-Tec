@@ -23,10 +23,10 @@ public class EngineRepair extends BaseStatMod {
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         } else {
             stats.getCombatEngineRepairTimeMult()
-                 .modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -38,7 +38,7 @@ public class EngineRepair extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getCombatEngineRepairTimeMult().getPercentStatMod(id);
+        MutableStat.StatMod statMod = stats.getCombatEngineRepairTimeMult().getMultStatMod(id);
 
         String description = "Engine repair time %s by %s";
         if (ComparisonTools.isNull(statMod)) {
@@ -65,6 +65,6 @@ public class EngineRepair extends BaseStatMod {
 
     @Override
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {
-        stats.getCombatEngineRepairTimeMult().modifyPercent(id, value);
+        stats.getCombatEngineRepairTimeMult().modifyMult(id, value);
     }
 }

@@ -22,7 +22,7 @@ public class FuelUse extends BaseStatMod {
     public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random,
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() != SlotCategory.FLIGHT_DECK) {
-            stats.getFuelUseMod().modifyPercent(id, generateModValue(statModValue, random, parentAugment.getAugmentQuality()));
+            stats.getFuelUseMod().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -34,7 +34,7 @@ public class FuelUse extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        MutableStat.StatMod statMod = stats.getFuelUseMod().getPercentBonus(id);
+        MutableStat.StatMod statMod = stats.getFuelUseMod().getMultBonus(id);
 
         String description = "Fuel use %s by %s";
         if (ComparisonTools.isNull(statMod)) {

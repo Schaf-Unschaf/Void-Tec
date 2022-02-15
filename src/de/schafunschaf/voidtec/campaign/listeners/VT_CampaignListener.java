@@ -11,7 +11,7 @@ import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.HullModDataStorage;
 import de.schafunschaf.voidtec.combat.vesai.HullModManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
-import de.schafunschaf.voidtec.helper.ShipAugmentGenerator;
+import de.schafunschaf.voidtec.helper.AugmentGenerator;
 import de.schafunschaf.voidtec.ids.VT_Items;
 import de.schafunschaf.voidtec.ids.VT_Settings;
 
@@ -46,7 +46,7 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
 
         // Give NPC-Fleets augments depending on fleet type, ship type and faction
         if (interactionTarget instanceof CampaignFleetAPI && !interactionTarget.isPlayerFleet()) {
-            ShipAugmentGenerator.generateFleetAugments((CampaignFleetAPI) interactionTarget, VT_Settings.aiHullmodChance, null);
+            AugmentGenerator.generateFleetAugments((CampaignFleetAPI) interactionTarget, VT_Settings.aiHullmodChance);
         }
     }
 
