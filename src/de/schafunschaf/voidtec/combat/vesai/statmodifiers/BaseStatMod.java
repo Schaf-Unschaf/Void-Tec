@@ -3,9 +3,12 @@ package de.schafunschaf.voidtec.combat.vesai.statmodifiers;
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.ShipAPI;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
+import de.schafunschaf.voidtec.ids.VT_Strings;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -21,12 +24,20 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 public abstract class BaseStatMod implements StatApplier {
 
     protected final String statID;
+    protected final String displayName;
 
-    protected int generateModValue(StatModValue<Float, Float, Boolean> statModValue, Random random, AugmentQuality quality) {
+    public static void generateStatTooltip(TooltipMakerAPI tooltip, String statID, int value) {
+        BaseStatMod statMod = StatModProvider.getStatMod(statID);
+        String text = statMod.displayName + " %s by %s";
+        statMod.generateTooltip(tooltip, value, text, null);
+    }
+
+    protected int generateModValue(StatModValue<Float, Float, Boolean, Boolean> statModValue, long randomSeed, AugmentQuality quality) {
         float qualityModifier = isNull(quality) ? 1f : quality.getModifier();
         float value;
+        Random random = new Random(randomSeed);
 
-        if (statModValue.minValue >= statModValue.maxValue) {
+        if (Math.abs(statModValue.minValue) >= Math.abs(statModValue.maxValue)) {
             value = statModValue.minValue;
         } else {
             int valueRange = Math.round(statModValue.maxValue) - Math.round(statModValue.minValue);
@@ -46,30 +57,55 @@ public abstract class BaseStatMod implements StatApplier {
     public void applyToFighter(MutableShipStatsAPI stats, String id, float value) {}
 
     @Override
-    public void runCombatScript(ShipAPI ship, float amount, Object data) {}
+    public void runCombatScript(ShipAPI ship, float amount, AugmentApplier augment) {}
+
+    @Override
+    public void collectStatValue(float value, AugmentApplier parentAugment) {
+        parentAugment.getInstalledSlot().getHullmodManager().addStatModifier(statID, value);
+    }
+
+    @Override
+    public boolean hasNegativeValueAsBenefit() {
+        return false;
+    }
+
+    @Override
+    public boolean isPercentage() {
+        return true;
+    }
 
     protected void generateTooltip(TooltipMakerAPI tooltip, MutableStat.StatMod statMod, String description, Color bulletColor,
-                                   boolean flipColors, boolean isPercentage) {
-        setBulletMode(tooltip, bulletColor);
-        String percentageSign = isPercentage ? "%" : "";
-        int value = (int) (100 * statMod.value) - 100;
-        boolean isPositive = value >= 0f;
+                                   AugmentApplier parentAugment) {
+        int value = isPercentage() ? (int) (100 * statMod.value) - 100 : (int) statMod.value;
+
+        if (isNull(tooltip)) {
+            collectStatValue(value, parentAugment);
+            return;
+        }
+
+        generateTooltip(tooltip, value, description, bulletColor);
+    }
+
+    private void generateTooltip(TooltipMakerAPI tooltip, int value, String text, Color bulletColor) {
+        String percentageSign = isPercentage() ? "%" : "";
+        boolean isPositive = value >= 0;
         String incDec = isPositive ? "increased" : "decreased";
 
-        if (flipColors) {
+        if (hasNegativeValueAsBenefit()) {
             isPositive = !isPositive;
         }
 
         Color hlColor = isPositive ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor();
 
-        tooltip.addPara(description, 0f, new Color[]{hlColor, hlColor}, incDec, Math.abs(value) + percentageSign);
+        setBulletMode(tooltip, isNull(bulletColor) ? hlColor : bulletColor);
+        tooltip.addPara(text, 0f, new Color[]{hlColor, hlColor}, incDec, Math.abs(value) + percentageSign);
         unindent(tooltip);
     }
 
-    protected void generateStatDescription(TooltipMakerAPI tooltip, String description, String incDecText, Color bulletColor,
-                                           float minValue, float maxValue, boolean isPositive, boolean isPercentage, String... highlights) {
+    protected LabelAPI generateStatDescription(TooltipMakerAPI tooltip, String description, String incDecText, Color bulletColor,
+                                               float minValue, float maxValue, boolean isPositive, String... highlights) {
         setBulletMode(tooltip, bulletColor);
-        String percentageSign = isPercentage ? "%" : "";
+        String percentageSign = isPercentage() ? "%" : "";
         int roundedMinValue = Math.round(Math.abs(minValue));
         int roundedMaxValue = Math.round(Math.abs(maxValue));
         String minValueString = roundedMinValue + percentageSign;
@@ -90,20 +126,25 @@ public abstract class BaseStatMod implements StatApplier {
         hlStrings.add(minValueString);
         hlStrings.add(maxValueString);
 
+        LabelAPI generatedLabel;
+
         if (roundedMinValue == roundedMaxValue) {
-            tooltip.addPara(String.format("%s %s by %s", incDecText, description, minValueString + percentageSign), 0f,
-                            hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
+            generatedLabel = tooltip.addPara(String.format("%s %s by %s", incDecText, description, minValueString + percentageSign), 0f,
+                                             hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
         } else {
-            tooltip.addPara(String.format("%s %s between %s and %s", incDecText, description, minValueString + percentageSign,
-                                          maxValueString + percentageSign), 0f, hlColors.toArray(new Color[0]),
-                            hlStrings.toArray(new String[0]));
+            generatedLabel = tooltip.addPara(String.format("%s %s between %s and %s", incDecText, description,
+                                                           minValueString + percentageSign,
+                                                           maxValueString + percentageSign), 0f, hlColors.toArray(new Color[0]),
+                                             hlStrings.toArray(new String[0]));
         }
 
         unindent(tooltip);
+
+        return generatedLabel;
     }
 
     protected void setBulletMode(TooltipMakerAPI tooltip, Color bulletColor) {
-        String bullet = "• ";
+        String bullet = VT_Strings.BULLET_CHAR + " ";
         tooltip.setBulletColor(bulletColor);
         tooltip.setBulletedListMode(bullet);
     }

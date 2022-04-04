@@ -50,7 +50,7 @@ public class AugmentDataLoader {
                 }
 
                 String primaryStatModValueString = row.optString("primaryStatValues");
-                List<StatModValue<Float, Float, Boolean>> primaryStatValues = new ArrayList<>();
+                List<StatModValue<Float, Float, Boolean, Boolean>> primaryStatValues = new ArrayList<>();
                 if (!primaryStatModValueString.isEmpty()) {
                     primaryStatValues = getStatValuesFromString(primaryStatModValueString);
                 }
@@ -68,7 +68,7 @@ public class AugmentDataLoader {
                 }
 
                 String secondaryStatModValueString = row.optString("secondaryStatValues");
-                List<StatModValue<Float, Float, Boolean>> secondaryStatValues = new ArrayList<>();
+                List<StatModValue<Float, Float, Boolean, Boolean>> secondaryStatValues = new ArrayList<>();
                 if (!secondaryStatModValueString.isEmpty()) {
                     secondaryStatValues = getStatValuesFromString(secondaryStatModValueString);
                 }
@@ -86,7 +86,8 @@ public class AugmentDataLoader {
                                                               new TextWithHighlights(row.optString("description")), row.optInt("rarity"),
                                                               SlotCategory.getEnum(row.getString("primarySlot")), primaryStatMods,
                                                               primaryStatValues, secondarySlots, secondaryStatMods, secondaryStatValues,
-                                                              augmentQuality, null, null, row.optBoolean("equalQualityRoll"), null, null);
+                                                              augmentQuality, null, null, row.optBoolean("equalQualityRoll"), null, null,
+                                                              row.optBoolean("uniqueMod"));
 
                     AugmentDataManager.storeAugmentData(augmentID, augmentData);
                 } catch (JSONException error) {
@@ -98,10 +99,10 @@ public class AugmentDataLoader {
         }
     }
 
-    private static List<StatApplier> getStatModsFromString(String primaryStatModString) {
+    public static List<StatApplier> convertStatMods(String... statModKeys) {
         List<StatApplier> statMods = new ArrayList<>();
 
-        for (String statModAsString : primaryStatModString.split("\\s*(,\\s*)+")) {
+        for (String statModAsString : statModKeys) {
             StatApplier statMod = StatModProvider.getStatMod(statModAsString.toLowerCase().trim());
             if (!isNull(statMod)) {
                 statMods.add(statMod);
@@ -109,6 +110,12 @@ public class AugmentDataLoader {
         }
 
         return statMods;
+    }
+
+    private static List<StatApplier> getStatModsFromString(String statModString) {
+        String[] strings = statModString.split("\\s*(,\\s*)+");
+
+        return convertStatMods(strings);
     }
 
     private static List<SlotCategory> getSlotsFromString(String slotString) {
@@ -123,10 +130,10 @@ public class AugmentDataLoader {
         return slotCategories;
     }
 
-    private static List<StatModValue<Float, Float, Boolean>> getStatValuesFromString(String primaryStatModValueString) {
-        List<StatModValue<Float, Float, Boolean>> statModValues = new ArrayList<>();
+    private static List<StatModValue<Float, Float, Boolean, Boolean>> getStatValuesFromString(String statModValueString) {
+        List<StatModValue<Float, Float, Boolean, Boolean>> statModValues = new ArrayList<>();
 
-        for (String statModValue : primaryStatModValueString.split("\\s*(_\\s*)+")) {
+        for (String statModValue : statModValueString.split("\\s*(_\\s*)+")) {
             if (!isNull(statModValue) && !statModValue.isEmpty()) {
                 statModValues.add(getStatModValueDataFromString(statModValue.trim()));
             }
@@ -135,9 +142,10 @@ public class AugmentDataLoader {
         return statModValues;
     }
 
-    private static StatModValue<Float, Float, Boolean> getStatModValueDataFromString(String statModValueString) {
+    private static StatModValue<Float, Float, Boolean, Boolean> getStatModValueDataFromString(String statModValueString) {
         String[] data = statModValueString.split("\\s*(,\\s*)+");
-        return new StatModValue<>(Float.valueOf(data[0]), Float.valueOf(data[1]), Boolean.valueOf(data[2].trim()));
+        return new StatModValue<>(Float.valueOf(data[0]), Float.valueOf(data[1]), Boolean.valueOf(data[2].trim()),
+                                  Boolean.valueOf(data[3].trim()));
     }
 }
 

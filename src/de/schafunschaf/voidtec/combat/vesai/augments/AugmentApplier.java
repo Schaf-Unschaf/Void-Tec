@@ -6,24 +6,27 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
 import de.schafunschaf.voidtec.helper.TextWithHighlights;
 
 import java.awt.Color;
 import java.util.List;
-import java.util.Random;
 
 public interface AugmentApplier {
 
     void applyAfterCreation(ShipAPI ship, String id);
 
-    void applyToShip(MutableShipStatsAPI stats, String id, Random random);
+    void applyToShip(MutableShipStatsAPI stats, String id, int slotIndex);
 
     void applyToFighter(MutableShipStatsAPI stats, String id);
 
     void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory,
-                         boolean isItemTooltip, Color bulletColorOverride);
+                         boolean isItemTooltip, boolean onlyStats, Color bulletColorOverride);
 
     void generateStatDescription(TooltipMakerAPI tooltip, float padding, Boolean isPrimary, Color bulletColorOverride);
+
+    void generateStatDescription(TooltipMakerAPI tooltip, float padding, Boolean isPrimary, Color bulletColorOverride,
+                                 AugmentQuality quality);
 
     void runCustomScript(ShipAPI ship, float amount);
 
@@ -41,7 +44,11 @@ public interface AugmentApplier {
 
     List<StatApplier> getPrimaryStatMods();
 
+    List<StatModValue<Float, Float, Boolean, Boolean>> getPrimaryStatValues();
+
     List<StatApplier> getSecondaryStatMods();
+
+    List<StatModValue<Float, Float, Boolean, Boolean>> getSecondaryStatValues();
 
     AugmentQuality getAugmentQuality();
 
@@ -52,6 +59,8 @@ public interface AugmentApplier {
     TextWithHighlights getAdditionalDescription();
 
     List<StatApplier> getActiveStatMods();
+
+    void collectAppliedStats(MutableShipStatsAPI stats, String id);
 
     boolean isRepairable();
 
@@ -72,4 +81,6 @@ public interface AugmentApplier {
     Float getFighterStatValue(String id);
 
     boolean isInPrimarySlot();
+
+    boolean isUniqueMod();
 }

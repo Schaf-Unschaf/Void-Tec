@@ -6,13 +6,18 @@ import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestData;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.ids.VT_Items;
+import de.schafunschaf.voidtec.ids.VT_Settings;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.Random;
 
 import static de.schafunschaf.voidtec.ids.VT_Settings.*;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
@@ -70,5 +75,27 @@ public class VoidTecUtils {
         }
 
         return Global.getSector().getPlayerFleet().getCargo().getCredits().get() >= installCostCredits * hullSizeMult;
+    }
+
+    public static void addAugmentToFleetCargo(AugmentApplier augment) {
+        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+        cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, augment), 1);
+    }
+
+    public static void addRandomAugmentsToFleetCargo(Random random, int numPerItem, int quantity) {
+        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+        for (int i = 0; i < quantity; i++) {
+            cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, AugmentDataManager.getRandomAugment(random)), numPerItem);
+        }
+    }
+
+    public static void addChestToFleetCargo(int storageSize) {
+        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+        cargo.addSpecial(new AugmentChestData(VT_Items.STORAGE_CHEST, null, storageSize), 1f);
+    }
+
+    public static float calcNeededCreditsForRepair(AugmentApplier augment) {
+        AugmentQuality higherQuality = augment.getAugmentQuality().getHigherQuality();
+        return (float) MathUtils.roundWholeNumber(VT_Settings.repairCostCredits * Math.pow(higherQuality.getModifier(), 3), 3);
     }
 }

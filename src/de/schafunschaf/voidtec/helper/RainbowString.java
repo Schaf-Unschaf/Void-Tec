@@ -27,7 +27,7 @@ public class RainbowString {
                 continue;
             }
 
-            outputString.append("%s ");
+            outputString.append(c).append(" ");
             hlColors.add(colorShifter.getCurrentColor());
             colorShifter.shiftColor(colorShiftAmount);
             hlStrings.add(Character.toString(c));

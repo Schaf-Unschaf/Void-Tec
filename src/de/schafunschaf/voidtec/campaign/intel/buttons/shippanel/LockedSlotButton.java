@@ -82,14 +82,13 @@ public class LockedSlotButton extends DefaultButton {
     }
 
     @Override
-    public ButtonAPI createButton(TooltipMakerAPI uiElement, float width, float height) {
-        SlotCategory slotCategory = augmentSlot.getSlotCategory();
+    public ButtonAPI addButton(TooltipMakerAPI tooltip, float width, float height) {
         Color buttonTextColor = Misc.getHighlightColor();
-        Color buttonColor = Misc.scaleColor(Misc.getDarkHighlightColor(), 0.3f);
+        Color buttonColor = Misc.scaleColor(Misc.getDarkHighlightColor(), 0.7f);
 
         if (!canUnlockWithCredits) {
             buttonTextColor = Misc.getStoryOptionColor();
-            buttonColor = Misc.scaleColor(Misc.getStoryDarkColor(), 0.5f);
+            buttonColor = Misc.getStoryDarkColor();
         }
 
         AugmentCargoWrapper selectedAugment = AugmentManagerIntel.getSelectedAugmentInCargo();
@@ -100,19 +99,19 @@ public class LockedSlotButton extends DefaultButton {
             buttonColor.darker();
         }
 
-        uiElement.setButtonFontVictor14();
-        ButtonAPI button = ButtonUtils.addAugmentButton(uiElement, height, 0f, buttonTextColor, buttonColor,
-                                                        this);
+        tooltip.setButtonFontVictor14();
+        ButtonAPI button = ButtonUtils.addCheckboxButton(tooltip, width, height, 0f, buttonTextColor, buttonColor, buttonColor, this);
+        button.setChecked(true);
 
         button.setEnabled(canUnlockSlot());
 
-        addTooltip(uiElement, slotCategory);
+        addTooltip(tooltip);
 
         return button;
     }
 
     @Override
-    protected void addTooltip(TooltipMakerAPI uiElement, SlotCategory slotCategory) {
+    public void addTooltip(TooltipMakerAPI tooltip) {
         final boolean playerDockedAtSpaceport = VoidTecUtils.isPlayerDockedAtSpaceport();
         boolean canUnlockWithCredits = unlockedSlots < VT_Settings.maxNumSlotsForCreditUnlock;
         int installCost = VT_Settings.installCostCredits * unlockedSlots;
@@ -126,9 +125,9 @@ public class LockedSlotButton extends DefaultButton {
         final Color hlColor = canUnlockWithCredits ? Misc.getHighlightColor() : Misc.getStoryOptionColor();
 
         final float stringWidth = playerDockedAtSpaceport
-                                  ? uiElement.computeStringWidth(unlockSlotText)
-                                  : uiElement.computeStringWidth(needSpaceportText);
-        uiElement.addTooltipToPrevious(new BaseTooltipCreator() {
+                                  ? tooltip.computeStringWidth(unlockSlotText)
+                                  : tooltip.computeStringWidth(needSpaceportText);
+        tooltip.addTooltipToPrevious(new BaseTooltipCreator() {
             @Override
             public float getTooltipWidth(Object tooltipParam) {
                 return stringWidth;

@@ -2,6 +2,7 @@ package de.schafunschaf.voidtec.combat.vesai.statmodifiers.weapon;
 
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
@@ -10,23 +11,22 @@ import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
 import de.schafunschaf.voidtec.util.ComparisonTools;
 
 import java.awt.Color;
-import java.util.Random;
 
 public class BallisticRange extends BaseStatMod {
 
-    public BallisticRange(String statID) {
-        super(statID);
+    public BallisticRange(String statID, String displayName) {
+        super(statID, displayName);
     }
 
     @Override
-    public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random,
+    public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean, Boolean> statModValue, long randomSeed,
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
+                                                 1f + generateModValue(statModValue, randomSeed, parentAugment.getAugmentQuality()) / 100f);
         } else {
             stats.getBallisticWeaponRangeBonus()
-                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
+                 .modifyMult(id, 1f + generateModValue(statModValue, randomSeed, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -50,18 +50,19 @@ public class BallisticRange extends BaseStatMod {
                 return;
             }
         }
-        generateTooltip(tooltip, statMod, description, bulletColor, false, true);
+        generateTooltip(tooltip, statMod, description, bulletColor, parentAugment);
     }
 
     @Override
-    public void generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
+    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
         boolean isPositive = minValue >= 0;
         String incDec = isPositive ? "Increases" : "Lowers";
         String hlString1 = "range";
         String hlString2 = "ballistic weapons";
         String description = String.format("the %s of all %s", hlString1, hlString2);
 
-        generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, true, hlString1, hlString2);
+        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, hlString1,
+                                       hlString2);
     }
 
     @Override

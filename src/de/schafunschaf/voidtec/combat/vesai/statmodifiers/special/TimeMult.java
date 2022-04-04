@@ -3,6 +3,7 @@ package de.schafunschaf.voidtec.combat.vesai.statmodifiers.special;
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.ShipAPI;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import de.schafunschaf.voidtec.combat.scripts.stats.StatScriptProvider;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
@@ -13,22 +14,21 @@ import de.schafunschaf.voidtec.ids.VT_StatModScripts;
 import de.schafunschaf.voidtec.util.ComparisonTools;
 
 import java.awt.Color;
-import java.util.Random;
 
 public class TimeMult extends BaseStatMod {
 
-    public TimeMult(String statID) {
-        super(statID);
+    public TimeMult(String statID, String displayName) {
+        super(statID, displayName);
     }
 
     @Override
-    public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random,
+    public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean, Boolean> statModValue, long randomSeed,
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
+                                                 1f + generateModValue(statModValue, randomSeed, parentAugment.getAugmentQuality()) / 100f);
         } else {
-            stats.getTimeMult().modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
+            stats.getTimeMult().modifyMult(id, 1f + generateModValue(statModValue, randomSeed, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -52,17 +52,17 @@ public class TimeMult extends BaseStatMod {
                 return;
             }
         }
-        generateTooltip(tooltip, statMod, description, bulletColor, false, true);
+        generateTooltip(tooltip, statMod, description, bulletColor, parentAugment);
     }
 
     @Override
-    public void generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
+    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
         boolean isPositive = minValue >= 0;
         String incDec = isPositive ? "Speeds up" : "Slows down";
         String hlString = "time flow";
         String description = String.format("the %s on board", hlString);
 
-        generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, true, hlString);
+        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, hlString);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class TimeMult extends BaseStatMod {
     }
 
     @Override
-    public void runCombatScript(ShipAPI ship, float amount, Object data) {
-        StatScriptProvider.getScript(VT_StatModScripts.TIME_ACCELERATION).run(ship, amount, data);
+    public void runCombatScript(ShipAPI ship, float amount, AugmentApplier augment) {
+        StatScriptProvider.getScript(VT_StatModScripts.TIME_ACCELERATION).run(ship, amount, augment);
     }
 }

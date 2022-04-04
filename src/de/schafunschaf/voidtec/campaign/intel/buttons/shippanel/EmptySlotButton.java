@@ -8,10 +8,13 @@ import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
+import de.schafunschaf.voidtec.campaign.intel.InfoPanel;
 import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
+import de.schafunschaf.voidtec.ids.VT_Strings;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,24 +28,35 @@ public class EmptySlotButton extends DefaultButton {
 
     private final AugmentSlot augmentSlot;
     private final boolean canInstallAugment;
+    private final String needSpaceportText = VoidTecUtils.isPlayerDockedAtSpaceport() ? "" : "\n\nNeed Spaceport for modification";
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
+        if (InfoPanel.getSelectedTab() != InfoPanel.InfoTabs.DETAILS) {
+            return;
+        }
+
         if (canInstallAugment) {
-            boolean success = augmentSlot.installAugment(AugmentManagerIntel.getSelectedAugmentInCargo().getAugment());
+            AugmentApplier augment = AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
+            AugmentApplier clonedAugment = AugmentDataManager.cloneAugment(augment);
+            boolean success = augmentSlot.installAugment(clonedAugment);
             if (success) {
                 removeAugmentFromCargo();
             }
 
+            AugmentManagerIntel.setSelectedInstalledAugment(success ? clonedAugment : null);
             AugmentManagerIntel.setSelectedAugmentInCargo(null);
             AugmentManagerIntel.setActiveCategoryFilter(null);
+            AugmentManagerIntel.setSelectedSlot(null);
         } else {
             SlotCategory slotCategory = augmentSlot.getSlotCategory();
             SlotCategory activeCategoryFilter = AugmentManagerIntel.getActiveCategoryFilter();
             if (!isNull(activeCategoryFilter) && activeCategoryFilter == slotCategory) {
                 AugmentManagerIntel.setActiveCategoryFilter(null);
+                AugmentManagerIntel.setSelectedSlot(null);
             } else {
                 AugmentManagerIntel.setActiveCategoryFilter(slotCategory);
+                AugmentManagerIntel.setSelectedSlot(augmentSlot);
             }
         }
     }
@@ -50,7 +64,7 @@ public class EmptySlotButton extends DefaultButton {
     @Override
     public void createConfirmationPrompt(TooltipMakerAPI tooltip) {
         AugmentApplier augment = AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
-        String bullet = "• ";
+        String bullet = VT_Strings.BULLET_CHAR + " ";
 
         tooltip.addPara("Install the augment in this slot (%s)?", 0f, augmentSlot.getSlotCategory().getColor(),
                         augmentSlot.getSlotCategory().getName());
@@ -75,45 +89,22 @@ public class EmptySlotButton extends DefaultButton {
     }
 
     @Override
-    public ButtonAPI createButton(TooltipMakerAPI uiElement, float width, float height) {
+    public ButtonAPI addButton(TooltipMakerAPI tooltip, float width, float height) {
         SlotCategory slotCategory = augmentSlot.getSlotCategory();
-        Color slotColor = slotCategory.getColor();
-        float scaleFactor;
+        float scaleFactor = getButtonScaleFactor();
+        Color slotColor = Misc.scaleColor(slotCategory.getColor(), scaleFactor);
 
-        SlotCategory activeCategoryFilter = AugmentManagerIntel.getActiveCategoryFilter();
-        boolean isFiltered = activeCategoryFilter == slotCategory;
-
-        if (canInstallAugment) {
-            if (isNull(activeCategoryFilter)) {
-                scaleFactor = 1f; // Augment selected without filter
-            } else {
-                scaleFactor = isFiltered ? 1f : 0.7f; // Augment selected with filter. Will highlight prim and sec slots
-            }
-        } else if (isNull(activeCategoryFilter)) {
-            scaleFactor = 0.5f; // No Augment selected and no filter
-        } else {
-            scaleFactor = isFiltered ? 1f : 0.1f; // No Augment selected but with filter. Will highlight prim and sec slots
-        }
-
-        Color buttonColor = Misc.scaleColor(slotColor, scaleFactor);
-
-        ButtonAPI button = ButtonUtils.addAugmentButton(uiElement, height, 0f, buttonColor, buttonColor,
-                                                        this);
-
-        addTooltip(uiElement, slotCategory);
-
-        return button;
+        return ButtonUtils.addAugmentButton(tooltip, width, slotColor, slotColor, false, false, this);
     }
 
     @Override
-    protected void addTooltip(TooltipMakerAPI uiElement, final SlotCategory slotCategory) {
-        final String emptySlotText = String.format("Empty %s slot", slotCategory);
-        final String needSpaceportText = "Need Spaceport for modification";
-        final float stringWidth = VoidTecUtils.isPlayerDockedAtSpaceport()
-                                  ? uiElement.computeStringWidth(emptySlotText)
-                                  : uiElement.computeStringWidth(needSpaceportText);
+    public void addTooltip(TooltipMakerAPI tooltip) {
+        final SlotCategory slotCategory = augmentSlot.getSlotCategory();
+        String emptySlotText = String.format("Empty %s slot", slotCategory);
+        final String tooltipText = emptySlotText + needSpaceportText;
+        final float stringWidth = tooltip.computeStringWidth(tooltipText);
 
-        uiElement.addTooltipToPrevious(new BaseTooltipCreator() {
+        tooltip.addTooltipToPrevious(new BaseTooltipCreator() {
             @Override
             public float getTooltipWidth(Object tooltipParam) {
                 return stringWidth;
@@ -121,12 +112,41 @@ public class EmptySlotButton extends DefaultButton {
 
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                tooltip.addPara(emptySlotText, 0f, slotCategory.getColor(), slotCategory.toString());
-                if (!VoidTecUtils.isPlayerDockedAtSpaceport()) {
-                    tooltip.addPara(needSpaceportText, Misc.getGrayColor(), 3f);
-                }
+                tooltip.addPara(tooltipText, 0f, new Color[]{slotCategory.getColor(), Misc.getGrayColor()},
+                                slotCategory.toString(), needSpaceportText);
             }
         }, TooltipMakerAPI.TooltipLocation.BELOW);
+    }
+
+    private float getButtonScaleFactor() {
+        SlotCategory activeCategoryFilter = AugmentManagerIntel.getActiveCategoryFilter();
+        SlotCategory slotCategory = augmentSlot.getSlotCategory();
+        float scaleFactor = 1f;
+
+        boolean filterActive = !isNull(activeCategoryFilter);
+        boolean augmentInCargoSelected = !isNull(AugmentManagerIntel.getSelectedAugmentInCargo());
+        boolean augmentInSlotSelected = !isNull(AugmentManagerIntel.getSelectedInstalledAugment());
+        boolean matchesFilter = activeCategoryFilter == slotCategory;
+
+        switch (InfoPanel.getSelectedTab()) {
+            case DETAILS:
+                if (augmentInCargoSelected) {
+                    return canInstallAugment ? 1f : 0.1f;
+                }
+                if (filterActive) {
+                    return matchesFilter ? 1f : 0.1f;
+                }
+                if (augmentInSlotSelected) {
+                    return 0.3f;
+                }
+                break;
+            case REPAIR:
+            case DISMANTLE:
+            case MANUFACTURE:
+                return 0.1f;
+        }
+
+        return scaleFactor;
     }
 
     private void removeAugmentFromCargo() {

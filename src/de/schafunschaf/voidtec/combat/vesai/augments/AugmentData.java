@@ -25,14 +25,19 @@ public class AugmentData {
     protected int rarity;
     protected SlotCategory primarySlot;
     protected List<StatApplier> primaryStatMods = new ArrayList<>();
-    protected List<StatModValue<Float, Float, Boolean>> primaryStatValues = new ArrayList<>();
+    protected List<StatModValue<Float, Float, Boolean, Boolean>> primaryStatValues = new ArrayList<>();
     protected List<SlotCategory> secondarySlots = new ArrayList<>();
     protected List<StatApplier> secondaryStatMods = new ArrayList<>();
-    protected List<StatModValue<Float, Float, Boolean>> secondaryStatValues = new ArrayList<>();
+    protected List<StatModValue<Float, Float, Boolean, Boolean>> secondaryStatValues = new ArrayList<>();
     protected String[] augmentQualityRange;
     protected TextWithHighlights combatScriptDescription = null;
     protected TextWithHighlights additionalDescription = null;
     protected boolean equalQualityRoll = false;
     protected CombatScriptRunner combatScript = null;
     protected AfterCreationEffect afterCreationEffect = null;
+    protected boolean uniqueMod = false;
+
+    protected void storeAugment() {
+        AugmentDataManager.storeAugmentData(augmentID, this);
+    }
 }

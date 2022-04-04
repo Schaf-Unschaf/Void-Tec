@@ -3,16 +3,16 @@ package de.schafunschaf.voidtec.plugins;
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
-import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestData;
-import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
+import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
 import de.schafunschaf.voidtec.combat.vesai.HullModDataStorage;
+import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.helper.ModLoadingHelper;
 import de.schafunschaf.voidtec.ids.VT_Augments;
-import de.schafunschaf.voidtec.ids.VT_Items;
 import de.schafunschaf.voidtec.ids.VT_Settings;
+import de.schafunschaf.voidtec.util.VoidTecUtils;
 import lombok.extern.log4j.Log4j;
 
 @Log4j
@@ -21,8 +21,14 @@ public class VoidTecPlugin extends BaseModPlugin {
     public static final String MOD_ID = "voidtec";
 
     @Override
+    public void afterGameSave() {
+        ModLoadingHelper.initIntel();
+    }
+
+    @Override
     public void beforeGameSave() {
         HullModDataStorage.getInstance().saveToMemory();
+        Global.getSector().getIntelManager().removeIntel(AugmentManagerIntel.getInstance());
     }
 
     @Override
@@ -42,22 +48,27 @@ public class VoidTecPlugin extends BaseModPlugin {
         // TODO remove before final release
         if (!newGame) {
             CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
-            for (int i = 0; i < 20; i++) {
-                cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, AugmentDataManager.getRandomAugment(null)), 1);
+            VoidTecUtils.addChestToFleetCargo(100);
+            VoidTecUtils.addRandomAugmentsToFleetCargo(null, 10, 20);
+            VoidTecUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment(VT_Augments.VT_RAINBOW_ENGINES, AugmentQuality.CUSTOMISED));
+            VoidTecUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment(VT_Augments.VT_RAINBOW_ENGINES, AugmentQuality.DESTROYED));
+            VoidTecUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment(VT_Augments.VT_RAINBOW_SHIELDS, AugmentQuality.CUSTOMISED));
+
+            AugmentApplier augment1 = AugmentDataManager.getAugment(VT_Augments.VT_PURSUIT_ENGINES, AugmentQuality.DOMAIN);
+            augment1.damageAugment(5);
+            VoidTecUtils.addAugmentToFleetCargo(augment1);
+
+            for (int i = 0; i < 5; i++) {
+                AugmentApplier augment = AugmentDataManager.getRandomAugment(SlotCategory.getRandomCategory(null),
+                                                                             AugmentQuality.getRandomQualityInRange(
+                                                                                     new String[]{AugmentQuality.EXPERIMENTAL.getName(),
+                                                                                                  AugmentQuality.DOMAIN.getName()}, null,
+                                                                                     true), null, null);
+                augment.damageAugment(3);
+                VoidTecUtils.addAugmentToFleetCargo(augment);
             }
-            cargo.addSpecial(new AugmentChestData(VT_Items.STORAGE_CHEST, null, 100), 1f);
-            cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null,
-                                                 AugmentDataManager.getAugment(VT_Augments.VT_RAINBOW_ENGINES, AugmentQuality.UNIQUE)), 1);
-            cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null,
-                                                 AugmentDataManager.getAugment(VT_Augments.VT_RAINBOW_ENGINES, AugmentQuality.DESTROYED)),
-                             1);
-            cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null,
-                                                 AugmentDataManager.getAugment(VT_Augments.VT_RAINBOW_SHIELDS, AugmentQuality.UNIQUE)), 1);
-            AugmentApplier augment = AugmentDataManager.getAugment(VT_Augments.VT_RAINBOW_ENGINES, AugmentQuality.COMMON);
-            augment.damageAugment(1);
-            cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null,
-                                                 augment), 1);
-            cargo.getCredits().add(100_000_000f);
+
+            cargo.getCredits().add(90_000_000f);
         }
     }
 }

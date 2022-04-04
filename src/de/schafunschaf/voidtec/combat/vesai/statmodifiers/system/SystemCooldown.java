@@ -2,6 +2,7 @@ package de.schafunschaf.voidtec.combat.vesai.statmodifiers.system;
 
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
@@ -10,23 +11,22 @@ import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
 import de.schafunschaf.voidtec.util.ComparisonTools;
 
 import java.awt.Color;
-import java.util.Random;
 
 public class SystemCooldown extends BaseStatMod {
 
-    public SystemCooldown(String statID) {
-        super(statID);
+    public SystemCooldown(String statID, String displayName) {
+        super(statID, displayName);
     }
 
     @Override
-    public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean> statModValue, Random random,
+    public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean, Boolean> statModValue, long randomSeed,
                             AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
+                                                 1f + generateModValue(statModValue, randomSeed, parentAugment.getAugmentQuality()) / 100f);
         } else {
             stats.getSystemCooldownBonus()
-                 .modifyMult(id, 1f + generateModValue(statModValue, random, parentAugment.getAugmentQuality()) / 100f);
+                 .modifyMult(id, 1f + generateModValue(statModValue, randomSeed, parentAugment.getAugmentQuality()) / 100f);
         }
     }
 
@@ -50,16 +50,21 @@ public class SystemCooldown extends BaseStatMod {
                 return;
             }
         }
-        generateTooltip(tooltip, statMod, description, bulletColor, true, true);
+        generateTooltip(tooltip, statMod, description, bulletColor, parentAugment);
     }
 
     @Override
-    public void generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
+    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
         boolean isPositive = minValue <= 0;
         String incDec = isPositive ? "Reduces" : "Increases";
         String hlString = "system ability cooldown";
         String description = String.format("the ships %s", hlString);
 
-        generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, true, hlString);
+        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, hlString);
+    }
+
+    @Override
+    public boolean hasNegativeValueAsBenefit() {
+        return true;
     }
 }

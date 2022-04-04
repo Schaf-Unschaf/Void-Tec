@@ -1,14 +1,12 @@
 package de.schafunschaf.voidtec.campaign.intel.buttons.shippanel;
 
 import com.fs.starfarer.api.combat.ShipAPI;
-import com.fs.starfarer.api.ui.BaseTooltipCreator;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.ShipPanel;
 import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
-import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.util.FormattingTools;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 
@@ -39,39 +37,24 @@ public class FilterHullSizeButton extends DefaultButton {
     }
 
     @Override
-    public ButtonAPI createButton(TooltipMakerAPI uiElement, float width, float height) {
+    public ButtonAPI addButton(TooltipMakerAPI tooltip, float width, float height) {
         Color textColor = filterActive ? Misc.getHighlightColor() : Misc.getBasePlayerColor();
         Color borderColor = Misc.getDarkPlayerColor();
         Color hlColor = Misc.getDarkPlayerColor();
 
-        ButtonAPI button = ButtonUtils.addCheckboxButton(uiElement, width, height, 0f, textColor,
+        ButtonAPI button = ButtonUtils.addCheckboxButton(tooltip, width, height, 0f, textColor,
                                                          borderColor, hlColor, this);
 
         button.setChecked(filterActive);
         button.highlight();
 
-        addTooltip(uiElement, null);
-
-        return button;
-    }
-
-    @Override
-    protected void addTooltip(TooltipMakerAPI uiElement, SlotCategory slotCategory) {
         String shipSizeString = FormattingTools.capitalizeFirst(
                 filter.toString().replace(ShipAPI.HullSize.CAPITAL_SHIP.toString(), "Capital").toLowerCase());
-        final String tooltipText = String.format("Filter by %s-Size", shipSizeString);
-        final float tooltipLength = uiElement.computeStringWidth(tooltipText);
+        String tooltipText = String.format("Filter by %s-Size", shipSizeString);
+        float tooltipLength = tooltip.computeStringWidth(tooltipText);
 
-        uiElement.addTooltipToPrevious(new BaseTooltipCreator() {
-            @Override
-            public float getTooltipWidth(Object tooltipParam) {
-                return tooltipLength;
-            }
+        addTooltip(tooltip);
 
-            @Override
-            public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                tooltip.addPara(tooltipText, 0f);
-            }
-        }, TooltipMakerAPI.TooltipLocation.BELOW);
+        return button;
     }
 }

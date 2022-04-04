@@ -13,6 +13,7 @@ import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.helper.RainbowString;
 import de.schafunschaf.voidtec.ids.VT_Icons;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.awt.Color;
@@ -23,25 +24,35 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNullOrEmpty;
 
 @Getter
+@AllArgsConstructor
 public class CargoPanel {
 
     public static boolean showDestroyedAugments = false;
     public static boolean showOnlyRepairable = false;
 
-    public void displayPanel(CustomPanelAPI panel, float width, float height, float padding) {
-        float headerHeight = 21f;
-        float sorterHeight = 68f;
-        float buttonHeight = 30f;
-        float filterButtonSize = 24f;
-        float itemSpacing = 3f;
-        float listSpacing = 64f;
+    private final float panelWidth;
+    private final float panelHeight;
+    private final float padding;
 
-        TooltipMakerAPI headerElement = panel.createUIElement(width - 3f, 0f, false);
+    private final float headerHeight = 20f;
+    private final float sorterHeight = 68f;
+    private final float elementHeight = 24f;
+    private final float filterButtonSize = 24f;
+    private final float itemSpacing = 3f;
+    private final float listSpacing = 64f;
+
+    public void render(CustomPanelAPI mainPanel) {
+        addHeader(mainPanel);
+        addAugmentList(mainPanel);
+    }
+
+    private void addHeader(CustomPanelAPI mainPanel) {
+        TooltipMakerAPI headerElement = mainPanel.createUIElement(panelWidth, 0f, false);
         String headerText = showOnlyRepairable ? "Damaged Augments" : "Available Augments";
         headerElement.addSectionHeading(headerText, Misc.getBrightPlayerColor(), Misc.getDarkPlayerColor(), Alignment.MID, 0f);
-        panel.addUIElement(headerElement).inTR(0f, headerHeight);
+        mainPanel.addUIElement(headerElement).inTR(0f, headerHeight);
 
-        final TooltipMakerAPI filterElement = panel.createUIElement(width - 3f, 0f, false);
+        final TooltipMakerAPI filterElement = mainPanel.createUIElement(panelWidth, 0f, false);
         String selectedSlot = isNull(AugmentManagerIntel.getActiveCategoryFilter())
                               ? "ALL"
                               : AugmentManagerIntel.getActiveCategoryFilter().toString();
@@ -51,32 +62,13 @@ public class CargoPanel {
 
         ButtonAPI lastButton = null;
         for (final SlotCategory slotCategory : SlotCategory.values) {
-            Color buttonColor = isNull(
-                    AugmentManagerIntel.getActiveCategoryFilter()) || AugmentManagerIntel.getActiveCategoryFilter() == slotCategory
-                                ? slotCategory.getColor()
-                                : Misc.scaleColorOnly(slotCategory.getColor(), 0.3f);
-            final String tooltipText = String.format("Display only %s slots", slotCategory);
-            final float tooltipWidth = headerElement.computeStringWidth(tooltipText);
+            ButtonAPI augmentButton = new FilterByCategoryButton(slotCategory).addButton(filterElement, filterButtonSize, filterButtonSize);
 
-            ButtonAPI augmentButton = ButtonUtils.addAugmentButton(filterElement, filterButtonSize, 6f, buttonColor, buttonColor,
-                                                                   new FilterByCategoryButton(slotCategory));
             if (!isNull(lastButton)) {
                 augmentButton.getPosition().rightOfMid(lastButton, 4f);
             } else {
-                augmentButton.getPosition().setXAlignOffset(4f);
+                augmentButton.getPosition().setXAlignOffset(4f).setYAlignOffset(-6f);
             }
-
-            filterElement.addTooltipToPrevious(new BaseTooltipCreator() {
-                @Override
-                public float getTooltipWidth(Object tooltipParam) {
-                    return tooltipWidth;
-                }
-
-                @Override
-                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                    tooltip.addPara(tooltipText, 0f, slotCategory.getColor(), slotCategory.toString());
-                }
-            }, TooltipMakerAPI.TooltipLocation.ABOVE);
 
             lastButton = augmentButton;
         }
@@ -85,7 +77,7 @@ public class CargoPanel {
         spacerComponent.getPosition().inTL(5f, 0f);
 
         filterElement.setParaFont(Fonts.ORBITRON_20AA);
-        filterElement.addPara("Filter:", Misc.getBasePlayerColor(), 10f);
+        filterElement.addPara("Filter:", Misc.getBasePlayerColor(), 7f);
 
         LabelAPI filterTextLabel = filterElement.addPara("%s", 6f, Misc.getGrayColor(), selectedColor, selectedSlot);
         UIComponentAPI filterTextElement = filterElement.getPrev();
@@ -93,14 +85,16 @@ public class CargoPanel {
         filterTextLabel.setAlignment(Alignment.MID);
         filterElement.setParaFont(Fonts.DEFAULT_SMALL);
 
-        ButtonAPI sortOrderButton = new SortOrderButton().createButton(filterElement, 20f, 20f);
-        sortOrderButton.getPosition().rightOfTop(filterTextElement, -sortOrderButton.getPosition().getWidth()).setYAlignOffset(1f);
+        ButtonAPI sortOrderButton = new SortOrderButton().addButton(filterElement, 45f, 20f);
+        sortOrderButton.getPosition().rightOfTop(filterTextElement, -sortOrderButton.getPosition().getWidth()).setYAlignOffset(-1f);
 
         ButtonUtils.addSeparatorLine(filterElement, filterTextElement.getPosition().getWidth(), Misc.getDarkPlayerColor(), 0f)
-                   .getPosition().belowLeft(filterTextElement, 2f);
-        panel.addUIElement(filterElement).belowLeft(headerElement, 0f);
+                   .getPosition().belowLeft(filterTextElement, 1f);
+        mainPanel.addUIElement(filterElement).belowLeft(headerElement, 0f);
+    }
 
-        TooltipMakerAPI uiElement = panel.createUIElement(width, height - padding - headerHeight - sorterHeight, true);
+    private void addAugmentList(CustomPanelAPI mainPanel) {
+        TooltipMakerAPI uiElement = mainPanel.createUIElement(panelWidth, panelHeight - headerHeight - sorterHeight + 7f, true);
         List<CustomPanelAPI> panelList = new ArrayList<>();
 
         boolean hasSelectedAugmentInList = false;
@@ -118,9 +112,9 @@ public class CargoPanel {
                 continue;
             }
 
-            CustomPanelAPI cargoPanel = panel.createCustomPanel(width, buttonHeight, null);
-            TooltipMakerAPI cargoElement = cargoPanel.createUIElement(width - 10f, buttonHeight, false);
-            generateAugmentForPanel(cargoElement, width, augmentCargoWrapper);
+            CustomPanelAPI cargoPanel = mainPanel.createCustomPanel(panelWidth, elementHeight, null);
+            TooltipMakerAPI cargoElement = cargoPanel.createUIElement(panelWidth, elementHeight, false);
+            generateAugmentForPanel(cargoElement, panelWidth, augmentCargoWrapper);
 
             cargoPanel.addUIElement(cargoElement);
             panelList.add(cargoPanel);
@@ -132,14 +126,14 @@ public class CargoPanel {
 
         for (int i = 0; i < panelList.size(); i++) {
             CustomPanelAPI customPanelAPI = panelList.get(i);
-            uiElement.addCustom(customPanelAPI, i == 0 ? itemSpacing + 10f : itemSpacing);
+            uiElement.addCustom(customPanelAPI, i == 0 ? itemSpacing + 10f : itemSpacing).getPosition().setXAlignOffset(0f);
         }
 
         if (!hasSelectedAugmentInList) {
             AugmentManagerIntel.setSelectedAugmentInCargo(null);
         }
 
-        panel.addUIElement(uiElement).inTR(0f, padding + headerHeight + listSpacing);
+        mainPanel.addUIElement(uiElement).inBR(0f, 0f);
     }
 
     private boolean matchesFilter(AugmentApplier augment) {
@@ -160,7 +154,7 @@ public class CargoPanel {
         float buttonWidth = 24f;
         float buttonHeight = 24f;
         float iconSize = 24f;
-        float itemSpacing = 10f;
+        float itemSpacing = 12f;
         float itemPadding = 4f;
         float slotIndicatorWidth = iconSize + itemPadding;
         float totalLineWidth = width - buttonWidth - itemSpacing;
@@ -202,9 +196,12 @@ public class CargoPanel {
         TooltipMakerAPI imageWithText = cargoElement.beginImageWithText(VT_Icons.AUGMENT_ITEM_ICON, iconSize);
         if (augment.getName().toLowerCase().contains("rainbow")) {
             RainbowString rainbowString = new RainbowString(augment.getName(), Color.RED, 20);
-            imageWithText.addPara(rainbowString.getConvertedString(), 3f, rainbowString.getHlColors(), rainbowString.getHlStrings());
+            imageWithText.addPara(
+                    imageWithText.shortenString(rainbowString.getConvertedString(), width - buttonWidth - iconSize - 2f - itemSpacing * 2),
+                    3f, rainbowString.getHlColors(),
+                    rainbowString.getHlStrings());
         } else {
-            imageWithText.addPara(cargoElement.shortenString(augment.getName(), width - buttonWidth - iconSize - 2f - itemSpacing * 2),
+            imageWithText.addPara(imageWithText.shortenString(augment.getName(), width - buttonWidth - iconSize - 2f - itemSpacing * 2),
                                   augment.getAugmentQuality().getColor(), 3f);
         }
         imageWithText.getPrev().getPosition().setXAlignOffset(-6f);

@@ -3,7 +3,6 @@ package de.schafunschaf.voidtec.campaign.intel.buttons;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 
 public class DefaultButton implements IntelButton {
 
@@ -46,10 +45,10 @@ public class DefaultButton implements IntelButton {
     }
 
     @Override
-    public ButtonAPI createButton(TooltipMakerAPI uiElement, float width, float height) {
+    public ButtonAPI addButton(TooltipMakerAPI tooltip, float width, float height) {
         return null;
     }
 
-    protected void addTooltip(TooltipMakerAPI uiElement, final SlotCategory slotCategory) {
-    }
+    @Override
+    public void addTooltip(TooltipMakerAPI tooltip) {}
 }

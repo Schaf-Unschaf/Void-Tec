@@ -19,6 +19,7 @@ public class SelectAugmentButton extends DefaultButton {
             AugmentManagerIntel.setSelectedAugmentInCargo(null);
         } else {
             AugmentManagerIntel.setSelectedAugmentInCargo(augment);
+            AugmentManagerIntel.setSelectedInstalledAugment(null);
         }
     }
 

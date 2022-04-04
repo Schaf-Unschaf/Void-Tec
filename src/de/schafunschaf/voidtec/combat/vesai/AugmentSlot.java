@@ -46,17 +46,14 @@ public class AugmentSlot {
         slottedAugment.applyAfterCreation(ship, id);
     }
 
-    public void applyToShip(MutableShipStatsAPI stats, String id) {
+    public void applyToShip(MutableShipStatsAPI stats, String id, int slotIndex) {
         if (isNull(slottedAugment)) {
             return;
         }
 
-        long randomSeed = (long) stats.getFleetMember().getId().hashCode() + slottedAugment.hashCode();
-        Random random = new Random(randomSeed);
-
         hullmodManager.getShipStatEffectManager().addAll(slottedAugment.getActiveStatMods());
 
-        slottedAugment.applyToShip(stats, id, random);
+        slottedAugment.applyToShip(stats, id, slotIndex);
     }
 
     public void applyToFighter(MutableShipStatsAPI stats, String id) {
@@ -72,7 +69,7 @@ public class AugmentSlot {
             return;
         }
 
-        slottedAugment.generateTooltip(stats, id, tooltip, width, slotCategory, isItemTooltip, null);
+        slottedAugment.generateTooltip(stats, id, tooltip, width, slotCategory, isItemTooltip, false, null);
     }
 
     public void unlockSlot() {
@@ -99,5 +96,9 @@ public class AugmentSlot {
 
     public boolean isEmpty() {
         return isNull(slottedAugment);
+    }
+
+    public void collectAppliedStats(MutableShipStatsAPI stats, String id) {
+        slottedAugment.collectAppliedStats(stats, id);
     }
 }

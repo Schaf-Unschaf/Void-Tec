@@ -19,9 +19,9 @@ public enum AugmentQuality {
     COMMON("Common", 1f, new Color(200, 200, 200), 70f),
     MILITARY("Military", 1.2f, new Color(0, 180, 50), 45f),
     EXPERIMENTAL("Experimental", 1.5f, new Color(0, 150, 255), 20f),
-    REMNANT("Remnant", 1.7f, new Color(70, 255, 235), 5f),
+    EXOTIC("Exotic", 1.7f, new Color(150, 70, 255), 5f),
     DOMAIN("Domain", 2f, new Color(255, 120, 0), 1f),
-    UNIQUE("Unique", 1f, new Color(200, 0, 255), 0f);
+    CUSTOMISED("Customised", 1f, new Color(0, 255, 150), 0f);
 
     public static final AugmentQuality[] values = values();
     public static final String[] allowedValues = getAllowedQualitiesArray();
@@ -37,14 +37,14 @@ public enum AugmentQuality {
         allowedSet.add(COMMON);
         allowedSet.add(MILITARY);
         allowedSet.add(EXPERIMENTAL);
-        allowedSet.add(REMNANT);
+        allowedSet.add(EXOTIC);
         allowedSet.add(DOMAIN);
 
         return allowedSet;
     }
 
     private static String[] getAllowedQualitiesArray() {
-        return new String[]{DEGRADED.name(), COMMON.name(), MILITARY.name(), EXPERIMENTAL.name(), REMNANT.name(), DOMAIN.name()};
+        return new String[]{DEGRADED.name(), COMMON.name(), MILITARY.name(), EXPERIMENTAL.name(), EXOTIC.name(), DOMAIN.name()};
     }
 
     public static AugmentQuality getRandomQuality(Random random, List<AugmentQuality> allowedQualities, boolean ignoreWeighting) {
@@ -58,7 +58,7 @@ public enum AugmentQuality {
 
         WeightedRandomPicker<AugmentQuality> picker = new WeightedRandomPicker<>(random);
         if (ignoreWeighting) {
-            picker.addAll(getAllowedQualities());
+            picker.addAll(allowedQualities);
         } else {
             for (AugmentQuality quality : allowedQualities) {
                 picker.add(quality, quality.getWeighing());
@@ -139,6 +139,19 @@ public enum AugmentQuality {
         }
 
         return null;
+    }
+
+    public static AugmentQuality getHighestQuality() {
+        float highestModifier = 0f;
+        AugmentQuality highestQuality = null;
+        for (AugmentQuality augmentQuality : values()) {
+            if (augmentQuality.getModifier() > highestModifier) {
+                highestQuality = augmentQuality;
+                highestModifier = augmentQuality.getModifier();
+            }
+        }
+
+        return highestQuality;
     }
 
     public AugmentQuality getHigherQuality() {

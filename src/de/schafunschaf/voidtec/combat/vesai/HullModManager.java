@@ -6,13 +6,18 @@ import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.ButtonAPI;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.ids.VT_Icons;
 import de.schafunschaf.voidtec.ids.VT_Settings;
 import de.schafunschaf.voidtec.util.ShipUtils;
+import de.schafunschaf.voidtec.util.ui.ButtonUtils;
+import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j;
 
@@ -20,7 +25,6 @@ import java.awt.Color;
 import java.util.*;
 
 import static com.fs.starfarer.api.combat.ShipAPI.HullSize;
-import static de.schafunschaf.voidtec.ids.VT_Colors.VT_GREY_COLOR;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @Log4j
@@ -31,9 +35,13 @@ public class HullModManager {
     private final ShipStatEffectManager shipStatEffectManager = new ShipStatEffectManager();
     @Getter
     private final String fleetMemberID;
+    private final Map<String, Float> appliedModifiers = new HashMap<>();
+    @Getter
+    private long randomSeed;
 
     public HullModManager(FleetMemberAPI fleetMember) {
         this.fleetMemberID = fleetMember.getId();
+        this.randomSeed = fleetMemberID.hashCode();
         HullModDataStorage.getInstance().storeShipID(fleetMemberID, this);
         generateSlotsForShip(fleetMember);
     }
@@ -46,8 +54,9 @@ public class HullModManager {
 
     public void applySlotEffects(MutableShipStatsAPI stats, String id) {
         shipStatEffectManager.clear();
-        for (AugmentSlot augmentSlot : shipAugmentSlots) {
-            augmentSlot.applyToShip(stats, id);
+        for (int i = 0; i < shipAugmentSlots.size(); i++) {
+            AugmentSlot augmentSlot = shipAugmentSlots.get(i);
+            augmentSlot.applyToShip(stats, id, i + 1);
         }
     }
 
@@ -57,7 +66,7 @@ public class HullModManager {
         }
     }
 
-    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, boolean isItemTooltip) {
+    public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width) {
         String shipName = stats.getFleetMember().getShipName();
         int maxSlots = shipAugmentSlots.size();
         Color highlightColor = Misc.getHighlightColor();
@@ -66,56 +75,93 @@ public class HullModManager {
                 10f, new Color[]{Misc.getBasePlayerColor(), highlightColor, highlightColor}, shipName, String.valueOf(maxSlots),
                 "Augments");
 
-        tooltip.addSpacer(10f);
+        tooltip.addSectionHeading("VESAI Slot Status", Alignment.MID, 6f);
+        tooltip.addSpacer(3f);
+        showSlots(tooltip, width);
+        tooltip.addSectionHeading("Modified Stats", Alignment.MID, 3f);
+        tooltip.addSpacer(3f);
+        listAppliedStats(tooltip, id, stats);
+        showSModInfo(tooltip, stats);
+    }
 
-        int numLockedSlots = 0;
+    private void showSlots(TooltipMakerAPI tooltip, float width) {
+        float buttonSize = 24f;
+        float buttonPadding = 10f;
+        float topBotPadding = 6f;
+        float vertSepWidth = 4f;
+        float panelSize = 0f;
 
-        boolean isFirstUnique = true;
-        for (AugmentSlot uniqueSlot : getUniqueSlots()) {
-            if (uniqueSlot.isEmpty()) {
-                addEmptySlotDesc(tooltip, width, uniqueSlot);
+        CustomPanelAPI slotPanel = Global.getSettings().createCustom(width, buttonSize, null);
+        TooltipMakerAPI slotPanelElement = slotPanel.createUIElement(width, buttonSize, false);
+
+        ButtonAPI lastButton = null;
+        boolean lastWasUniqueSlot = false;
+        boolean lastWasLockedSlot = false;
+        for (AugmentSlot augmentSlot : getAllSlots()) {
+            boolean isUnique = !augmentSlot.isEmpty() && augmentSlot.getSlottedAugment().isUniqueMod();
+            boolean isUniqueSlot = augmentSlot.getSlotCategory() == SlotCategory.COSMETIC
+                    || augmentSlot.getSlotCategory() == SlotCategory.SPECIAL;
+            boolean isBetweenCategories = lastWasUniqueSlot && !isUniqueSlot
+                    || !augmentSlot.isUnlocked() && !lastWasLockedSlot;
+            Color slotColor = augmentSlot.isUnlocked() ? augmentSlot.getSlotCategory().getColor() : Misc.getGrayColor();
+            ButtonAPI currentButton;
+
+            currentButton = ButtonUtils.addFakeAugmentButton(slotPanelElement, buttonSize, slotColor, slotColor,
+                                                             !augmentSlot.isEmpty() || !augmentSlot.isUnlocked(), isUnique);
+
+            if (isNull(lastButton)) {
+                currentButton.getPosition().inTL(0, 0);
             } else {
-                uniqueSlot.generateTooltip(stats, id, tooltip, width, isItemTooltip);
+                float extraPadding = isBetweenCategories ? buttonPadding + buttonSize : 0f;
+                currentButton.getPosition().rightOfTop(lastButton, buttonPadding + extraPadding);
+                if (isBetweenCategories) {
+                    UIUtils.addVerticalSeparator(slotPanelElement, vertSepWidth, buttonSize + topBotPadding, Misc.getDarkPlayerColor())
+                           .getPosition()
+                           .rightOfTop(lastButton, (buttonPadding + extraPadding - vertSepWidth) / 2)
+                           .setYAlignOffset(3f);
+                }
+                panelSize += buttonPadding + extraPadding;
             }
 
-            if (isFirstUnique) {
-                tooltip.addSpacer(10f);
-                isFirstUnique = false;
-            }
-        }
-
-        for (AugmentSlot augmentSlot : getSlotsForDisplay()) {
             if (!augmentSlot.isUnlocked()) {
-                numLockedSlots++;
-                continue;
+                slotPanelElement.addImage(VT_Icons.LOCKED_SLOT_ICON, buttonSize, 0);
+                slotPanelElement.getPrev().getPosition().rightOfTop(currentButton, -buttonSize);
             }
 
-            tooltip.addSpacer(10f);
+            panelSize += buttonSize;
+            lastButton = currentButton;
 
-            if (augmentSlot.isEmpty()) {
-                addEmptySlotDesc(tooltip, width, augmentSlot);
-                continue;
-            }
-
-            augmentSlot.generateTooltip(stats, id, tooltip, width, isItemTooltip);
+            lastWasUniqueSlot = isUniqueSlot;
+            lastWasLockedSlot = !augmentSlot.isUnlocked();
         }
 
+        float xPad = (width - panelSize) / 2;
+        slotPanel.addUIElement(slotPanelElement).inTL(xPad, 0);
+        tooltip.addCustom(slotPanel, 0f);
+    }
+
+    private void listAppliedStats(TooltipMakerAPI tooltip, String id, MutableShipStatsAPI stats) {
+        for (AugmentSlot filledSlot : getFilledSlots()) {
+            filledSlot.collectAppliedStats(stats, id);
+        }
+
+        List<String> modifierList = new ArrayList<>(appliedModifiers.keySet());
+        Collections.sort(modifierList);
+        for (String key : modifierList) {
+            int value = appliedModifiers.get(key).intValue();
+            if (value != 0) {
+                BaseStatMod.generateStatTooltip(tooltip, key, value);
+            }
+        }
+
+        appliedModifiers.clear();
+    }
+
+    private void showSModInfo(TooltipMakerAPI tooltip, MutableShipStatsAPI stats) {
         float maxPermanentHullmods = Global.getSettings().getFloat("maxPermanentHullmods");
         int builtInBonusSlots = (int) stats.getDynamic().getMod(Stats.MAX_PERMANENT_HULLMODS_MOD).getFlatBonus();
         int maxBuiltInMods = (int) (maxPermanentHullmods + builtInBonusSlots);
         int currentBuiltInMods = stats.getVariant().getSMods().size();
-
-        tooltip.addSectionHeading("VESAI System Status", Alignment.MID, 10f);
-        tooltip.addPara("--- All systems are fully operational ---", Misc.getPositiveHighlightColor(), 3f).setAlignment(Alignment.MID);
-
-        if (numLockedSlots > 0) {
-            tooltip.addSpacer(10f);
-            TooltipMakerAPI imageWithText = tooltip.beginImageWithText(VT_Icons.LOCKED_SLOT_ICON, 32f);
-            imageWithText.addPara(String.format("%s Augment slots are still locked", numLockedSlots), 0f, VT_GREY_COLOR,
-                                  Misc.getHighlightColor(), String.valueOf(numLockedSlots));
-            imageWithText.addPara("Type: Unknown", 3f, VT_GREY_COLOR, "Unknown");
-            tooltip.addImageWithText(0f);
-        }
 
         if (maxBuiltInMods > 0) {
             tooltip.addPara("Available Build-In Slots: %s/%s", 10f, Misc.getTextColor(), Misc.getHighlightColor(),
@@ -127,27 +173,13 @@ public class HullModManager {
                         SlotCategory.SPECIAL.getColor(), SlotCategory.SPECIAL.name());
     }
 
-    private void addEmptySlotDesc(TooltipMakerAPI tooltip, float width, AugmentSlot augmentSlot) {
-        tooltip.addButton("", null, VT_GREY_COLOR, VT_GREY_COLOR, width, 0f, 3f);
-        tooltip.addPara("Empty Augment Slot", VT_GREY_COLOR, 3f);
-        TooltipMakerAPI imageWithText = tooltip.beginImageWithText(VT_Icons.EMPTY_SLOT_ICON, 40f);
-        imageWithText.addPara("Type: %s", 3f, augmentSlot.getSlotCategory().color, augmentSlot.getSlotCategory().toString());
-        tooltip.addImageWithText(3f);
-        tooltip.addButton("", null, VT_GREY_COLOR, VT_GREY_COLOR, width, 0f, 3f);
-    }
-
-    public void runCombatScript(ShipAPI ship, float amount) {
-        for (AugmentSlot augmentSlot : getFilledSlots()) {
-            augmentSlot.getSlottedAugment().runCustomScript(ship, amount);
-        }
-    }
-
     public boolean installAugment(AugmentSlot augmentSlot, AugmentApplier augment) {
         return augmentSlot.isEmpty() && isAugmentCompatible(augmentSlot, augment) && augmentSlot.insertAugment(augment);
     }
 
     public boolean isAugmentCompatible(AugmentSlot augmentSlot, AugmentApplier augment) {
-        if (isNull(augment) || hasSameAugmentSlotted(augment) || augment.getAugmentQuality() == AugmentQuality.DESTROYED) {
+        if (isNull(augment) || hasSameAugmentSlotted(augment) || augment.getAugmentQuality() == AugmentQuality.DESTROYED
+                || hasUniqueModInSlotType(augmentSlot, augment)) {
             return false;
         }
 
@@ -168,6 +200,18 @@ public class HullModManager {
         for (AugmentSlot augmentSlot : getFilledSlots()) {
             if (augmentSlot.getSlottedAugment().getAugmentID().equals(augment.getAugmentID())) {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasUniqueModInSlotType(AugmentSlot augmentSlot, AugmentApplier augment) {
+        AugmentApplier slottedAugment = augmentSlot.getSlottedAugment();
+        if (!isNull(slottedAugment)) {
+            boolean isUniqueMod = slottedAugment.isUniqueMod();
+            if (isUniqueMod) {
+                return augment.isUniqueMod();
             }
         }
 
@@ -206,20 +250,6 @@ public class HullModManager {
         }
 
         return unlockedSlots;
-    }
-
-    public List<AugmentSlot> getEmptySlots() {
-        List<AugmentSlot> emptySlots = new ArrayList<>();
-
-        for (AugmentSlot augmentSlot : shipAugmentSlots) {
-            if (!augmentSlot.isEmpty()) {
-                continue;
-            }
-
-            emptySlots.add(augmentSlot);
-        }
-
-        return emptySlots;
     }
 
     public List<AugmentSlot> getFilledSlots() {
@@ -261,6 +291,13 @@ public class HullModManager {
         return slotsForDisplay;
     }
 
+    public List<AugmentSlot> getAllSlots() {
+        List<AugmentSlot> slotList = new ArrayList<>(getUniqueSlots());
+        slotList.addAll(getSlotsForDisplay());
+
+        return slotList;
+    }
+
     public AugmentSlot damageRandomAugment(int numLevelsDamaged, Random random) {
         if (isNull(random)) {
             random = new Random();
@@ -270,7 +307,7 @@ public class HullModManager {
 
         for (AugmentSlot filledSlot : getFilledSlots()) {
             AugmentQuality augmentQuality = filledSlot.getSlottedAugment().getAugmentQuality();
-            if (augmentQuality != AugmentQuality.UNIQUE && augmentQuality.getLowerQuality() != augmentQuality) {
+            if (augmentQuality != AugmentQuality.CUSTOMISED && augmentQuality.getLowerQuality() != augmentQuality) {
                 slotsWithDamageableAugments.add(filledSlot);
             }
         }
@@ -285,36 +322,12 @@ public class HullModManager {
         return augmentSlot;
     }
 
-    public AugmentSlot repairRandomAugment(int numLevelsRepaired, Random random) {
-        if (isNull(random)) {
-            random = new Random();
-        }
-
-        List<AugmentSlot> slotsWithRepairableAugments = new ArrayList<>();
-
-        for (AugmentSlot filledSlot : getFilledSlots()) {
-            AugmentApplier slottedAugment = filledSlot.getSlottedAugment();
-            if (slottedAugment.getAugmentQuality() != slottedAugment.getInitialQuality()) {
-                slotsWithRepairableAugments.add(filledSlot);
-            }
-        }
-
-        if (slotsWithRepairableAugments.isEmpty()) {
-            return null;
-        }
-
-        AugmentSlot augmentSlot = slotsWithRepairableAugments.get(random.nextInt(slotsWithRepairableAugments.size()));
-        augmentSlot.getSlottedAugment().repairAugment(numLevelsRepaired);
-
-        return augmentSlot;
-    }
-
     public void generateSlotsForShip(FleetMemberAPI fleetMember) {
         if (VT_Settings.sheepDebug) {
             log.info(String.format("Generating slots for %s", ShipUtils.generateShipNameWithClass(fleetMember)));
         }
 
-        Random random = new Random(fleetMember.getId().hashCode());
+        Random random = new Random(randomSeed);
         HullSize hullSize = fleetMember.getVariant().getHullSize();
         boolean isPhase = fleetMember.isPhaseShip();
         int numFlightDecks = fleetMember.getNumFlightDecks();
@@ -367,5 +380,17 @@ public class HullModManager {
                 log.info(String.format("Slot: %s (unlocked: %s)", shipAugmentSlots.get(i + 1).getSlotCategory().name(), isUnlocked));
             }
         }
+    }
+
+    public void addStatModifier(String statID, float value) {
+        if (appliedModifiers.containsKey(statID)) {
+            appliedModifiers.put(statID, appliedModifiers.get(statID) + value);
+        } else {
+            appliedModifiers.put(statID, value);
+        }
+    }
+
+    public void rollNewRandomSeed() {
+        randomSeed = Misc.genRandomSeed();
     }
 }

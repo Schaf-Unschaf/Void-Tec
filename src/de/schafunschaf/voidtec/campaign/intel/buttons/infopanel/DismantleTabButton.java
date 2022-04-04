@@ -4,6 +4,7 @@ import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
 import de.schafunschaf.voidtec.campaign.intel.CargoPanel;
 import de.schafunschaf.voidtec.campaign.intel.InfoPanel;
 import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
@@ -20,6 +21,7 @@ public class DismantleTabButton extends DefaultButton {
     public void buttonPressConfirmed(IntelUIAPI ui) {
         CargoPanel.showDestroyedAugments = true;
         CargoPanel.showOnlyRepairable = false;
+        AugmentManagerIntel.setShowingManufacturingPanel(false);
         InfoPanel.setSelectedTab(InfoPanel.InfoTabs.DISMANTLE);
     }
 
@@ -29,12 +31,14 @@ public class DismantleTabButton extends DefaultButton {
     }
 
     @Override
-    public ButtonAPI createButton(TooltipMakerAPI uiElement, float width, float height) {
+    public ButtonAPI addButton(TooltipMakerAPI tooltip, float width, float height) {
         Color textColor = numAugments > 0 ? Misc.getHighlightColor() : Misc.getBasePlayerColor();
-        ButtonAPI areaCheckbox = uiElement.addAreaCheckbox(getName(), this, Misc.getBasePlayerColor(), Misc.getDarkPlayerColor(),
-                                                           textColor, width, height, 0f);
-
+        Color bgColor = numAugments > 0 && isSelected() ? Misc.getDarkHighlightColor().darker().darker() : Misc.getDarkPlayerColor();
+        Color hlColor = numAugments > 0 ? Misc.getDarkHighlightColor() : Misc.getDarkPlayerColor();
+        ButtonAPI areaCheckbox = tooltip.addAreaCheckbox(getName(), this, hlColor, bgColor,
+                                                         textColor, width, height, 0f);
         areaCheckbox.setChecked(isSelected());
+
         return areaCheckbox;
     }
 

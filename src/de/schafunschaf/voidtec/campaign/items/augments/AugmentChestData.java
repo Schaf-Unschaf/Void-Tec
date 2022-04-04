@@ -7,8 +7,6 @@ import de.schafunschaf.voidtec.helper.ColorShifter;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.awt.Color;
-
 @Getter
 @Setter
 public class AugmentChestData extends SpecialItemData {
@@ -21,7 +19,7 @@ public class AugmentChestData extends SpecialItemData {
     public AugmentChestData(String id, String data, int size) {
         super(id, data);
         this.chestStorage = Global.getFactory().createCargo(true);
-        this.colorShifter = new ColorShifter(Color.RED);
+        this.colorShifter = new ColorShifter(null);
         this.maxSize = 100;
         this.currentSize = 0;
     }

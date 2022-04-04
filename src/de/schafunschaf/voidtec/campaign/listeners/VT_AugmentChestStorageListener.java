@@ -14,11 +14,10 @@ import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestData;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestPlugin;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DialogHelperLeaveStorage;
+import de.schafunschaf.voidtec.helper.ProgressBar;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 
 import java.awt.Color;
-
-import static de.schafunschaf.voidtec.helper.ProgressBar.addStorageMeter;
 
 public class VT_AugmentChestStorageListener implements CargoPickerListener {
 
@@ -79,9 +78,10 @@ public class VT_AugmentChestStorageListener implements CargoPickerListener {
         float maxSize = augmentChestData.getMaxSize();
         float currentSize = augmentChestData.getCurrentSize() + sumCargoAffected;
 
-        ButtonAPI outerButton = addStorageMeter(panel, 200f, 22f, currentSize, maxSize,
-                                                Misc.scaleColorOnly(Misc.getBasePlayerColor(), 0.8f),
-                                                Misc.scaleColorOnly(Misc.getDarkPlayerColor(), 0.2f), Misc.getBasePlayerColor(), 0f);
+        ButtonAPI outerButton = ProgressBar.addStorageMeter(panel, 200f, 22f, currentSize, maxSize,
+                                                            Misc.scaleColorOnly(Misc.getBasePlayerColor(), 0.8f),
+                                                            Misc.scaleColorOnly(Misc.getDarkPlayerColor(), 0.2f), Misc.getBasePlayerColor(),
+                                                            0f);
 
         augmentChestPlugin.createTooltip(panel, false, null, null);
         panel.addPara("Allowed Items", Misc.getHighlightColor(), 10f);

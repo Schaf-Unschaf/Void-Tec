@@ -5,7 +5,8 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.cosmetic.VT_RainbowEngines;
 import de.schafunschaf.voidtec.combat.vesai.augments.cosmetic.VT_RainbowShields;
-import de.schafunschaf.voidtec.ids.VT_Augments;
+import de.schafunschaf.voidtec.combat.vesai.augments.engine.VT_PursuitEngines;
+import de.schafunschaf.voidtec.combat.vesai.augments.engine.VT_TravelDrives;
 
 import java.util.*;
 
@@ -16,7 +17,16 @@ public class AugmentDataManager {
     private static final Map<String, AugmentData> AUGMENT_DATA_MAP = new HashMap<>();
 
     public static AugmentApplier getAugment(String augmentID, AugmentQuality augmentQuality) {
-        return createAugmentFromData(AUGMENT_DATA_MAP.get(augmentID), augmentQuality, null);
+        return createAugmentFromData(AUGMENT_DATA_MAP.get(augmentID), augmentQuality);
+    }
+
+    public static AugmentApplier cloneAugment(AugmentApplier augment) {
+        AugmentApplier clonedAugment = createAugmentFromData(AUGMENT_DATA_MAP.get(augment.getAugmentID()), augment.getInitialQuality());
+        if (!isNull(clonedAugment)) {
+            clonedAugment.damageAugment(augment.getInitialQuality().ordinal() - augment.getAugmentQuality().ordinal());
+        }
+
+        return clonedAugment;
     }
 
     public static void storeAugmentData(String augmentID, AugmentData augment) {
@@ -24,8 +34,10 @@ public class AugmentDataManager {
     }
 
     public static void initCustomAugments() {
-        AugmentDataManager.storeAugmentData(VT_Augments.VT_RAINBOW_ENGINES, new VT_RainbowEngines());
-        AugmentDataManager.storeAugmentData(VT_Augments.VT_RAINBOW_SHIELDS, new VT_RainbowShields());
+        new VT_RainbowEngines();
+        new VT_RainbowShields();
+        new VT_PursuitEngines();
+        new VT_TravelDrives();
     }
 
     public static AugmentApplier getRandomAugment(Random random) {
@@ -70,10 +82,10 @@ public class AugmentDataManager {
             }
         }
 
-        return createAugmentFromData(picker.pick(), augmentQuality, random);
+        return createAugmentFromData(picker.pick(), augmentQuality);
     }
 
-    private static AugmentApplier createAugmentFromData(AugmentData augmentData, AugmentQuality augmentQuality, Random random) {
-        return isNull(augmentData) ? null : new BaseAugment(augmentData, augmentQuality, random);
+    private static AugmentApplier createAugmentFromData(AugmentData augmentData, AugmentQuality augmentQuality) {
+        return isNull(augmentData) ? null : new BaseAugment(augmentData, augmentQuality);
     }
 }

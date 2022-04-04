@@ -7,6 +7,7 @@ import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import data.scripts.util.MagicRender;
 import de.schafunschaf.voidtec.combat.vesai.CombatScriptRunner;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.ids.VT_DynamicStatKeys;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class TimeAccelerationEffect implements CombatScriptRunner {
     private final String scriptID;
 
     @Override
-    public void run(ShipAPI ship, float amount, Object data) {
+    public void run(ShipAPI ship, float amount, AugmentApplier augment) {
         MutableStat stat = ship.getMutableStats().getDynamic().getStat(VT_DynamicStatKeys.TIME_ACCELERATION_TRACKER);
         int timeAcceleration = (int) (ship.getMutableStats().getTimeMult().getModifiedValue() * 100);
         boolean isDebuff = timeAcceleration < 100;

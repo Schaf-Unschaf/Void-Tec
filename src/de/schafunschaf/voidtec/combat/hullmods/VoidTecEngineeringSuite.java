@@ -11,7 +11,6 @@ import de.schafunschaf.voidtec.combat.scripts.fx.AugmentationEffect;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.HullModDataStorage;
 import de.schafunschaf.voidtec.combat.vesai.HullModManager;
-import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.ids.VT_Colors;
 
 import java.awt.Color;
@@ -26,8 +25,9 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
     @Override
     public void applyEffectsAfterShipCreation(ShipAPI ship, String id) {
         HullModManager hullModManager = HullModDataStorage.getInstance().getHullModManager(ship.getFleetMemberId());
-        if (isNull(hullModManager))
+        if (isNull(hullModManager)) {
             return;
+        }
 
         hullModManager.applyAfterCreation(ship, id);
     }
@@ -64,11 +64,8 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
             return;
         }
 
-        for (AugmentSlot uniqueSlot : hullmodManager.getUniqueSlots()) {
-            AugmentApplier slottedAugment = uniqueSlot.getSlottedAugment();
-            if (!isNull(slottedAugment)) {
-                slottedAugment.runCustomScript(ship, amount);
-            }
+        for (AugmentSlot augmentSlot : hullmodManager.getFilledSlots()) {
+            augmentSlot.getSlottedAugment().runCustomScript(ship, amount);
         }
 
         hullmodManager.getShipStatEffectManager().runScripts(ship, amount);
@@ -94,7 +91,7 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
             return;
         }
 
-        hullmodManager.generateTooltip(fleetMember.getStats(), HULL_MOD_ID, tooltip, width, false);
+        hullmodManager.generateTooltip(fleetMember.getStats(), HULL_MOD_ID, tooltip, width);
     }
 
     @Override

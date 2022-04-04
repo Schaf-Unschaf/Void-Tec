@@ -1,6 +1,7 @@
 package de.schafunschaf.voidtec.campaign.intel.tabs;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
@@ -9,9 +10,9 @@ import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
 import de.schafunschaf.voidtec.campaign.intel.CargoPanel;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemPlugin;
+import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
-import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.helper.TextWithHighlights;
 import de.schafunschaf.voidtec.util.FormattingTools;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
@@ -31,102 +32,110 @@ public class DetailsTab {
     private final float augmentPanelWidth;
     private final float primaryPanelWidth;
     private final float secondaryPanelWidth;
+    private final float augmentPanelYOffset;
     private final float panelHeaderHeight = 20f;
 
-    private final AugmentCargoWrapper selectedAugmentInCargo = AugmentManagerIntel.getSelectedAugmentInCargo();
+    private final AugmentApplier selectedAugment = AugmentManagerIntel.getSelectedAugment();
+    private final AugmentApplier selectedInstalledAugment = AugmentManagerIntel.getSelectedInstalledAugment();
 
-    public DetailsTab(TooltipMakerAPI tooltip, float width, float height, float padding) {
+    public DetailsTab(TooltipMakerAPI tooltip, float width, float height, float padding, float subHDOffset) {
         this.tooltip = tooltip;
         this.parentHeight = height;
         this.padding = padding;
         this.augmentPanelWidth = width * 0.25f;
         this.primaryPanelWidth = width * 0.375f;
         this.secondaryPanelWidth = width * 0.375f;
+        this.augmentPanelYOffset = subHDOffset;
 
         CargoPanel.showDestroyedAugments = false;
         CargoPanel.showOnlyRepairable = false;
     }
 
-    public void render() {
-        CustomPanelAPI augmentInfoPanel = Global.getSettings()
-                                                .createCustom(augmentPanelWidth, parentHeight - padding, null);
-        TooltipMakerAPI augmentUIElement = augmentInfoPanel.createUIElement(augmentPanelWidth, parentHeight - padding, false);
+    public void render(CustomPanelAPI mainPanel) {
+        boolean hasAugmentSelected = !isNull(selectedAugment);
 
-        CustomPanelAPI primaryStatPanel = Global.getSettings()
-                                                .createCustom(primaryPanelWidth, parentHeight - padding, null);
+        if (!hasAugmentSelected) {
+            tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
+            tooltip.addPara("No Augment Selected", Misc.getBasePlayerColor(), padding).setAlignment(Alignment.MID);
+            tooltip.setParaFontDefault();
+            return;
+        }
+
+        CustomPanelAPI augmentInfoPanel = mainPanel.createCustomPanel(augmentPanelWidth, parentHeight + augmentPanelYOffset - padding,
+                                                                      null);
+        TooltipMakerAPI augmentUIElement = augmentInfoPanel.createUIElement(augmentPanelWidth, parentHeight + augmentPanelYOffset - padding,
+                                                                            false);
+
+        CustomPanelAPI primaryStatPanel = mainPanel.createCustomPanel(primaryPanelWidth, parentHeight - padding, null);
         TooltipMakerAPI primaryStatUIElement = primaryStatPanel.createUIElement(primaryPanelWidth, parentHeight - padding, false);
 
-        CustomPanelAPI secondaryStatPanel = Global.getSettings()
-                                                  .createCustom(secondaryPanelWidth, parentHeight - padding, null);
+        CustomPanelAPI secondaryStatPanel = mainPanel.createCustomPanel(secondaryPanelWidth, parentHeight - padding, null);
         TooltipMakerAPI secondaryStatUIElement = secondaryStatPanel.createUIElement(secondaryPanelWidth, parentHeight - padding, false);
 
-        buildAugmentPanel(augmentUIElement);
-        buildStatPanel(primaryStatUIElement, primaryPanelWidth, true);
-        buildStatPanel(secondaryStatUIElement, secondaryPanelWidth, false);
-
+        buildAugmentPanel(mainPanel, augmentUIElement);
         augmentInfoPanel.addUIElement(augmentUIElement);
-        primaryStatPanel.addUIElement(primaryStatUIElement);
-        secondaryStatPanel.addUIElement(secondaryStatUIElement);
-
         tooltip.addCustom(augmentInfoPanel, 0f).getPosition()
-               .setSize(augmentPanelWidth, parentHeight - padding);
-        tooltip.addCustom(primaryStatPanel, 0f).getPosition()
-               .setSize(primaryPanelWidth, parentHeight - padding)
-               .rightOfTop(augmentInfoPanel, 0f);
-        tooltip.addCustom(secondaryStatPanel, 0f).getPosition()
-               .setSize(secondaryPanelWidth, parentHeight - padding)
-               .rightOfTop(primaryStatPanel, 0f);
+               .setSize(augmentPanelWidth, parentHeight + augmentPanelYOffset - padding);
+
+        if (!isNull(selectedInstalledAugment)) {
+            buildStatPanel(primaryStatUIElement, primaryPanelWidth + secondaryPanelWidth, true);
+            primaryStatPanel.addUIElement(primaryStatUIElement);
+            tooltip.addCustom(primaryStatPanel, 0f).getPosition()
+                   .setSize(primaryPanelWidth, parentHeight - padding)
+                   .rightOfTop(augmentInfoPanel, 0f);
+        } else {
+            buildStatPanel(primaryStatUIElement, primaryPanelWidth, true);
+            buildStatPanel(secondaryStatUIElement, secondaryPanelWidth, false);
+            primaryStatPanel.addUIElement(primaryStatUIElement);
+            secondaryStatPanel.addUIElement(secondaryStatUIElement);
+            tooltip.addCustom(primaryStatPanel, 0f).getPosition()
+                   .setSize(primaryPanelWidth, parentHeight - padding)
+                   .rightOfTop(augmentInfoPanel, 0f);
+            tooltip.addCustom(secondaryStatPanel, 0f).getPosition()
+                   .setSize(secondaryPanelWidth, parentHeight - padding)
+                   .rightOfTop(primaryStatPanel, 0f);
+        }
     }
 
-    private void buildAugmentPanel(TooltipMakerAPI tooltip) {
-        CustomPanelAPI headerPanel = Global.getSettings().createCustom(augmentPanelWidth, panelHeaderHeight, null);
-        TooltipMakerAPI headerUIElement = headerPanel.createUIElement(augmentPanelWidth, panelHeaderHeight, false);
+    private void buildAugmentPanel(CustomPanelAPI mainPanel, TooltipMakerAPI tooltip) {
+        CustomPanelAPI bodyPanel = mainPanel.createCustomPanel(augmentPanelWidth, panelHeaderHeight, null);
+        TooltipMakerAPI panelUIElement = bodyPanel.createUIElement(augmentPanelWidth, parentHeight + augmentPanelYOffset - padding, true);
 
-        boolean hasAugmentSelected = !isNull(selectedAugmentInCargo);
+        panelUIElement.setParaFont(Fonts.INSIGNIA_LARGE);
+        panelUIElement.setParaFontColor(Misc.getBasePlayerColor());
+        panelUIElement.addPara(selectedAugment.getName(), 0f);
+        panelUIElement.setParaFontDefault();
+        panelUIElement.setParaFontColor(Misc.getTextColor());
 
-        headerUIElement.setParaFont(Fonts.ORBITRON_12);
-        headerUIElement.addPara(hasAugmentSelected ? "Selected Augment" : "No Augment Selected", Misc.getBasePlayerColor(), 0f)
-                       .setAlignment(Alignment.MID);
-        ButtonUtils.addSeparatorLine(headerUIElement, augmentPanelWidth - 5f, Misc.getDarkPlayerColor(), 2f)
-                   .getPosition()
-                   .setXAlignOffset(-5f);
+        AugmentItemPlugin.addTechInfo(panelUIElement, selectedAugment, 6f, 0f);
+        TextWithHighlights augmentDescription = selectedAugment.getDescription();
+        panelUIElement.addPara(augmentDescription.getDisplayString(), 6f, Misc.getHighlightColor(), augmentDescription.getHighlights());
+        bodyPanel.addUIElement(panelUIElement);
 
-        headerPanel.addUIElement(headerUIElement);
-
-        tooltip.addCustom(headerPanel, 0f).getPosition()
-               .setXAlignOffset(0f); // Needed or it will apply the vanilla 5f border offset
-
-        if (hasAugmentSelected) {
-            CustomPanelAPI bodyPanel = Global.getSettings().createCustom(augmentPanelWidth, panelHeaderHeight, null);
-            TooltipMakerAPI bodyUIElement = bodyPanel.createUIElement(augmentPanelWidth, parentHeight - padding - panelHeaderHeight, true);
-
-            AugmentApplier augment = selectedAugmentInCargo.getAugment();
-
-            bodyUIElement.setParaFont(Fonts.INSIGNIA_LARGE);
-            bodyUIElement.addPara(augment.getName(), 0f);
-            bodyUIElement.setParaFontDefault();
-
-            ((AugmentItemPlugin) selectedAugmentInCargo.getAugmentCargoStack().getPlugin()).addTechInfo(bodyUIElement, 6f, 0f);
-            TextWithHighlights augmentDescription = augment.getDescription();
-            bodyUIElement.addPara(augmentDescription.getDisplayString(), 6f, Misc.getHighlightColor(), augmentDescription.getHighlights());
-            bodyPanel.addUIElement(bodyUIElement);
-
-            tooltip.addCustom(bodyPanel, 0f).getPosition()
-                   .setYAlignOffset(-(parentHeight - padding - tooltip.getPrev().getPosition().getHeight() - panelHeaderHeight));
-        }
+        tooltip.addCustom(bodyPanel, 0f).getPosition()
+               .setXAlignOffset(0f)
+               .setYAlignOffset(-(parentHeight - padding - tooltip.getPrev().getPosition().getHeight()));
     }
 
     private void buildStatPanel(TooltipMakerAPI tooltip, float panelWidth, boolean isPrimary) {
         buildStatHeader(tooltip, panelWidth, isPrimary);
 
-        if (!isNull(selectedAugmentInCargo)) {
+        if (!isNull(selectedAugment)) {
             CustomPanelAPI bodyPanel = Global.getSettings().createCustom(panelWidth, panelHeaderHeight, null);
             TooltipMakerAPI bodyUIElement = bodyPanel.createUIElement(panelWidth, parentHeight - padding - panelHeaderHeight, true);
 
-            AugmentApplier augment = selectedAugmentInCargo.getAugment();
-
-            augment.generateStatDescription(bodyUIElement, 0, true, Misc.getBasePlayerColor());
-
+            if (isNull(selectedInstalledAugment)) {
+                selectedAugment.generateStatDescription(bodyUIElement, 0, isPrimary, Misc.getBasePlayerColor());
+            } else {
+                for (FleetMemberAPI memberAPI : Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy()) {
+                    if (memberAPI.getId().equals(selectedAugment.getInstalledSlot().getHullmodManager().getFleetMemberID())) {
+                        SlotCategory slotCategory = selectedAugment.getInstalledSlot().getSlotCategory();
+                        selectedAugment.generateTooltip(memberAPI.getStats(), VoidTecEngineeringSuite.HULL_MOD_ID, bodyUIElement,
+                                                        panelWidth, slotCategory, false, true, slotCategory.getColor());
+                        break;
+                    }
+                }
+            }
             bodyPanel.addUIElement(bodyUIElement);
             tooltip.addCustom(bodyPanel, 0f).getPosition()
                    .setYAlignOffset(-(parentHeight - padding - tooltip.getPrev().getPosition().getHeight() - panelHeaderHeight));
@@ -137,26 +146,22 @@ public class DetailsTab {
         CustomPanelAPI headerPanel = Global.getSettings().createCustom(width, panelHeaderHeight, null);
         TooltipMakerAPI headerUIElement = headerPanel.createUIElement(width, panelHeaderHeight, false);
 
-        boolean hasAugmentSelected = !isNull(selectedAugmentInCargo);
-
         headerUIElement.setParaFont(Fonts.ORBITRON_12);
         headerUIElement.setParaFontColor(Misc.getBasePlayerColor());
 
-        if (hasAugmentSelected) {
-            AugmentApplier augment = selectedAugmentInCargo.getAugment();
-
+        if (isNull(selectedInstalledAugment) && !isNull(selectedAugment)) {
             String headerText;
             StringBuilder hlTokens = new StringBuilder();
             List<Color> hlColors = new ArrayList<>();
             List<String> hlStrings = new ArrayList<>();
 
             if (isPrimary) {
-                hlColors.add(augment.getPrimarySlot().getColor());
-                hlStrings.add(augment.getPrimarySlot().getName());
+                hlColors.add(selectedAugment.getPrimarySlot().getColor());
+                hlStrings.add(selectedAugment.getPrimarySlot().getName());
                 headerText = "Slot:";
                 hlTokens = new StringBuilder(" %s");
             } else {
-                List<SlotCategory> secondarySlots = augment.getSecondarySlots();
+                List<SlotCategory> secondarySlots = selectedAugment.getSecondarySlots();
 
                 if (secondarySlots.isEmpty()) {
                     headerText = "-";
@@ -179,13 +184,19 @@ public class DetailsTab {
 
             headerUIElement.addPara(outputString, 0f, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]))
                            .setAlignment(Alignment.MID);
-        } else {
-            headerUIElement.addPara("-", Misc.getBasePlayerColor(), 0f).setAlignment(Alignment.MID);
-        }
 
-        ButtonUtils.addSeparatorLine(headerUIElement, width - 5f, Misc.getDarkPlayerColor(), 2f)
-                   .getPosition()
-                   .setXAlignOffset(-5f);
+            ButtonUtils.addSeparatorLine(headerUIElement, width - 5f, Misc.getDarkPlayerColor(), 2f)
+                       .getPosition()
+                       .setXAlignOffset(-5f);
+        } else if (!isNull(selectedInstalledAugment)) {
+            SlotCategory slotCategory = selectedInstalledAugment.getInstalledSlot().getSlotCategory();
+            headerUIElement.addPara(String.format("Installed in Slot: %s", slotCategory.getName()), 0f, slotCategory.getColor(),
+                                    slotCategory.getName()).setAlignment(Alignment.MID);
+
+            ButtonUtils.addSeparatorLine(headerUIElement, width - 5f, Misc.getDarkPlayerColor(), 2f)
+                       .getPosition()
+                       .setXAlignOffset(-5f);
+        }
 
         headerPanel.addUIElement(headerUIElement);
         tooltip.addCustom(headerPanel, 0f).getPosition()

@@ -10,27 +10,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static de.schafunschaf.voidtec.ids.VT_Icons.*;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @Getter
 @AllArgsConstructor
 public enum SlotCategory {
-    WEAPON("Weapon", new Color(200, 0, 0), 2, WEAPON_SLOT_ICON),
-    FLIGHT_DECK("Flight Deck", new Color(255, 100, 0), 0, FLIGHT_DECK_SLOT_ICON),
-    STRUCTURE("Structure", new Color(0, 170, 0), 2, STRUCTURE_SLOT_ICON),
-    SHIELD("Shield", new Color(0, 200, 255), 2, SHIELD_SLOT_ICON),
-    REACTOR("Reactor", new Color(170, 70, 225), 2, REACTOR_SLOT_ICON),
-    ENGINE("Engine", new Color(255, 200, 0), 2, ENGINE_SLOT_ICON),
-    SYSTEM("System", new Color(0, 100, 255), 2, SYSTEM_SLOT_ICON),
-    COSMETIC("Cosmetic", new Color(200, 200, 200), 0, COSMETIC_SLOT_ICON),
-    SPECIAL("Special", new Color(0, 200, 150), 0, SPECIAL_SLOT_ICON);
+    WEAPON("Weapon", new Color(200, 0, 0), 2),
+    FLIGHT_DECK("Flight Deck", new Color(255, 100, 0), 0),
+    STRUCTURE("Structure", new Color(0, 170, 0), 2),
+    SHIELD("Shield", new Color(0, 200, 255), 2),
+    REACTOR("Reactor", new Color(170, 70, 225), 2),
+    ENGINE("Engine", new Color(255, 200, 0), 2),
+    SYSTEM("System", new Color(0, 100, 255), 2),
+    COSMETIC("Cosmetic", new Color(200, 200, 200), 0),
+    SPECIAL("Special", new Color(0, 200, 150), 0);
 
     public static final SlotCategory[] values = values();
     String name;
     Color color;
     int weighting;
-    String icon;
 
     public static List<SlotCategory> getAllowedCategories() {
         List<SlotCategory> allowedCategories = new ArrayList<>();

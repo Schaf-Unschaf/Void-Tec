@@ -4,20 +4,21 @@ import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.combat.vesai.AfterCreationEffect;
-import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
-import de.schafunschaf.voidtec.combat.vesai.CombatScriptRunner;
-import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
+import de.schafunschaf.voidtec.combat.vesai.*;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
 import de.schafunschaf.voidtec.helper.RainbowString;
 import de.schafunschaf.voidtec.helper.TextWithHighlights;
 import de.schafunschaf.voidtec.ids.VT_Strings;
+import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.awt.Color;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
@@ -32,10 +33,10 @@ public class BaseAugment implements AugmentApplier {
     protected int rarity;
     protected SlotCategory primarySlot;
     protected List<StatApplier> primaryStatMods;
-    protected List<StatModValue<Float, Float, Boolean>> primaryStatValues;
+    protected List<StatModValue<Float, Float, Boolean, Boolean>> primaryStatValues;
     protected List<SlotCategory> secondarySlots;
     protected List<StatApplier> secondaryStatMods;
-    protected List<StatModValue<Float, Float, Boolean>> secondaryStatValues;
+    protected List<StatModValue<Float, Float, Boolean, Boolean>> secondaryStatValues;
     protected AugmentQuality augmentQuality;
     protected TextWithHighlights combatScriptDescription;
     protected CombatScriptRunner combatScriptRunner;
@@ -44,8 +45,9 @@ public class BaseAugment implements AugmentApplier {
     protected AugmentQuality initialQuality;
     private AugmentSlot installedSlot;
     private Map<String, Float> appliedFighterValues;
+    private boolean uniqueMod;
 
-    public BaseAugment(AugmentData augmentData, AugmentQuality augmentQuality, Random random) {
+    public BaseAugment(AugmentData augmentData, AugmentQuality augmentQuality) {
         this.augmentID = augmentData.getAugmentID();
         this.manufacturer = augmentData.getManufacturer();
         this.name = augmentData.getName();
@@ -58,7 +60,7 @@ public class BaseAugment implements AugmentApplier {
         this.secondaryStatMods = augmentData.getSecondaryStatMods();
         this.secondaryStatValues = augmentData.getSecondaryStatValues();
         this.augmentQuality = isNull(augmentQuality)
-                              ? AugmentQuality.getRandomQualityInRange(augmentData.getAugmentQualityRange(), random,
+                              ? AugmentQuality.getRandomQualityInRange(augmentData.getAugmentQualityRange(), null,
                                                                        augmentData.isEqualQualityRoll())
                               : augmentQuality;
         this.initialQuality = augmentQuality;
@@ -67,6 +69,7 @@ public class BaseAugment implements AugmentApplier {
         this.additionalDescription = augmentData.getAdditionalDescription();
         this.afterCreationEffect = augmentData.getAfterCreationEffect();
         this.appliedFighterValues = new HashMap<>();
+        this.uniqueMod = augmentData.isUniqueMod();
     }
 
     @Override
@@ -77,7 +80,7 @@ public class BaseAugment implements AugmentApplier {
     }
 
     @Override
-    public void applyToShip(MutableShipStatsAPI stats, String id, Random random) {
+    public void applyToShip(MutableShipStatsAPI stats, String id, int slotIndex) {
         if (augmentQuality == AugmentQuality.DESTROYED) {
             return;
         }
@@ -85,11 +88,15 @@ public class BaseAugment implements AugmentApplier {
         boolean inPrimarySlot = isInPrimarySlot();
 
         List<StatApplier> statMods = inPrimarySlot ? getPrimaryStatMods() : getSecondaryStatMods();
-        List<StatModValue<Float, Float, Boolean>> statModValues = inPrimarySlot ? getPrimaryStatValues() : getSecondaryStatValues();
+        List<StatModValue<Float, Float, Boolean, Boolean>> statModValues = inPrimarySlot
+                                                                           ? getPrimaryStatValues()
+                                                                           : getSecondaryStatValues();
 
         for (int i = 0; i < statMods.size(); i++) {
+            long hullModManagerSeed = HullModDataStorage.getInstance().getHullModManager(stats.getFleetMember().getId()).getRandomSeed();
+            long randomSeed = slotIndex * (i + 1) * 100 * hullModManagerSeed;
             StatApplier statApplier = statMods.get(i);
-            statApplier.applyToShip(stats, id + "_" + getAugmentID(), statModValues.get(i), random, this);
+            statApplier.applyToShip(stats, id + "_" + getAugmentID(), statModValues.get(i), randomSeed, this);
         }
     }
 
@@ -109,20 +116,26 @@ public class BaseAugment implements AugmentApplier {
 
     @Override
     public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory,
-                                boolean isItemTooltip, Color bulletColorOverride) {
-        tooltip.addButton("", null, getAugmentQuality().getColor(), getAugmentQuality().getColor(), width, 0f, 3f);
+                                boolean isItemTooltip, boolean onlyStats, Color bulletColorOverride) {
+        if (!onlyStats) {
+            if (getName().toLowerCase().contains("rainbow")) {
+                RainbowString rainbowString = new RainbowString(getName(), Color.RED, 20);
+                tooltip.addPara(rainbowString.getConvertedString(), 0f, rainbowString.getHlColors(), rainbowString.getHlStrings());
+            } else {
+                String uniqueText = "Unique Modification";
+                String uniqueString = isUniqueMod() ? uniqueText + " - " : "";
+                String text = String.format("%s%s (%s)", uniqueString, getName(), getAugmentQuality().getName());
+                tooltip.addPara(text, 0f, new Color[]{Misc.getHighlightColor(), getAugmentQuality().getColor()},
+                                uniqueText, getAugmentQuality().getName());
+            }
 
-        if (getName().toLowerCase().contains("rainbow")) {
-            RainbowString rainbowString = new RainbowString(getName(), Color.RED, 20);
-            tooltip.addPara(rainbowString.getConvertedString(), 3f, rainbowString.getHlColors(), rainbowString.getHlStrings());
-        } else {
-            tooltip.addPara(String.format("%s (%s)", getName(), getAugmentQuality().getName()), getAugmentQuality().getColor(), 3f);
+            UIUtils.addHorizontalSeparator(tooltip, width, 1f, slotCategory.getColor(), 3f);
+            tooltip.addSpacer(3f);
         }
 
         if (isItemTooltip || slotCategory == SlotCategory.SPECIAL || slotCategory == SlotCategory.COSMETIC) {
-            tooltip.addPara(getDescription().getDisplayString(), 3f, Misc.getHighlightColor(), getDescription().getHighlights());
+            tooltip.addPara(getDescription().getDisplayString(), 0f, Misc.getHighlightColor(), getDescription().getHighlights());
         }
-        tooltip.addSpacer(3f);
 
         List<StatApplier> statMods = isInPrimarySlot() ? getPrimaryStatMods() : getSecondaryStatMods();
         if (!isNull(statMods) && !statMods.isEmpty()) {
@@ -132,27 +145,28 @@ public class BaseAugment implements AugmentApplier {
                 bulletColor = installedSlot.getSlotCategory().getColor();
             }
 
-            TooltipMakerAPI imageWithText = tooltip.beginImageWithText(slotCategory.getIcon(), 40f);
             if (augmentQuality == AugmentQuality.DESTROYED) {
-                imageWithText.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), 0f);
+                tooltip.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), 0f);
             } else {
                 for (StatApplier statApplier : statMods) {
-                    statApplier.generateTooltipEntry(stats, id + "_" + getAugmentID(), imageWithText, bulletColor, this);
+                    statApplier.generateTooltipEntry(stats, id + "_" + getAugmentID(), tooltip, bulletColor, this);
                 }
             }
-
-            tooltip.addImageWithText(3f);
         }
 
         addAdditionalDescriptions(tooltip);
-
-        tooltip.addButton("", null, getAugmentQuality().getColor(), getAugmentQuality().getColor(), width, 0f, 3f);
     }
 
     @Override
     public void generateStatDescription(TooltipMakerAPI tooltip, float padding, Boolean isPrimary, Color bulletColorOverride) {
-        if (augmentQuality == AugmentQuality.DESTROYED) {
-            tooltip.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), 0f);
+        generateStatDescription(tooltip, padding, isPrimary, bulletColorOverride, augmentQuality);
+    }
+
+    @Override
+    public void generateStatDescription(TooltipMakerAPI tooltip, float padding, Boolean isPrimary, Color bulletColorOverride,
+                                        AugmentQuality quality) {
+        if (quality == AugmentQuality.DESTROYED) {
+            tooltip.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, quality.getColor(), 0f);
             return;
         }
 
@@ -167,7 +181,9 @@ public class BaseAugment implements AugmentApplier {
             return;
         }
 
-        List<StatModValue<Float, Float, Boolean>> statModValues = inPrimarySlot ? getPrimaryStatValues() : getSecondaryStatValues();
+        List<StatModValue<Float, Float, Boolean, Boolean>> statModValues = inPrimarySlot
+                                                                           ? getPrimaryStatValues()
+                                                                           : getSecondaryStatValues();
         Color bulletColor = isNull(bulletColorOverride) ? primarySlot.getColor() : bulletColorOverride;
 
         if (isNull(bulletColorOverride) && !isNull(installedSlot)) {
@@ -176,10 +192,16 @@ public class BaseAugment implements AugmentApplier {
 
         for (int i = 0; i < statMods.size(); i++) {
             StatApplier statApplier = statMods.get(i);
-            StatModValue<Float, Float, Boolean> statModValue = statModValues.get(i);
-            float mult = statModValue.getsModified ? augmentQuality.getModifier() : 1f;
+            StatModValue<Float, Float, Boolean, Boolean> statModValue = statModValues.get(i);
+            float mult = 1f;
+            if (statModValue.getsModified) {
+                mult = statModValue.invertModifier
+                       ? AugmentQuality.getHighestQuality().getModifier() + 1 - quality.getModifier()
+                       : quality.getModifier();
+            }
             float minValue = statModValue.minValue * mult;
             float maxValue = statModValue.maxValue * mult;
+            tooltip.addSpacer(3f);
             statApplier.generateStatDescription(tooltip, bulletColor, minValue, maxValue);
         }
 
@@ -189,23 +211,9 @@ public class BaseAugment implements AugmentApplier {
         }
     }
 
-    private void addAdditionalDescriptions(TooltipMakerAPI tooltip) {
-        if (!isNull(combatScriptDescription) && !combatScriptDescription.getDisplayString().isEmpty()) {
-            tooltip.addPara(getCombatScriptDescription().getDisplayString(), 3f, Misc.getHighlightColor(),
-                            getCombatScriptDescription().getHighlights());
-        }
-
-        if (!isNull(additionalDescription) && !additionalDescription.getDisplayString().isEmpty()) {
-            tooltip.addPara(getAdditionalDescription().getDisplayString(), 3f, Misc.getHighlightColor(),
-                            getAdditionalDescription().getHighlights());
-        }
-    }
-
     @Override
     public void runCustomScript(ShipAPI ship, float amount) {
-        if ((installedSlot.getSlotCategory() == SlotCategory.COSMETIC
-                || installedSlot.getSlotCategory() == SlotCategory.SPECIAL)
-                && !isNull(combatScriptRunner)) {
+        if (!isNull(combatScriptRunner)) {
             combatScriptRunner.run(ship, amount, this);
         }
     }
@@ -213,6 +221,13 @@ public class BaseAugment implements AugmentApplier {
     @Override
     public List<StatApplier> getActiveStatMods() {
         return isInPrimarySlot() ? primaryStatMods : secondaryStatMods;
+    }
+
+    @Override
+    public void collectAppliedStats(MutableShipStatsAPI stats, String id) {
+        for (StatApplier statMod : getActiveStatMods()) {
+            statMod.generateTooltipEntry(stats, id + "_" + getAugmentID(), null, null, this);
+        }
     }
 
     @Override
@@ -247,7 +262,7 @@ public class BaseAugment implements AugmentApplier {
 
     @Override
     public void installAugment(AugmentSlot augmentSlot) {
-        this.installedSlot = augmentSlot;
+        installedSlot = augmentSlot;
     }
 
     @Override
@@ -272,6 +287,18 @@ public class BaseAugment implements AugmentApplier {
         }
 
         return installedSlot.getSlotCategory() == primarySlot;
+    }
+
+    private void addAdditionalDescriptions(TooltipMakerAPI tooltip) {
+        if (!isNull(combatScriptDescription) && !combatScriptDescription.getDisplayString().isEmpty()) {
+            tooltip.addPara(getCombatScriptDescription().getDisplayString(), 3f, Misc.getHighlightColor(),
+                            getCombatScriptDescription().getHighlights());
+        }
+
+        if (!isNull(additionalDescription) && !additionalDescription.getDisplayString().isEmpty()) {
+            tooltip.addPara(getAdditionalDescription().getDisplayString(), 3f, Misc.getHighlightColor(),
+                            getAdditionalDescription().getHighlights());
+        }
     }
 
     @Override

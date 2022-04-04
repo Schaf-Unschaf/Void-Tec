@@ -84,11 +84,11 @@ public class VT_LootListener implements ShowLootListener {
                     return;
                 case Entities.WEAPONS_CACHE_REMNANT:
                     addLootToCargo(loot, 5, SlotCategory.WEAPON,
-                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.REMNANT.name()}, 1, salvageRandom);
+                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.EXOTIC.name()}, 1, salvageRandom);
                     addLootToCargo(loot, 3, SlotCategory.STRUCTURE,
-                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.REMNANT.name()}, 1, salvageRandom);
+                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.EXOTIC.name()}, 1, salvageRandom);
                     addLootToCargo(loot, 2, SlotCategory.REACTOR,
-                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.REMNANT.name()}, 1, salvageRandom);
+                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.EXOTIC.name()}, 1, salvageRandom);
                     return;
 
                 case Entities.WEAPONS_CACHE_SMALL:
@@ -117,11 +117,11 @@ public class VT_LootListener implements ShowLootListener {
                     return;
                 case Entities.WEAPONS_CACHE_SMALL_REMNANT:
                     addLootToCargo(loot, 3, SlotCategory.WEAPON,
-                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.REMNANT.name()}, 1, salvageRandom);
+                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.EXOTIC.name()}, 1, salvageRandom);
                     addLootToCargo(loot, 1, SlotCategory.STRUCTURE,
-                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.REMNANT.name()}, 1, salvageRandom);
+                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.EXOTIC.name()}, 1, salvageRandom);
                     addLootToCargo(loot, 1, SlotCategory.REACTOR,
-                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.REMNANT.name()}, 1, salvageRandom);
+                                   new String[]{AugmentQuality.EXPERIMENTAL.name(), AugmentQuality.EXOTIC.name()}, 1, salvageRandom);
                     return;
 
                 case Entities.ALPHA_SITE_WEAPONS_CACHE:
@@ -145,7 +145,8 @@ public class VT_LootListener implements ShowLootListener {
                                    new String[]{AugmentQuality.MILITARY.name(), AugmentQuality.EXPERIMENTAL.name()}, 1, salvageRandom);
                     addLootToCargo(loot, 5, SlotCategory.REACTOR,
                                    new String[]{AugmentQuality.MILITARY.name(), AugmentQuality.EXPERIMENTAL.name()}, 1, salvageRandom);
-                    addLootToCargo(loot, 3, SlotCategory.SPECIAL, new String[]{AugmentQuality.UNIQUE.name(), AugmentQuality.UNIQUE.name()},
+                    addLootToCargo(loot, 3, SlotCategory.SPECIAL,
+                                   new String[]{AugmentQuality.CUSTOMISED.name(), AugmentQuality.CUSTOMISED.name()},
                                    0, salvageRandom);
                     return;
 
@@ -184,25 +185,23 @@ public class VT_LootListener implements ShowLootListener {
 
         if (!isNull(interactionTarget.getMarket())) {
             for (MarketConditionAPI condition : interactionTarget.getMarket().getConditions()) {
-                if (condition.getId().equals(Conditions.RUINS_SCATTERED)) {
-                    addLootToCargo(loot, 3, null, new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 2,
-                                   salvageRandom);
-                    return;
-                }
-                if (condition.getId().equals(Conditions.RUINS_WIDESPREAD)) {
-                    addLootToCargo(loot, 5, null, new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 2,
-                                   salvageRandom);
-                    return;
-                }
-                if (condition.getId().equals(Conditions.RUINS_EXTENSIVE)) {
-                    addLootToCargo(loot, 7, null, new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 2,
-                                   salvageRandom);
-                    return;
-                }
-                if (condition.getId().equals(Conditions.RUINS_VAST)) {
-                    addLootToCargo(loot, 10, null, new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 2,
-                                   salvageRandom);
-                    return;
+                switch (condition.getId()) {
+                    case Conditions.RUINS_SCATTERED:
+                        addLootToCargo(loot, 3, null, new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 2,
+                                       salvageRandom);
+                        return;
+                    case Conditions.RUINS_WIDESPREAD:
+                        addLootToCargo(loot, 5, null, new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 2,
+                                       salvageRandom);
+                        return;
+                    case Conditions.RUINS_EXTENSIVE:
+                        addLootToCargo(loot, 7, null, new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 2,
+                                       salvageRandom);
+                        return;
+                    case Conditions.RUINS_VAST:
+                        addLootToCargo(loot, 10, null, new String[]{AugmentQuality.COMMON.name(), AugmentQuality.EXPERIMENTAL.name()}, 2,
+                                       salvageRandom);
+                        return;
                 }
             }
         }

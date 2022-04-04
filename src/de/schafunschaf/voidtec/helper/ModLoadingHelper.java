@@ -1,7 +1,6 @@
 package de.schafunschaf.voidtec.helper;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.comm.IntelManagerAPI;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
 import de.schafunschaf.voidtec.campaign.listeners.VT_CampaignListener;
 import de.schafunschaf.voidtec.campaign.listeners.VT_LootListener;
@@ -15,13 +14,16 @@ import lombok.extern.log4j.Log4j;
 public class ModLoadingHelper {
 
     public static void initManagerAndPlugins() {
-        IntelManagerAPI intelManager = Global.getSector().getIntelManager();
-        if (!intelManager.hasIntelOfClass(AugmentManagerIntel.class)) {
-            intelManager.addIntel(new AugmentManagerIntel(), true);
-        }
+        initIntel();
 
         Global.getSector().addTransientListener(new VT_CampaignListener(false));
         Global.getSector().getListenerManager().addListener(new VT_LootListener(), true);
+    }
+
+    public static void initIntel() {
+        AugmentManagerIntel augmentManagerIntel = AugmentManagerIntel.getInstance();
+        augmentManagerIntel.setNew(false);
+        Global.getSector().getIntelManager().addIntel(augmentManagerIntel, true);
     }
 
     public static void initStatMods() {

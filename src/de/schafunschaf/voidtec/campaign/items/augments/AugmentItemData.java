@@ -19,7 +19,7 @@ public class AugmentItemData extends SpecialItemData {
         this.augment = augment;
         float modifier = augment.getAugmentQuality().getModifier();
         float breathingLength = 300f;
-        if (augment.getAugmentQuality() == AugmentQuality.UNIQUE) {
+        if (augment.getAugmentQuality() == AugmentQuality.CUSTOMISED) {
             colorShifter = new ColorShifter(null);
         } else if (!(augment.getAugmentQuality() == AugmentQuality.DESTROYED || augment.getAugmentQuality() == AugmentQuality.DOMAIN)) {
             float maxTimeAtFull = (1 / (3f - modifier)) * breathingLength * 3;
@@ -43,9 +43,10 @@ public class AugmentItemData extends SpecialItemData {
         if (obj instanceof AugmentItemData) {
             AugmentApplier otherAugment = ((AugmentItemData) obj).augment;
             boolean isSameAugment = otherAugment.getAugmentID().equals(this.augment.getAugmentID());
-            boolean isSameQuality = otherAugment.getAugmentQuality() == this.augment.getAugmentQuality();
+            boolean hasSameInitQuality = otherAugment.getInitialQuality() == this.augment.getInitialQuality();
+            boolean hasSameCurQuality = otherAugment.getAugmentQuality() == this.augment.getAugmentQuality();
 
-            return isSameAugment && isSameQuality;
+            return isSameAugment && hasSameInitQuality && hasSameCurQuality;
         }
 
         return false;

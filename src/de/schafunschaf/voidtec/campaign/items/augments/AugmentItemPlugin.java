@@ -35,6 +35,63 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 @Getter
 public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
+    public static void addTechInfo(TooltipMakerAPI tooltip, AugmentApplier augment, float padding, float paraPadding) {
+        if (isNull(augment)) {
+            return;
+        }
+
+        String manufacturerName = isNull(augment.getManufacturer()) ? "Unknown" : augment.getManufacturer();
+        FactionAPI faction = Global.getSector().getFaction(manufacturerName.toLowerCase());
+        Color manufacturerColor = VoidTecUtils.getManufacturerColor(manufacturerName);
+        if (!isNull(faction)) {
+            manufacturerName = Misc.ucFirst(faction.getDisplayNameWithArticleWithoutArticle());
+        }
+
+        String qualityDescription = String.format("Quality: %s", augment.getAugmentQuality().getName());
+        List<Color> hlColors = new ArrayList<>();
+        List<String> hlStrings = new ArrayList<>();
+        hlColors.add(augment.getAugmentQuality().getColor());
+        hlStrings.add(augment.getAugmentQuality().getName());
+
+        boolean isDamaged = augment.getAugmentQuality() != augment.getInitialQuality()
+                && augment.getInitialQuality() != AugmentQuality.DESTROYED;
+        if (isDamaged) {
+            qualityDescription += String.format(" (%s)", augment.getInitialQuality().getName());
+            hlColors.add(augment.getInitialQuality().getColor());
+            hlStrings.add(augment.getInitialQuality().getName());
+        }
+
+        String unique = "Unique";
+        String uniqueString = augment.isUniqueMod() ? String.format(" (%s)", unique) : "";
+
+        tooltip.setParaFontColor(Misc.getGrayColor());
+        tooltip.addPara("Manufacturer: %s", padding, manufacturerColor, manufacturerName);
+        tooltip.addPara(qualityDescription, paraPadding, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
+        tooltip.addPara("Slot: %s" + uniqueString, paraPadding, new Color[]{augment.getPrimarySlot().getColor(), Misc.getHighlightColor()},
+                        augment.getPrimarySlot().getName(), unique);
+
+        if (!augment.getSecondarySlots().isEmpty()) {
+            StringBuilder secondarySlotStringBuilder = new StringBuilder("Compatible: ");
+            List<String> secSlotStrings = new ArrayList<>();
+            List<Color> secSlotColors = new ArrayList<>();
+
+            for (Iterator<SlotCategory> iterator = augment.getSecondarySlots().iterator(); iterator.hasNext(); ) {
+                SlotCategory secondarySlot = iterator.next();
+                secondarySlotStringBuilder.append(secondarySlot.getName());
+                secSlotStrings.add(secondarySlot.getName());
+                secSlotColors.add(secondarySlot.getColor());
+                if (iterator.hasNext()) {
+                    secondarySlotStringBuilder.append(", ");
+                }
+            }
+
+            tooltip.addPara(secondarySlotStringBuilder.toString(), paraPadding, secSlotColors.toArray(new Color[0]),
+                            secSlotStrings.toArray(new String[0]));
+        }
+
+        tooltip.setParaFontColor(Misc.getTextColor());
+    }
+
     @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, CargoTransferHandlerAPI transferHandler, Object stackSource) {
         float largePad = 10f;
@@ -53,7 +110,10 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
             tooltip.addTitle(getName());
         }
 
-        addTechInfo(tooltip, largePad, smallPad);
+        addTechInfo(tooltip, augment, largePad, smallPad);
+        if (expanded && augment.isUniqueMod()) {
+            tooltip.addPara("There can only be one unique augment installed in each category.", Misc.getGrayColor(), smallPad);
+        }
 
         tooltip.addPara(augment.getDescription().getDisplayString(), largePad, Misc.getHighlightColor(),
                         augment.getDescription().getHighlights());
@@ -75,7 +135,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
             if (!(augmentQuality == AugmentQuality.DESTROYED) && !isNull(augment.getPrimaryStatMods()) && !augment.getPrimaryStatMods()
                                                                                                                   .isEmpty()) {
-                tooltip.addSectionHeading("Primary Stat Modification Info", augment.getPrimarySlot().getColor(),
+                tooltip.addSectionHeading("Primary Stat Modification Info", augment.getPrimarySlot().getColor().brighter(),
                                           Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
                 tooltip.addSpacer(smallPad);
                 augment.generateStatDescription(tooltip, smallPad, true, null);
@@ -83,29 +143,11 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
             if (!(augmentQuality == AugmentQuality.DESTROYED) && !isNull(augment.getSecondaryStatMods()) && !augment.getSecondaryStatMods()
                                                                                                                     .isEmpty()) {
-                StringBuilder secondarySlotStringBuilder = new StringBuilder("Compatible with: ");
-                List<String> hlStrings = new ArrayList<>();
-                List<Color> hlColors = new ArrayList<>();
-
-                for (Iterator<SlotCategory> iterator = augment.getSecondarySlots().iterator(); iterator.hasNext(); ) {
-                    SlotCategory secondarySlot = iterator.next();
-                    secondarySlotStringBuilder.append(secondarySlot.getName());
-                    hlStrings.add(secondarySlot.getName());
-                    hlColors.add(secondarySlot.getColor());
-                    if (iterator.hasNext()) {
-                        secondarySlotStringBuilder.append(", ");
-                    }
-                }
-
-                tooltip.addSectionHeading("Secondary Stat Modification Info", augment.getPrimarySlot().getColor(),
+                tooltip.addSectionHeading("Secondary Stat Modification Info", augment.getPrimarySlot().getColor().brighter(),
                                           Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
                 tooltip.addSpacer(smallPad);
 
                 augment.generateStatDescription(tooltip, smallPad, false, null);
-
-                tooltip.setParaFontColor(Misc.getGrayColor());
-                tooltip.addPara(secondarySlotStringBuilder.toString(), largePad, hlColors.toArray(new Color[0]),
-                                hlStrings.toArray(new String[0]));
             }
         } else {
             if (!(transferHandler.getSubmarketTradedWith()
@@ -176,38 +218,6 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
     @Override
     public String getDesignType() {
         return super.getDesignType();
-    }
-
-    public void addTechInfo(TooltipMakerAPI tooltip, float padding, float paraPadding) {
-        AugmentApplier augment = getAugmentItemData().getAugment();
-
-        String manufacturerName = isNull(augment.getManufacturer()) ? "Unknown" : augment.getManufacturer();
-        FactionAPI faction = Global.getSector().getFaction(manufacturerName.toLowerCase());
-        Color manufacturerColor = VoidTecUtils.getManufacturerColor(manufacturerName);
-        if (!isNull(faction)) {
-            manufacturerName = Misc.ucFirst(faction.getDisplayNameWithArticleWithoutArticle());
-        }
-
-        String qualityDescription = String.format("Quality: %s", augment.getAugmentQuality().getName());
-        List<Color> hlColors = new ArrayList<>();
-        List<String> hlStrings = new ArrayList<>();
-        hlColors.add(Misc.getGrayColor());
-        hlColors.add(augment.getAugmentQuality().getColor());
-        hlStrings.add("Quality:");
-        hlStrings.add(augment.getAugmentQuality().getName());
-
-        boolean isDamaged = augment.getAugmentQuality() != augment.getInitialQuality()
-                && augment.getInitialQuality() != AugmentQuality.DESTROYED;
-        if (isDamaged) {
-            qualityDescription += String.format(" (%s)", augment.getInitialQuality().getName());
-            hlColors.add(augment.getInitialQuality().getColor());
-            hlStrings.add(augment.getInitialQuality().getName());
-        }
-
-        tooltip.addPara("Manufacturer: %s", padding, Misc.getGrayColor(), manufacturerColor, manufacturerName);
-        tooltip.addPara(qualityDescription, paraPadding, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
-        tooltip.addPara("Type: %s", paraPadding, Misc.getGrayColor(), augment.getPrimarySlot().getColor(),
-                        augment.getPrimarySlot().getName());
     }
 
     public AugmentItemData getAugmentItemData() {

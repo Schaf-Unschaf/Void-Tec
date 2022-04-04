@@ -22,5 +22,7 @@ public interface IntelButton {
 
     int getShortcut();
 
-    ButtonAPI createButton(TooltipMakerAPI tooltip, float width, float height);
+    ButtonAPI addButton(TooltipMakerAPI tooltip, float width, float height);
+
+    void addTooltip(TooltipMakerAPI tooltip);
 }

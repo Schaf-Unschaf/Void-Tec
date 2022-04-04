@@ -1,5 +1,6 @@
 package de.schafunschaf.voidtec.helper;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -15,6 +16,7 @@ import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
+import de.schafunschaf.voidtec.ids.VT_MemoryKeys;
 import de.schafunschaf.voidtec.ids.VT_Settings;
 import de.schafunschaf.voidtec.imported.CustomFactionCategories;
 import de.schafunschaf.voidtec.imported.SpecialShips;
@@ -112,8 +114,11 @@ public class AugmentGenerator {
 
             ShipVariantAPI variant = ship.getVariant();
             variant.addPermaMod(VoidTecEngineeringSuite.HULL_MOD_ID);
-            fillUnlockedSlots(hullModManager, ship, ship.getFleetData().getFleet().getFaction(),
-                              qualityRange, random);
+            Object prefFactionObject = ship.getFleetData().getFleet().getMemoryWithoutUpdate().get(VT_MemoryKeys.VT_PREF_FACTION_KEY);
+            FactionAPI preferredFaction = isNull(prefFactionObject)
+                                          ? ship.getFleetData().getFleet().getFaction()
+                                          : Global.getSector().getFaction(((String) prefFactionObject));
+            fillUnlockedSlots(hullModManager, ship, preferredFaction, qualityRange, random);
         }
     }
 
@@ -153,7 +158,7 @@ public class AugmentGenerator {
         CIVILIAN(new String[]{AugmentQuality.DEGRADED.name(), AugmentQuality.MILITARY.name()}),
         MILITARY(new String[]{AugmentQuality.COMMON.name(), AugmentQuality.MILITARY.name()}),
         SPECIAL(new String[]{AugmentQuality.MILITARY.name(), AugmentQuality.EXPERIMENTAL.name()}),
-        REMNANT(new String[]{AugmentQuality.REMNANT.name()}),
+        REMNANT(new String[]{AugmentQuality.EXOTIC.name()}),
         DOMAIN(new String[]{AugmentQuality.DOMAIN.name()});
 
         public static final GenerationCategory[] values = values();

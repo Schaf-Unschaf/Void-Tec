@@ -27,10 +27,11 @@ public class VT_StatModKeys {
     public static final String CRITICAL_MALFUNCTIONS = "critical_malfunctions";
     public static final String CR_LOSS = "cr_loss";
     public static final String ENGINE_MALFUNCTIONS = "engine_malfunctions";
-    public static final String MAX_CR = "max_cr";
-    public static final String PEAK_CR = "peak_cr";
+    public static final String CR_MAX = "cr_max";
+    public static final String CR_PEAK = "cr_peak";
     public static final String SHIELD_MALFUNCTIONS = "shield_malfunctions";
     public static final String WEAPON_MALFUNCTIONS = "weapon_malfunctions";
+    public static final String SUPPLIES_PER_MONTH = "supplies_per_month";
 
     public static final String BALLISTIC_DAMAGE = "ballistic_damage";
     public static final String BALLISTIC_FLUX = "ballistic_flux";

@@ -5,7 +5,7 @@ import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.campaign.intel.buttons.*;
+import de.schafunschaf.voidtec.campaign.intel.buttons.IntelButton;
 import de.schafunschaf.voidtec.campaign.intel.buttons.shippanel.*;
 import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
@@ -14,7 +14,8 @@ import de.schafunschaf.voidtec.combat.vesai.HullModManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Settings;
-import lombok.Getter;
+import de.schafunschaf.voidtec.util.ui.UIUtils;
+import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
+@RequiredArgsConstructor
 public class ShipPanel {
 
     public static boolean displayWithHullmod = true;
@@ -31,27 +33,30 @@ public class ShipPanel {
     public static List<ShipAPI.HullSize> displayHullSizes = new ArrayList<>(
             Arrays.asList(ShipAPI.HullSize.FRIGATE, ShipAPI.HullSize.DESTROYER, ShipAPI.HullSize.CRUISER, ShipAPI.HullSize.CAPITAL_SHIP));
 
+    private final float panelWidth;
+    private final float panelHeight;
+    private final float padding;
+
     private final float panelHeaderHeight = 21f;
-    private final int numMaxColumns = 4;
-    private final int numMaxRows = 5;
-    private final float shipElementPadding = 16f;
+
+    private final float shipElementWidth = 228f;
     private final float shipElementHeight = 104f;
-    @Getter
-    private final float panelHeight = numMaxRows * shipElementHeight;
     private final float shipIconSize = 64f;
+    private final float shipElementMinPadding = 10f;
+
     private final float augmentButtonSize = 24f;
     private final float augmentButtonPadding = 4f;
-    private final float shipElementWidth = calculateShipElementWidth();
-    @Getter
-    private final float panelWidth = numMaxColumns * (shipElementWidth + shipElementPadding);
-    private final int cols = (int) Math.floor(panelWidth / (shipElementWidth + shipElementPadding));
 
-    private float calculateShipElementWidth() {
-        // fits 6 slots (64 ship size + 6*24 slots + 5*4 padding)
-        return shipIconSize + 6 * augmentButtonSize + 5 * augmentButtonPadding;
+    public void render(CustomPanelAPI mainPanel) {
+        TooltipMakerAPI mainPanelUIElement = mainPanel.createUIElement(panelWidth, panelHeight, false);
+
+        addHeader(mainPanel, mainPanelUIElement);
+        addFleetOverview(mainPanel, mainPanelUIElement);
+
+        mainPanel.addUIElement(mainPanelUIElement).inTL(0f, 0);
     }
 
-    public void displayPanel(CustomPanelAPI panel, float width, float height, float padding) {
+    private void addHeader(CustomPanelAPI mainPanel, TooltipMakerAPI tooltip) {
         List<FleetMemberAPI> playerShips = filterShips();
         int currentFleetSize = Global.getSector().getPlayerFleet().getNumShips();
         int hiddenShips = currentFleetSize - playerShips.size();
@@ -63,47 +68,30 @@ public class ShipPanel {
             fleetSizeString += filteredString;
         }
 
-        float sumXPadding = 0f;
-        float yPadding = 0f;
+        CustomPanelAPI headerPanel = mainPanel.createCustomPanel(panelWidth, panelHeaderHeight, null);
+        TooltipMakerAPI headerElement = headerPanel.createUIElement(panelWidth, panelHeaderHeight, false);
+        headerElement.addSectionHeading("", Misc.getBrightPlayerColor(), Misc.getDarkPlayerColor(), Alignment.LMID, 0f);
 
-        int shipsDone = 0;
-        TooltipMakerAPI headerElement = panel.createUIElement(panelWidth, height - panelHeaderHeight, false);
-        headerElement.addSectionHeading(String.format("Fleet Overview - %s", fleetSizeString), Misc.getBrightPlayerColor(),
-                                        Misc.getDarkPlayerColor(), Alignment.MID, 0f);
-        addFilterButtons(headerElement);
-        panel.addUIElement(headerElement).inTL(0f, panelHeaderHeight);
+        float filterWidth = addFilterButtons(headerElement);
+        UIComponentAPI lastFilter = headerElement.getPrev();
 
-        TooltipMakerAPI fleetDisplayElement = panel.createUIElement(panelWidth, panelHeight, true);
-        CustomPanelAPI displayRowPanel = panel.createCustomPanel(panelWidth, shipElementHeight, null);
-        List<CustomPanelAPI> panelList = new ArrayList<>();
+        Color numColor = Misc.getHighlightColor();
+        Color filteredColor = Misc.getNegativeHighlightColor();
 
-        for (final FleetMemberAPI ship : playerShips) {
-            if (shipsDone >= cols) {
-                panelList.add(displayRowPanel);
-                displayRowPanel = panel.createCustomPanel(panelWidth, shipElementHeight, null);
-                shipsDone = 0;
-                sumXPadding = 0;
-                yPadding = 6f;
-            }
+        headerElement.setParaFont(Fonts.ORBITRON_12);
+        headerElement.setParaFontColor(Misc.getBrightPlayerColor());
+        headerElement.addPara(String.format("Fleet Overview - %s", fleetSizeString), 0f, new Color[]{numColor, numColor, filteredColor},
+                              String.valueOf(currentFleetSize), String.valueOf(maxShipsInFleet), String.valueOf(hiddenShips))
+                     .setAlignment(Alignment.MID);
+        UIComponentAPI textElement = headerElement.getPrev();
+        textElement.getPosition().setSize(panelWidth - filterWidth, textElement.getPosition().getHeight());
+        textElement.getPosition().leftOfTop(lastFilter, 0f);
 
-            TooltipMakerAPI shipElement = displayRowPanel.createUIElement(shipElementWidth, shipElementHeight, false);
-            generateShipForPanel(shipElement, ship);
-            displayRowPanel.addUIElement(shipElement).inTL(sumXPadding, yPadding);
-            sumXPadding += shipElementWidth + shipElementPadding;
-            shipsDone++;
-        }
-
-        panelList.add(displayRowPanel);
-
-        for (CustomPanelAPI customPanel : panelList) {
-            fleetDisplayElement.addCustom(customPanel, 0f);
-        }
-
-        panel.addUIElement(fleetDisplayElement).inTL(0f, padding + panelHeaderHeight);
-
+        headerPanel.addUIElement(headerElement).inTL(0, 0);
+        tooltip.addCustom(headerPanel, padding).getPosition().setXAlignOffset(0f);
     }
 
-    private void addFilterButtons(TooltipMakerAPI tooltip) {
+    private float addFilterButtons(TooltipMakerAPI tooltip) {
         float filterButtonWidth = 40f;
         float hmButtonWidth = 55f;
         float buttonHeight = 18f;
@@ -111,10 +99,10 @@ public class ShipPanel {
 
         UIComponentAPI prev = tooltip.getPrev();
 
-        ButtonAPI lastButton = new FilterWithHullmodButton().createButton(tooltip, hmButtonWidth, buttonHeight);
+        ButtonAPI lastButton = new FilterWithHullmodButton().addButton(tooltip, hmButtonWidth, buttonHeight);
         lastButton.getPosition().rightOfTop(prev, -lastButton.getPosition().getWidth() + buttonSpacing);
 
-        ButtonAPI nextButton = new FilterWithoutHullmodButton().createButton(tooltip, hmButtonWidth, buttonHeight);
+        ButtonAPI nextButton = new FilterWithoutHullmodButton().addButton(tooltip, hmButtonWidth, buttonHeight);
         nextButton.getPosition().rightOfTop(lastButton, -nextButton.getPosition().getWidth() - hmButtonWidth - buttonSpacing);
         lastButton = nextButton;
 
@@ -125,24 +113,90 @@ public class ShipPanel {
         for (ShipAPI.HullSize hullSize : hullSizeFilters) {
             float prevButtonWidth = isFirst ? hmButtonWidth : filterButtonWidth;
 
-            nextButton = new FilterHullSizeButton(hullSize).createButton(tooltip, filterButtonWidth,
-                                                                         buttonHeight);
+            nextButton = new FilterHullSizeButton(hullSize).addButton(tooltip, filterButtonWidth,
+                                                                      buttonHeight);
             nextButton.getPosition().rightOfTop(lastButton, -nextButton.getPosition().getWidth() - prevButtonWidth - buttonSpacing);
             lastButton = nextButton;
             isFirst = false;
         }
+
+        return filterButtonWidth * 4 + hmButtonWidth * 2 + buttonSpacing * 7;
+    }
+
+    private void addFleetOverview(CustomPanelAPI mainPanel, TooltipMakerAPI mainPanelUIElement) {
+        CustomPanelAPI fleetOverviewPanel = mainPanel.createCustomPanel(panelWidth, panelHeight - panelHeaderHeight - 2f, null);
+        TooltipMakerAPI fleetOverviewElement = fleetOverviewPanel.createUIElement(panelWidth, panelHeight - panelHeaderHeight - 2f, true);
+
+        CustomPanelAPI rowPanel = mainPanel.createCustomPanel(panelWidth, shipElementHeight, null);
+        List<CustomPanelAPI> panelList = new ArrayList<>();
+
+        List<FleetMemberAPI> playerShips = filterShips();
+        int shipsDone = 0;
+        int cols = (int) Math.floor((panelWidth - shipElementMinPadding) / (shipElementWidth + shipElementMinPadding));
+        float blockLayoutPadding = (panelWidth - cols * (shipElementWidth + shipElementMinPadding)) / (cols + 1);
+        float sumXPadding = (blockLayoutPadding + shipElementMinPadding) / 2;
+        float yPadding = 5f;
+        for (final FleetMemberAPI ship : playerShips) {
+            if (shipsDone >= cols) {
+                panelList.add(rowPanel);
+                shipsDone = 0;
+                sumXPadding = (blockLayoutPadding + shipElementMinPadding) / 2;
+                rowPanel = mainPanel.createCustomPanel(panelWidth, shipElementHeight, null);
+            }
+
+            TooltipMakerAPI shipElement = rowPanel.createUIElement(shipElementWidth, shipElementHeight, false);
+
+            generateShipForPanel(shipElement, ship);
+
+            rowPanel.addUIElement(shipElement).inTL(sumXPadding, -3f);
+            sumXPadding += blockLayoutPadding + shipElementMinPadding + shipElementWidth;
+            shipsDone++;
+        }
+
+        panelList.add(rowPanel);
+
+        for (CustomPanelAPI customPanel : panelList) {
+            fleetOverviewElement.addCustom(customPanel, yPadding).getPosition().setXAlignOffset(0f);
+        }
+        fleetOverviewElement.addSpacer(yPadding * 2);
+
+        fleetOverviewPanel.addUIElement(fleetOverviewElement);
+        mainPanelUIElement.addCustom(fleetOverviewPanel, 0f).getPosition().setXAlignOffset(0f);
     }
 
     private void generateShipForPanel(TooltipMakerAPI shipElement, final FleetMemberAPI ship) {
         float labelButtonWidth = augmentButtonSize * VT_Settings.MAX_SLOTS + augmentButtonPadding * (VT_Settings.MAX_SLOTS - 1);
 
         boolean hasVESAI = true;
+        boolean isSelected = false;
         HullModManager hullmodManager = HullModDataStorage.getInstance().getHullModManager(ship.getId());
         if (isNull(hullmodManager)) {
             hasVESAI = false;
+        } else {
+            for (AugmentSlot augmentSlot : hullmodManager.getUnlockedSlots()) {
+                AugmentApplier selectedAugment = AugmentManagerIntel.getSelectedInstalledAugment();
+                AugmentSlot selectedSlot = AugmentManagerIntel.getSelectedSlot();
+                AugmentApplier slottedAugment = augmentSlot.getSlottedAugment();
+
+                boolean matchesInstalledAugment = !isNull(slottedAugment) && slottedAugment == selectedAugment;
+                boolean matchesSlot = !isNull(selectedSlot) && augmentSlot == selectedSlot;
+
+                if ((matchesSlot || matchesInstalledAugment)) {
+                    isSelected = true;
+                    break;
+                }
+            }
+
+            if (isSelected) {
+                UIComponentAPI box = UIUtils.addBox(shipElement, "", null, null, shipElementWidth + 8, shipElementHeight + 2, 1f, 0f,
+                                                    null, Misc.getHighlightColor(), Misc.setAlpha(Misc.getHighlightColor(), 15));
+                box.getPosition().inTL(1f, -2f);
+            }
         }
 
-        shipElement.addPara(shipElement.shortenString(ship.getShipName(), shipElementWidth), Misc.getBasePlayerColor(), 0f);
+        shipElement.addPara(shipElement.shortenString(ship.getShipName(), shipElementWidth), Misc.getBasePlayerColor(), 0f)
+                   .getPosition()
+                   .inTL(5f, 0);
         shipElement.addShipList(1, 1, shipIconSize, Misc.getDarkPlayerColor(), Collections.singletonList(ship), 10f);
         UIComponentAPI shipListComponent = shipElement.getPrev();
 
@@ -152,8 +206,8 @@ public class ShipPanel {
 
         if (hasVESAI) {
             ButtonAPI lastScriptRunnerButton = null;
-            for (AugmentSlot scriptRunnerSlot : hullmodManager.getUniqueSlots()) {
-                ButtonAPI specialSlotButton = createAugmentSlotButton(shipElement, scriptRunnerSlot, ship);
+            for (AugmentSlot augmentSlot : hullmodManager.getUniqueSlots()) {
+                ButtonAPI specialSlotButton = createAugmentSlotButton(shipElement, augmentSlot, ship);
 
                 if (isNull(lastScriptRunnerButton)) {
                     specialSlotButton.getPosition().rightOfTop(shipListComponent, 0f);
@@ -165,13 +219,13 @@ public class ShipPanel {
                 lastScriptRunnerButton = specialSlotButton;
 
                 float maxStringWidth = 5 * augmentButtonSize + 4 * augmentButtonPadding;
-                String specialButtonText = scriptRunnerSlot.isEmpty()
+                String specialButtonText = augmentSlot.isEmpty()
                                            ? shipElement.shortenString(
-                        String.format("%s Slot Empty", scriptRunnerSlot.getSlotCategory().getName()), maxStringWidth)
-                                           : shipElement.shortenString(scriptRunnerSlot.getSlottedAugment().getName(), maxStringWidth);
-                Color textColor = scriptRunnerSlot.isEmpty()
+                        String.format("Empty %s Slot", augmentSlot.getSlotCategory().getName()), maxStringWidth)
+                                           : shipElement.shortenString(augmentSlot.getSlottedAugment().getName(), maxStringWidth);
+                Color textColor = augmentSlot.isEmpty()
                                   ? Misc.getGrayColor()
-                                  : scriptRunnerSlot.getSlottedAugment().getAugmentQuality().getColor();
+                                  : augmentSlot.getSlottedAugment().getAugmentQuality().getColor();
                 shipElement.addPara(specialButtonText, textColor, 0f)
                            .getPosition()
                            .rightOfMid(specialSlotButton, augmentButtonPadding + 4f);
@@ -189,16 +243,17 @@ public class ShipPanel {
 
                 lastAugmentButton = augmentSlotButton;
             }
-
         } else {
-            new InstallHullmodButton(ship).createButton(shipElement, labelButtonWidth, augmentButtonSize)
+            new InstallHullmodButton(ship).addButton(shipElement, labelButtonWidth, augmentButtonSize)
                                           .getPosition()
                                           .setYAlignOffset(-8f);
         }
 
-        shipElement.addButton("", null, shipElementWidth, 0f, 0f);
-        UIComponentAPI separatorComponent = shipElement.getPrev();
-        separatorComponent.getPosition().belowLeft(shipListComponent, 13f);
+        if (!isSelected) {
+            shipElement.addButton("", null, shipElementWidth, 0f, 0f);
+            UIComponentAPI separatorComponent = shipElement.getPrev();
+            separatorComponent.getPosition().belowLeft(shipListComponent, 13f);
+        }
     }
 
     private ButtonAPI createAugmentSlotButton(final TooltipMakerAPI uiElement, final AugmentSlot augmentSlot,
@@ -222,7 +277,7 @@ public class ShipPanel {
             intelButton = new FilledSlotButton(slottedAugment, ship);
         }
 
-        return intelButton.createButton(uiElement, augmentButtonSize, augmentButtonSize);
+        return intelButton.addButton(uiElement, augmentButtonSize, augmentButtonSize);
     }
 
     private List<FleetMemberAPI> filterShips() {
