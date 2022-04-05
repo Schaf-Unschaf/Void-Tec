@@ -1,3 +1,7 @@
 name,id,tags,tech/manufacturer,rarity,base price,stack size,cargo space,baseRaidDanger,icon,sound id,sound id drop,plugin,plugin params,desc,order
-Augment Chip,VT_augment,,VoidTec,,2000,1,0,,graphics\icons\cargo\vt_augment_chip_dummy.png,ui_chip_pickup,ui_ship_bp_drop,de.schafunschaf.voidtec.campaign.items.augments.AugmentItemPlugin,,,95
-Augment Storage Chest,VT_storageChest,,VoidTec,,100000,1,1,,graphics\icons\cargo\vt_storage_chest.png,ui_cargo_special_military_pickup,ui_cargo_special_military_drop,de.schafunschaf.voidtec.campaign.items.augments.AugmentChestPlugin,,,94
+Augment Chip,VT_augment,,VoidTec,,2000,1,0,,graphics\icons\cargo\vt_dummy.png,ui_chip_pickup,ui_ship_bp_drop,de.schafunschaf.voidtec.campaign.items.augments.AugmentItemPlugin,,,95
+XS Storage,VT_storageChest_XS,,VoidTec,,2000,1,50,,graphics\icons\cargo\vt_dummy.png,ui_cargo_special_military_pickup,ui_cargo_special_military_drop,de.schafunschaf.voidtec.campaign.items.chests.BaseChestPlugin,,,94
+S Storage,VT_storageChest_S,,VoidTec,,6000,1,150,,graphics\icons\cargo\vt_dummy.png,ui_cargo_special_military_pickup,ui_cargo_special_military_drop,de.schafunschaf.voidtec.campaign.items.chests.BaseChestPlugin,,,93
+M Storage,VT_storageChest_M,,VoidTec,,15000,1,400,,graphics\icons\cargo\vt_dummy.png,ui_cargo_special_military_pickup,ui_cargo_special_military_drop,de.schafunschaf.voidtec.campaign.items.chests.BaseChestPlugin,,,92
+L Storage,VT_storageChest_L,,VoidTec,,40000,1,1000,,graphics\icons\cargo\vt_dummy.png,ui_cargo_special_military_pickup,ui_cargo_special_military_drop,de.schafunschaf.voidtec.campaign.items.chests.BaseChestPlugin,,,91
+XL Storage,VT_storageChest_XL,,VoidTec,,92000,1,2300,,graphics\icons\cargo\vt_dummy.png,ui_cargo_special_military_pickup,ui_cargo_special_military_drop,de.schafunschaf.voidtec.campaign.items.chests.BaseChestPlugin,,,90

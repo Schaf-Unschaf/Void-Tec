@@ -93,6 +93,21 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
     }
 
     @Override
+    public void performRightClickAction() {
+        getAugmentItemData().getAugment().runRightClickAction();
+    }
+
+    @Override
+    public boolean hasRightClickAction() {
+        return true;
+    }
+
+    @Override
+    public boolean shouldRemoveOnRightClickAction() {
+        return false;
+    }
+
+    @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, CargoTransferHandlerAPI transferHandler, Object stackSource) {
         float largePad = 10f;
         float smallPad = 3f;

@@ -1,37 +1,36 @@
-package de.schafunschaf.voidtec.campaign.items.augments;
+package de.schafunschaf.voidtec.campaign.items.chests;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoTransferHandlerAPI;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
 import com.fs.starfarer.api.campaign.impl.items.BaseSpecialItemPlugin;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DialogHelperOpenStorage;
-import de.schafunschaf.voidtec.helper.ColorShifter;
-import de.schafunschaf.voidtec.ids.VT_Icons;
+import de.schafunschaf.voidtec.util.FormattingTools;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
-import lombok.Getter;
 import lombok.SneakyThrows;
+import org.lwjgl.input.Keyboard;
 
 import java.awt.Color;
-import java.awt.Robot;
-import java.awt.event.KeyEvent;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
-@Getter
-public class AugmentChestPlugin extends BaseSpecialItemPlugin {
+public class BaseChestPlugin extends BaseSpecialItemPlugin implements StorageChestPlugin {
 
-    @SneakyThrows
     @Override
     public void performRightClickAction() {
-        Robot robot = new Robot();
-        Global.getSector().addTransientScript(new VT_DialogHelperOpenStorage(this));
-        robot.keyPress(KeyEvent.VK_ESCAPE);
-        robot.keyRelease(KeyEvent.VK_ESCAPE);
+        if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+            getChestData().setCurrentMode(getChestData().getCurrentMode().cycleNextMode());
+            return;
+        }
+
+        if (getChestData().getCurrentMode() != BaseChestData.UseMode.LOCKED) {
+            VoidTecUtils.openDialogPlugin(new VT_DialogHelperOpenStorage(this));
+        }
     }
 
     @Override
@@ -45,25 +44,36 @@ public class AugmentChestPlugin extends BaseSpecialItemPlugin {
     }
 
     @Override
+    public float getTooltipWidth() {
+        return 320f;
+    }
+
+    @SneakyThrows
+    @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, CargoTransferHandlerAPI transferHandler, Object stackSource) {
+        float smallPad = 3f;
         float largePad = 10f;
 
-        AugmentChestData augmentChestData = getAugmentChestData();
-        int currentSize = augmentChestData.getCurrentSize();
-        int maxSize = augmentChestData.getMaxSize();
-
-        String manufacturerName = "VoidTec";
+        String manufacturerName = isNull(getChestData().getManufacturer()) ? "Unknown" : getChestData().getManufacturer();
+        FactionAPI faction = Global.getSector().getFaction(manufacturerName);
         Color manufacturerColor = VoidTecUtils.getManufacturerColor(manufacturerName);
-        Color spaceHLColor = currentSize < maxSize ? Misc.getHighlightColor() : Misc.getNegativeHighlightColor();
+        if (!isNull(faction)) {
+            manufacturerName = Misc.ucFirst(faction.getDisplayNameWithArticleWithoutArticle());
+        }
 
-        tooltip.addTitle(getName(), Misc.getHighlightColor());
+        tooltip.addTitle(getName(), getChestData().getColor());
         tooltip.addPara("Manufacturer: %s", largePad, Misc.getGrayColor(), manufacturerColor, manufacturerName);
-        String hlString = maxSize + " Augment Chips";
-        tooltip.addPara(String.format(
-                "This handy little chest was designed for any eager captain or collector in the sector and stores up to %s inside.",
-                hlString), largePad, Misc.getHighlightColor(), hlString);
+        tooltip.addPara("Needed Space: %s", smallPad, Misc.getGrayColor(), Misc.getHighlightColor(),
+                        String.valueOf(((int) stack.getCargoSpacePerUnit())));
+
+        getChestData().createTooltip(tooltip, expanded, transferHandler, stackSource);
 
         if (!isNull(stackSource)) {
+            int currentSize = getChestData().getCurrentSize();
+            int maxSize = getChestData().getMaxSize();
+            BaseChestData.UseMode currentMode = getChestData().getCurrentMode();
+            Color spaceHLColor = currentSize < maxSize ? Misc.getHighlightColor() : Misc.getNegativeHighlightColor();
+
             if (expanded && (transferHandler.getSubmarketTradedWith()
                                             .getSpecId()
                                             .equals(Submarkets.SUBMARKET_STORAGE) || transferHandler.getSubmarketTradedWith()
@@ -78,9 +88,19 @@ public class AugmentChestPlugin extends BaseSpecialItemPlugin {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
             }
 
-            tooltip.addPara(String.format("Space used: %s/%s", currentSize, maxSize), largePad, Misc.getGrayColor(), spaceHLColor,
+            tooltip.addPara(String.format("Inventory: %s/%s", currentSize, maxSize), largePad, Misc.getGrayColor(), spaceHLColor,
                             String.valueOf(currentSize), String.valueOf(maxSize));
-            tooltip.addPara("Right-click to open", Misc.getPositiveHighlightColor(), largePad);
+
+            if (currentMode == BaseChestData.UseMode.LOCKED) {
+                tooltip.addPara("This Chest is %s!", largePad, currentMode.getColor(),
+                                FormattingTools.capitalizeFirst(currentMode.name().toLowerCase()));
+                tooltip.addPara("Ctrl+Right-Click to unlock with the %s", smallPad, Misc.getGrayColor(), Misc.getHighlightColor(),
+                                "Skeleton Key");
+            } else {
+                tooltip.addPara("Right-Click to %s", smallPad, currentMode.getColor(),
+                                FormattingTools.capitalizeFirst(currentMode.name().toLowerCase()));
+                tooltip.addPara("Ctrl+Right-Click to switch modes", Misc.getGrayColor(), largePad);
+            }
         }
     }
 
@@ -91,7 +111,7 @@ public class AugmentChestPlugin extends BaseSpecialItemPlugin {
 
     @Override
     public String getName() {
-        return super.getName();
+        return getChestData().getName();
     }
 
     @Override
@@ -101,16 +121,7 @@ public class AugmentChestPlugin extends BaseSpecialItemPlugin {
 
     @Override
     public void render(float x, float y, float w, float h, float alphaMult, float glowMult, SpecialItemRendererAPI renderer) {
-        AugmentChestData augmentChestData = getAugmentChestData();
-        ColorShifter colorShifter = augmentChestData.getColorShifter();
-
-        SpriteAPI glow = Global.getSettings().getSprite(VT_Icons.AUGMENT_ITEM_CHEST_ICON_GLOW);
-
-        Color glowColor = Misc.scaleColor(colorShifter.shiftColor(0.5f), 0.5f);
-
-        glow.setColor(glowColor);
-        glow.setAdditiveBlend();
-        glow.renderAtCenter(0f, 0f);
+        getChestData().render(x, y, w, h, alphaMult, glowMult, renderer);
     }
 
     @Override
@@ -119,12 +130,16 @@ public class AugmentChestPlugin extends BaseSpecialItemPlugin {
     }
 
     public void addToSize(int num) {
-        AugmentChestData augmentChestData = getAugmentChestData();
+        StorageChestData augmentChestData = getChestData();
         int currentSize = augmentChestData.getCurrentSize();
         augmentChestData.setCurrentSize(currentSize + num);
     }
 
-    public AugmentChestData getAugmentChestData() {
-        return (AugmentChestData) stack.getSpecialDataIfSpecial();
+    public StorageChestData getChestData() {
+        return (StorageChestData) stack.getSpecialDataIfSpecial();
+    }
+
+    public void setName(String name) {
+        getChestData().setName(name);
     }
 }

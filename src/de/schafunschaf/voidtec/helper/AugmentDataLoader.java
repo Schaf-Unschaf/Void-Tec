@@ -83,10 +83,11 @@ public class AugmentDataLoader {
 
                 try {
                     AugmentData augmentData = new AugmentData(augmentID, row.optString("manufacturer"), row.optString("name"),
-                                                              new TextWithHighlights(row.optString("description")), row.optInt("rarity"),
-                                                              SlotCategory.getEnum(row.getString("primarySlot")), primaryStatMods,
-                                                              primaryStatValues, secondarySlots, secondaryStatMods, secondaryStatValues,
-                                                              augmentQuality, null, null, row.optBoolean("equalQualityRoll"), null, null,
+                                                              new TextWithHighlights(row.optString("description"), null),
+                                                              row.optInt("rarity"), SlotCategory.getEnum(row.getString("primarySlot")),
+                                                              primaryStatMods, primaryStatValues, secondarySlots, secondaryStatMods,
+                                                              secondaryStatValues, augmentQuality, null, null,
+                                                              row.optBoolean("equalQualityRoll"), null, null, null,
                                                               row.optBoolean("uniqueMod"));
 
                     AugmentDataManager.storeAugmentData(augmentID, augmentData);

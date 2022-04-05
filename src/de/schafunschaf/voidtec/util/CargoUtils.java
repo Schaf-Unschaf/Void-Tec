@@ -6,8 +6,10 @@ import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
-import de.schafunschaf.voidtec.campaign.items.augments.AugmentChestData;
+import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
+import de.schafunschaf.voidtec.campaign.items.chests.StorageChestData;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Items;
 
@@ -26,7 +28,7 @@ public class CargoUtils {
         CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
         CargoAPI localCargo = Global.getFactory().createCargo(true);
 
-        List<AugmentChestData> chestsInStorage = new ArrayList<>();
+        List<StorageChestData> chestsInStorage = new ArrayList<>();
         List<AugmentCargoWrapper> augmentCargoWrappers = new ArrayList<>();
 
         for (EveryFrameScript transientScript : Global.getSector().getTransientScripts()) {
@@ -40,7 +42,7 @@ public class CargoUtils {
 
         searchCargoForItems(localCargo, chestsInStorage, augmentCargoWrappers, AugmentCargoWrapper.CargoSource.LOCAL_STORAGE);
         searchCargoForItems(playerCargo, chestsInStorage, augmentCargoWrappers, AugmentCargoWrapper.CargoSource.PLAYER_FLEET);
-        for (AugmentChestData augmentChestData : chestsInStorage) {
+        for (StorageChestData augmentChestData : chestsInStorage) {
             searchCargoForItems(augmentChestData.getChestStorage(), chestsInStorage, augmentCargoWrappers,
                                 AugmentCargoWrapper.CargoSource.CARGO_CHEST);
         }
@@ -64,7 +66,7 @@ public class CargoUtils {
         return augmentCargoWrappers;
     }
 
-    public static void searchCargoForItems(CargoAPI storageCargo, List<AugmentChestData> chestsInStorage,
+    public static void searchCargoForItems(CargoAPI storageCargo, List<StorageChestData> chestsInStorage,
                                            List<AugmentCargoWrapper> augmentCargoWrappers, AugmentCargoWrapper.CargoSource cargoSource) {
         for (CargoStackAPI cargoStackAPI : storageCargo.getStacksCopy()) {
             SpecialItemData specialItemData = cargoStackAPI.getSpecialDataIfSpecial();
@@ -72,8 +74,8 @@ public class CargoUtils {
                 continue;
             }
 
-            if (specialItemData.getId().equals(VT_Items.STORAGE_CHEST)) {
-                chestsInStorage.add(((AugmentChestData) specialItemData));
+            if (specialItemData.getId().contains(VT_Items.STORAGE_CHEST_ID)) {
+                chestsInStorage.add(((StorageChestData) specialItemData));
                 continue;
             }
 
@@ -83,5 +85,59 @@ public class CargoUtils {
                 augmentCargoWrappers.add(new AugmentCargoWrapper(cargoStackAPI, cargoSource, storageCargo));
             }
         }
+    }
+
+    public static CargoAPI getPlayerCargoForChestStorage() {
+        CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
+        CargoAPI cargo = Global.getFactory().createCargo(true);
+
+        for (CargoStackAPI itemData : playerCargo.getStacksCopy()) {
+            if ((itemData.isCommodityStack() || itemData.isWeaponStack() || itemData.isFighterWingStack())
+                    && !itemData.isCrewStack() && !itemData.isMarineStack()) {
+                cargo.addFromStack(itemData);
+                continue;
+            }
+
+            SpecialItemData specialItemData = itemData.getSpecialDataIfSpecial();
+            if (!isNull(specialItemData) && !specialItemData.getId().contains(VT_Items.STORAGE_CHEST_ID)) {
+                cargo.addFromStack(itemData);
+            }
+        }
+
+        return cargo;
+    }
+
+    public static CargoAPI getAugmentsInPlayerCargo() {
+        CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
+        CargoAPI cargo = Global.getFactory().createCargo(true);
+
+        for (CargoStackAPI itemData : playerCargo.getStacksCopy()) {
+            SpecialItemData specialItemData = itemData.getSpecialDataIfSpecial();
+            if (isNull(specialItemData)) {
+                continue;
+            }
+
+            if (specialItemData.getId().equals(VT_Items.AUGMENT_ITEM)) {
+                cargo.addFromStack(itemData);
+            }
+        }
+
+        return cargo;
+    }
+
+    public static void adjustItemInCargo(CargoAPI sourceCargo, CargoAPI cargoToAdjust) {
+        List<CargoStackAPI> sourceCargoStacks = sourceCargo.getStacksCopy();
+
+        for (CargoStackAPI sourceCargoStack : sourceCargoStacks) {
+            cargoToAdjust.removeItems(sourceCargoStack.getType(), sourceCargoStack.getData(), sourceCargoStack.getSize());
+        }
+    }
+
+    public static AugmentApplier getAugmentFromStack(CargoStackAPI cargoStack) {
+        if (isNull(cargoStack)) {
+            return null;
+        }
+
+        return ((AugmentItemData) cargoStack.getData()).getAugment();
     }
 }

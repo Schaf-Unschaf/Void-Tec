@@ -135,7 +135,7 @@ public class ShipPanel {
         int cols = (int) Math.floor((panelWidth - shipElementMinPadding) / (shipElementWidth + shipElementMinPadding));
         float blockLayoutPadding = (panelWidth - cols * (shipElementWidth + shipElementMinPadding)) / (cols + 1);
         float sumXPadding = (blockLayoutPadding + shipElementMinPadding) / 2;
-        float yPadding = 5f;
+        float yPadding = 8f;
         for (final FleetMemberAPI ship : playerShips) {
             if (shipsDone >= cols) {
                 panelList.add(rowPanel);

@@ -3,7 +3,7 @@ package de.schafunschaf.voidtec.helper;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
-import de.schafunschaf.voidtec.util.VoidTecUtils;
+import de.schafunschaf.voidtec.util.CargoUtils;
 import lombok.Getter;
 
 @Getter
@@ -18,7 +18,7 @@ public class AugmentCargoWrapper {
         this.augmentCargoStack = augmentCargoStack;
         this.cargoSource = cargoSource;
         this.sourceCargo = sourceCargo;
-        this.augment = VoidTecUtils.getAugmentFromStack(augmentCargoStack);
+        this.augment = CargoUtils.getAugmentFromStack(augmentCargoStack);
     }
 
     public enum CargoSource {

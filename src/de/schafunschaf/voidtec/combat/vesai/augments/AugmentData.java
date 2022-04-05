@@ -1,7 +1,6 @@
 package de.schafunschaf.voidtec.combat.vesai.augments;
 
 import de.schafunschaf.voidtec.combat.vesai.AfterCreationEffect;
-import de.schafunschaf.voidtec.combat.vesai.CombatScriptRunner;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
@@ -33,8 +32,9 @@ public class AugmentData {
     protected TextWithHighlights combatScriptDescription = null;
     protected TextWithHighlights additionalDescription = null;
     protected boolean equalQualityRoll = false;
-    protected CombatScriptRunner combatScript = null;
+    protected String combatScriptPath = null;
     protected AfterCreationEffect afterCreationEffect = null;
+    protected String rightClickActionPath = null;
     protected boolean uniqueMod = false;
 
     protected void storeAugment() {

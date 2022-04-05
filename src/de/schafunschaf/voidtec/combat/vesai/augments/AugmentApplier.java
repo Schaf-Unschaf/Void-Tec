@@ -4,6 +4,8 @@ import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
+import de.schafunschaf.voidtec.combat.vesai.CombatScriptRunner;
+import de.schafunschaf.voidtec.combat.vesai.RightClickAction;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
@@ -27,6 +29,8 @@ public interface AugmentApplier {
 
     void generateStatDescription(TooltipMakerAPI tooltip, float padding, Boolean isPrimary, Color bulletColorOverride,
                                  AugmentQuality quality);
+
+    CombatScriptRunner getCombatScriptRunner();
 
     void runCustomScript(ShipAPI ship, float amount);
 
@@ -59,6 +63,10 @@ public interface AugmentApplier {
     TextWithHighlights getAdditionalDescription();
 
     List<StatApplier> getActiveStatMods();
+
+    RightClickAction getRightClickAction();
+
+    void runRightClickAction();
 
     void collectAppliedStats(MutableShipStatsAPI stats, String id);
 
