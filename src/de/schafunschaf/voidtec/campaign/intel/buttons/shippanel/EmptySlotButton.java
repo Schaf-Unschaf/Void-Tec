@@ -37,14 +37,15 @@ public class EmptySlotButton extends DefaultButton {
         }
 
         if (canInstallAugment) {
-            AugmentApplier augment = AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
-            AugmentApplier clonedAugment = AugmentDataManager.cloneAugment(augment);
-            boolean success = augmentSlot.installAugment(clonedAugment);
+            AugmentApplier augmentFromCargo = AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
+            AugmentApplier augmentToInstall = augmentFromCargo.isStackable() ? AugmentDataManager.cloneAugment(augmentFromCargo) :
+                                              augmentFromCargo;
+            boolean success = augmentSlot.installAugment(augmentToInstall);
             if (success) {
                 removeAugmentFromCargo();
             }
 
-            AugmentManagerIntel.setSelectedInstalledAugment(success ? clonedAugment : null);
+            AugmentManagerIntel.setSelectedInstalledAugment(success ? augmentToInstall : null);
             AugmentManagerIntel.setSelectedAugmentInCargo(null);
             AugmentManagerIntel.setActiveCategoryFilter(null);
             AugmentManagerIntel.setSelectedSlot(null);

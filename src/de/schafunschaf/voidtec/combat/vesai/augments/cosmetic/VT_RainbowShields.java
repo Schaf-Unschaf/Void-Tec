@@ -20,6 +20,7 @@ public class VT_RainbowShields extends AugmentData {
         this.augmentQualityRange = new String[]{AugmentQuality.CUSTOMISED.name()};
         this.combatScriptDescription = new TextWithHighlights("Makes your shield change color over time.", null);
         this.combatScriptPath = "de.schafunschaf.voidtec.combat.scripts.fx.RainbowShieldEffect";
+        this.stackable = false;
         storeAugment();
     }
 

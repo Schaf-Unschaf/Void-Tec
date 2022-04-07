@@ -13,14 +13,16 @@ public class VT_EngineRecolor extends AugmentData {
         this.manufacturer = "VoidTec";
         this.name = "Variable Flame Colorizer";
         this.description = new TextWithHighlights(
-                "Bored of those always same and boring looking engine flames? Try the all new '==Exhaust Colorizer==' for your ship and " +
-                        "kiss those boring exhausts goodbye!", null);
+                "Want to impress your opposing fleet commander? Try the all new '==Exhaust Colorizer==' for your ship and make him " +
+                        "think about all the wrong decisions he made when fitting his ship, only to get vaporized by a Reaper-Torpedo " +
+                        "mere seconds later.", null);
         this.rarity = 20;
         this.primarySlot = SlotCategory.COSMETIC;
         this.augmentQualityRange = new String[]{AugmentQuality.CUSTOMISED.name()};
         this.combatScriptDescription = new TextWithHighlights("Makes your engine flames change to your ==specified color==.", null);
         this.rightClickActionPath = "de.schafunschaf.voidtec.combat.scripts.interactions.OpenColorPickerAction";
         this.combatScriptPath = "de.schafunschaf.voidtec.combat.scripts.fx.EngineRecolorEffect";
+        this.stackable = false;
         storeAugment();
     }
 

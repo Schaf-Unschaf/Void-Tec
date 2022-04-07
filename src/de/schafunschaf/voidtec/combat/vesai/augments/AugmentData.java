@@ -36,6 +36,7 @@ public class AugmentData {
     protected AfterCreationEffect afterCreationEffect = null;
     protected String rightClickActionPath = null;
     protected boolean uniqueMod = false;
+    protected boolean stackable = true;
 
     protected void storeAugment() {
         AugmentDataManager.storeAugmentData(augmentID, this);

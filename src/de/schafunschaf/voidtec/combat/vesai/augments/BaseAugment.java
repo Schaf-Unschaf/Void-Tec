@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.Objects;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
+@Log4j
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -51,6 +53,7 @@ public class BaseAugment implements AugmentApplier {
     protected AugmentSlot installedSlot;
     protected Map<String, Float> appliedFighterValues;
     protected boolean uniqueMod;
+    protected boolean stackable;
 
     public BaseAugment(AugmentData augmentData, AugmentQuality augmentQuality) {
         this.augmentID = augmentData.getAugmentID();
@@ -76,6 +79,7 @@ public class BaseAugment implements AugmentApplier {
         this.rightClickAction = ((RightClickAction) createInstanceFromPath(augmentData.getRightClickActionPath()));
         this.appliedFighterValues = new HashMap<>();
         this.uniqueMod = augmentData.isUniqueMod();
+        this.stackable = augmentData.isStackable();
     }
 
     @SneakyThrows
@@ -86,7 +90,10 @@ public class BaseAugment implements AugmentApplier {
 
         try {
             Class<?> aClass = Global.getSettings().getScriptClassLoader().loadClass(rightClickActionPath);
-            return aClass.newInstance();
+            Object newInstance = aClass.newInstance();
+            log.info(rightClickActionPath + "\n" + newInstance);
+
+            return newInstance;
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
             e.printStackTrace();
         }
@@ -352,7 +359,7 @@ public class BaseAugment implements AugmentApplier {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass() || !stackable) {
             return false;
         }
         BaseAugment that = (BaseAugment) o;

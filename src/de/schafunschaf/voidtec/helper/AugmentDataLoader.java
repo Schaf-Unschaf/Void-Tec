@@ -88,7 +88,7 @@ public class AugmentDataLoader {
                                                               primaryStatMods, primaryStatValues, secondarySlots, secondaryStatMods,
                                                               secondaryStatValues, augmentQuality, null, null,
                                                               row.optBoolean("equalQualityRoll"), null, null, null,
-                                                              row.optBoolean("uniqueMod"));
+                                                              row.optBoolean("uniqueMod"), true);
 
                     AugmentDataManager.storeAugmentData(augmentID, augmentData);
                 } catch (JSONException error) {

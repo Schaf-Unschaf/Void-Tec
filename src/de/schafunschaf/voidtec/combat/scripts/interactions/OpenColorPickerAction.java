@@ -12,7 +12,7 @@ import java.awt.Color;
 
 public class OpenColorPickerAction implements RightClickAction {
 
-    private Color customColor = Color.BLACK;
+    private Color customColor = Color.YELLOW;
 
     @Override
     public void run() {
@@ -24,7 +24,7 @@ public class OpenColorPickerAction implements RightClickAction {
         dialog.getTextPanel().addPara(VT_Strings.VT_SHEEP_WIKI);
 
         CustomDialogDelegate delegate = new VT_ColorPickerDialog(dialog, this);
-        dialog.showCustomDialog(310, 300, delegate);
+        dialog.showCustomDialog(200, 155, delegate);
     }
 
     @Override

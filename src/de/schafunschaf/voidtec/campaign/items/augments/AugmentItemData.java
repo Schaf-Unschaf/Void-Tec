@@ -42,11 +42,12 @@ public class AugmentItemData extends SpecialItemData {
     public boolean equals(Object obj) {
         if (obj instanceof AugmentItemData) {
             AugmentApplier otherAugment = ((AugmentItemData) obj).augment;
+            boolean isStackable = augment.isStackable() && otherAugment.isStackable();
             boolean isSameAugment = otherAugment.getAugmentID().equals(this.augment.getAugmentID());
             boolean hasSameInitQuality = otherAugment.getInitialQuality() == this.augment.getInitialQuality();
             boolean hasSameCurQuality = otherAugment.getAugmentQuality() == this.augment.getAugmentQuality();
 
-            return isSameAugment && hasSameInitQuality && hasSameCurQuality;
+            return isStackable && isSameAugment && hasSameInitQuality && hasSameCurQuality;
         }
 
         return false;

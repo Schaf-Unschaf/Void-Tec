@@ -91,4 +91,6 @@ public interface AugmentApplier {
     boolean isInPrimarySlot();
 
     boolean isUniqueMod();
+
+    boolean isStackable();
 }

@@ -4,12 +4,12 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
-import com.fs.starfarer.api.ui.Fonts;
-import com.fs.starfarer.api.ui.TextFieldAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.*;
+import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.campaign.dialog.ui.ColorPickerPanelPlugin;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DialogHelperLeaveToCargo;
 import de.schafunschaf.voidtec.combat.vesai.RightClickAction;
+import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;
@@ -28,29 +28,43 @@ public class VT_ColorPickerDialog implements CustomDialogDelegate {
     public void createCustomDialog(CustomPanelAPI panel) {
         Color currentColor = (Color) rightClickAction.getActionObject();
 
-        TooltipMakerAPI uiElement = panel.createUIElement(300, 70, false);
+        TooltipMakerAPI uiElement = panel.createUIElement(200, 70, false);
+        uiElement.addSpacer(0f).getPosition();
         uiElement.setParaFont(Fonts.INSIGNIA_LARGE);
-        uiElement.addPara("Pick new color values:", 0f);
-        fieldRed = addColorField(currentColor.getRed(), Color.RED, uiElement);
-        fieldGreen = addColorField(currentColor.getGreen(), Color.GREEN, uiElement);
-        fieldBlue = addColorField(currentColor.getBlue(), Color.BLUE, uiElement);
-        fieldAlpha = addColorField(currentColor.getAlpha(), Color.WHITE, uiElement);
-
+        uiElement.addPara("Pick a new color", 0f).setAlignment(Alignment.MID);
+        uiElement.getPrev().getPosition().setYAlignOffset(-20f).setXAlignOffset(0);
+        UIUtils.addVerticalSeparator(uiElement, 200, 1, Misc.getBasePlayerColor()).getPosition().setXAlignOffset(-5f).setYAlignOffset(-3f);
+        uiElement.addSpacer(0f).getPosition().setXAlignOffset(-10f).setYAlignOffset(20f);
+        fieldRed = addColorField("Red (0-255)", currentColor.getRed(), Color.RED, uiElement);
+        fieldGreen = addColorField("Green (0-255)", currentColor.getGreen(), Color.GREEN, uiElement);
+        fieldBlue = addColorField("Blue (0-255)", currentColor.getBlue(), Color.BLUE, uiElement);
+        fieldAlpha = addColorField("Alpha (0-255)", currentColor.getAlpha(), Color.WHITE, uiElement);
+        uiElement.addSpacer(10f);
         panel.addUIElement(uiElement);
     }
 
-    private TextFieldAPI addColorField(int value, Color color, TooltipMakerAPI uiElement) {
-        TextFieldAPI field = uiElement.addTextField(300, 10f);
+    private TextFieldAPI addColorField(String text, int value, Color color, TooltipMakerAPI uiElement) {
+        CustomPanelAPI panel = Global.getSettings().createCustom(180, 30, null);
+        TooltipMakerAPI fieldElement = panel.createUIElement(180, 30, false);
+        TextFieldAPI field = fieldElement.addTextField(60, 10f);
         field.setColor(color);
         field.setText(String.valueOf(value));
         field.setUndoOnEscape(true);
+        field.setMidAlignment();
+        field.setBorderColor(color);
+        field.setMaxChars(3);
+        UIComponentAPI prev = fieldElement.getPrev();
+        fieldElement.setParaFont(Fonts.INSIGNIA_LARGE);
+        fieldElement.addPara(text, color, 0f).getPosition().rightOfMid(prev, 10f).setYAlignOffset(-1f);
 
+        panel.addUIElement(fieldElement).inTL(0, 0);
+        uiElement.addCustom(panel, 3f);
         return field;
     }
 
     @Override
     public boolean hasCancelButton() {
-        return true;
+        return false;
     }
 
     @Override
@@ -65,14 +79,22 @@ public class VT_ColorPickerDialog implements CustomDialogDelegate {
 
     @Override
     public void customDialogConfirm() {
+        applyColor();
+        closeDialog();
+    }
+
+    private void applyColor() {
+        Color color = generateColor();
+        rightClickAction.setActionObject(color);
+    }
+
+    public Color generateColor() {
         int redValue = getColorValue(fieldRed);
         int greenValue = getColorValue(fieldGreen);
         int blueValue = getColorValue(fieldBlue);
         int alphaValue = getColorValue(fieldAlpha);
 
-        rightClickAction.setActionObject(new Color(redValue, greenValue, blueValue, alphaValue));
-
-        closeDialog();
+        return new Color(redValue, greenValue, blueValue, alphaValue);
     }
 
     private int getColorValue(TextFieldAPI textField) {
@@ -94,7 +116,7 @@ public class VT_ColorPickerDialog implements CustomDialogDelegate {
 
     @Override
     public CustomUIPanelPlugin getCustomPanelPlugin() {
-        return null;
+        return new ColorPickerPanelPlugin(this);
     }
 
     private void closeDialog() {

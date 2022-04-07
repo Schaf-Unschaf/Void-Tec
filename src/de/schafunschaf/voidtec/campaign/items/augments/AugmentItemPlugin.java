@@ -99,7 +99,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
     @Override
     public boolean hasRightClickAction() {
-        return true;
+        return !isNull(getAugmentItemData().getAugment().getRightClickAction());
     }
 
     @Override
@@ -130,8 +130,13 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
             tooltip.addPara("There can only be one unique augment installed in each category.", Misc.getGrayColor(), smallPad);
         }
 
-        tooltip.addPara(augment.getDescription().getDisplayString(), largePad, Misc.getHighlightColor(),
+        Color highlightColor = Misc.getHighlightColor();
+        if (!isNull(augment.getRightClickAction()) && augment.getRightClickAction().getActionObject() instanceof Color) {
+            highlightColor = ((Color) augment.getRightClickAction().getActionObject());
+        }
+        tooltip.addPara(augment.getDescription().getDisplayString(), largePad, highlightColor,
                         augment.getDescription().getHighlights());
+
         if (augmentQuality == AugmentQuality.DESTROYED) {
             tooltip.addSectionHeading("NON-FUNCTIONAL AUGMENT DETECTED", augmentQuality.getColor(),
                                       Misc.scaleColor(augmentQuality.getColor(), 0.4f), Alignment.MID, largePad);
@@ -177,6 +182,10 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                     && (!augment.getPrimaryStatMods().isEmpty() || !augment.getSecondaryStatMods().isEmpty())) {
                 tooltip.addPara("Expand to see detailed modification info.", Misc.getGrayColor(), largePad);
             }
+        }
+
+        if (hasRightClickAction() && !stackSource.equals(AugmentManagerIntel.STACK_SOURCE)) {
+            tooltip.addPara("Right-Click to open customisation dialog", Misc.getPositiveHighlightColor(), largePad);
         }
     }
 

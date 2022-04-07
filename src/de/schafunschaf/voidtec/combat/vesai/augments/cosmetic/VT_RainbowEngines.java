@@ -20,6 +20,7 @@ public class VT_RainbowEngines extends AugmentData {
         this.augmentQualityRange = new String[]{AugmentQuality.CUSTOMISED.name()};
         this.combatScriptDescription = new TextWithHighlights("Makes your engine flames change color over time.", null);
         this.combatScriptPath = "de.schafunschaf.voidtec.combat.scripts.fx.RainbowEngineEffect";
+        this.stackable = false;
         storeAugment();
     }
 
