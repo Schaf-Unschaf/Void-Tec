@@ -3,16 +3,10 @@
   "name": "VoidTec",
   "author": "Schaf-Unschaf",
   "version": "0.1.0",
-  "description": "SECRET",
+  "description": "Pimp your ride",
   "gameVersion": "0.95a-RC15",
   "jars": [
     "jars/VoidTec.jar"
-  ],
-  "dependencies": [
-    {
-      "id": "bountiesexpanded",
-      "name": "Bounties Expanded"
-    }
   ],
   "modPlugin": "de.schafunschaf.voidtec.plugins.VoidTecPlugin"
 }

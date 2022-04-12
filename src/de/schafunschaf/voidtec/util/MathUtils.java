@@ -2,6 +2,9 @@ package de.schafunschaf.voidtec.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Random;
+
+import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class MathUtils {
 
@@ -31,5 +34,13 @@ public class MathUtils {
 
     public static float clamp(float value, float min, float max) {
         return Math.min(Math.max(value, min), max);
+    }
+
+    public static boolean rollSuccessful(int chance, Random random) {
+        if (isNull(random)) {
+            random = new Random();
+        }
+
+        return random.nextInt(100) < chance;
     }
 }

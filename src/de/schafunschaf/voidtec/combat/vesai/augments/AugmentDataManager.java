@@ -3,11 +3,6 @@ package de.schafunschaf.voidtec.combat.vesai.augments;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
-import de.schafunschaf.voidtec.combat.vesai.augments.cosmetic.VT_EngineRecolor;
-import de.schafunschaf.voidtec.combat.vesai.augments.cosmetic.VT_RainbowEngines;
-import de.schafunschaf.voidtec.combat.vesai.augments.cosmetic.VT_RainbowShields;
-import de.schafunschaf.voidtec.combat.vesai.augments.engine.VT_PursuitEngines;
-import de.schafunschaf.voidtec.combat.vesai.augments.engine.VT_TravelDrives;
 
 import java.util.*;
 
@@ -32,14 +27,6 @@ public class AugmentDataManager {
 
     public static void storeAugmentData(String augmentID, AugmentData augment) {
         AUGMENT_DATA_MAP.put(augmentID, augment);
-    }
-
-    public static void initCustomAugments() {
-        new VT_RainbowEngines();
-        new VT_RainbowShields();
-        new VT_PursuitEngines();
-        new VT_TravelDrives();
-        new VT_EngineRecolor();
     }
 
     public static AugmentApplier getRandomAugment(Random random) {

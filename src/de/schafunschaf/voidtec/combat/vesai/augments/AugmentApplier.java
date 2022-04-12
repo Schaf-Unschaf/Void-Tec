@@ -4,7 +4,6 @@ import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
-import de.schafunschaf.voidtec.combat.vesai.CombatScriptRunner;
 import de.schafunschaf.voidtec.combat.vesai.RightClickAction;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
@@ -16,23 +15,23 @@ import java.util.List;
 
 public interface AugmentApplier {
 
-    void applyAfterCreation(ShipAPI ship, String id);
-
     void applyToShip(MutableShipStatsAPI stats, String id, int slotIndex);
 
     void applyToFighter(MutableShipStatsAPI stats, String id);
 
     void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory,
-                         boolean isItemTooltip, boolean onlyStats, Color bulletColorOverride);
+                         Color bulletColorOverride);
 
     void generateStatDescription(TooltipMakerAPI tooltip, float padding, Boolean isPrimary, Color bulletColorOverride);
 
     void generateStatDescription(TooltipMakerAPI tooltip, float padding, Boolean isPrimary, Color bulletColorOverride,
                                  AugmentQuality quality);
 
-    CombatScriptRunner getCombatScriptRunner();
+    void applyBeforeCreation(MutableShipStatsAPI stats, String id);
 
-    void runCustomScript(ShipAPI ship, float amount);
+    void applyAfterCreation(ShipAPI ship, String id);
+
+    void runCombatScript(ShipAPI ship, float amount);
 
     String getAugmentID();
 
@@ -58,8 +57,6 @@ public interface AugmentApplier {
 
     AugmentQuality getInitialQuality();
 
-    TextWithHighlights getCombatScriptDescription();
-
     TextWithHighlights getAdditionalDescription();
 
     List<StatApplier> getActiveStatMods();
@@ -82,7 +79,7 @@ public interface AugmentApplier {
 
     AugmentSlot getInstalledSlot();
 
-    void removeAugment();
+    void uninstall();
 
     void updateFighterStatValue(String id, float value);
 

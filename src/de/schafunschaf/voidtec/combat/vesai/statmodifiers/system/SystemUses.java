@@ -66,7 +66,7 @@ public class SystemUses extends BaseStatMod {
     }
 
     @Override
-    public boolean isPercentage() {
+    public boolean isMult() {
         return false;
     }
 }

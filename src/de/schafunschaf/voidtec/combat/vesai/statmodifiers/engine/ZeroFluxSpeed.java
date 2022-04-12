@@ -68,7 +68,7 @@ public class ZeroFluxSpeed extends BaseStatMod {
     }
 
     @Override
-    public boolean isPercentage() {
+    public boolean isMult() {
         return false;
     }
 }

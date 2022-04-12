@@ -15,7 +15,8 @@ public class VT_Settings {
     public static int removalCostSP = 1;
     public static int aiHullmodChance = 50;
     public static int recoverChance = 25;
-    public static int damageChance = 75;
+    public static int damageChanceOnDestroy = 75;
+    public static int damageChanceOnDamage = 15;
     public static int repairCostCredits = 5_000;
     public static int partDisassemblePercentage = 25;
 

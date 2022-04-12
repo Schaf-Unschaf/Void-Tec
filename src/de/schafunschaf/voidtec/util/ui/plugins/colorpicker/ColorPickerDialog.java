@@ -1,24 +1,25 @@
-package de.schafunschaf.voidtec.campaign.dialog;
+package de.schafunschaf.voidtec.util.ui.plugins.colorpicker;
 
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.campaign.dialog.ui.ColorPickerPanelPlugin;
-import de.schafunschaf.voidtec.campaign.scripts.VT_DialogHelperLeaveToCargo;
-import de.schafunschaf.voidtec.combat.vesai.RightClickAction;
 import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;
 
+import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
+
 @RequiredArgsConstructor
-public class VT_ColorPickerDialog implements CustomDialogDelegate {
+public class ColorPickerDialog implements CustomDialogDelegate {
 
     private final InteractionDialogAPI dialog;
-    private final RightClickAction rightClickAction;
+    private final PickableColor pickableColor;
+    private final EveryFrameScript onCloseAction;
     private TextFieldAPI fieldRed = null;
     private TextFieldAPI fieldGreen = null;
     private TextFieldAPI fieldBlue = null;
@@ -26,15 +27,14 @@ public class VT_ColorPickerDialog implements CustomDialogDelegate {
 
     @Override
     public void createCustomDialog(CustomPanelAPI panel) {
-        Color currentColor = (Color) rightClickAction.getActionObject();
+        Color currentColor = pickableColor.getCurrentColor();
 
         TooltipMakerAPI uiElement = panel.createUIElement(200, 70, false);
-        uiElement.addSpacer(0f).getPosition();
         uiElement.setParaFont(Fonts.INSIGNIA_LARGE);
         uiElement.addPara("Pick a new color", 0f).setAlignment(Alignment.MID);
-        uiElement.getPrev().getPosition().setYAlignOffset(-20f).setXAlignOffset(0);
+        uiElement.getPrev().getPosition().setYAlignOffset(-5f);
         UIUtils.addVerticalSeparator(uiElement, 200, 1, Misc.getBasePlayerColor()).getPosition().setXAlignOffset(-5f).setYAlignOffset(-3f);
-        uiElement.addSpacer(0f).getPosition().setXAlignOffset(-10f).setYAlignOffset(20f);
+        uiElement.addSpacer(0f).getPosition().setXAlignOffset(-10f).setYAlignOffset(5f);
         fieldRed = addColorField("Red (0-255)", currentColor.getRed(), Color.RED, uiElement);
         fieldGreen = addColorField("Green (0-255)", currentColor.getGreen(), Color.GREEN, uiElement);
         fieldBlue = addColorField("Blue (0-255)", currentColor.getBlue(), Color.BLUE, uiElement);
@@ -85,7 +85,7 @@ public class VT_ColorPickerDialog implements CustomDialogDelegate {
 
     private void applyColor() {
         Color color = generateColor();
-        rightClickAction.setActionObject(color);
+        pickableColor.setColor(color);
     }
 
     public Color generateColor() {
@@ -103,7 +103,7 @@ public class VT_ColorPickerDialog implements CustomDialogDelegate {
             parsedValue = Integer.parseInt(textField.getText());
 
         } catch (NumberFormatException exception) {
-            Global.getLogger(VT_ColorPickerDialog.class).error(exception);
+            Global.getLogger(ColorPickerDialog.class).error(exception);
         }
 
         return Math.max(Math.min(parsedValue, 255), 0);
@@ -120,7 +120,10 @@ public class VT_ColorPickerDialog implements CustomDialogDelegate {
     }
 
     private void closeDialog() {
-        Global.getSector().addTransientScript(new VT_DialogHelperLeaveToCargo());
+        if (!isNull(onCloseAction)) {
+            Global.getSector().addTransientScript(onCloseAction);
+        }
+
         dialog.dismiss();
     }
 }

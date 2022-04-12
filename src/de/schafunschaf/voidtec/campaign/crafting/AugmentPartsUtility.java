@@ -6,7 +6,9 @@ import de.schafunschaf.voidtec.campaign.crafting.parts.CraftingComponent;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
+import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Settings;
+import de.schafunschaf.voidtec.util.CargoUtils;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 
 import java.util.ArrayList;
@@ -18,15 +20,15 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 public class AugmentPartsUtility {
 
     private static final int BASE_PART_AMOUNT = 5;
-    private static final int BASIC_REPAIR_MOD = 3;
-    private static final int PRIMARY_REPAIR_MOD = 2;
-    private static final int SECONDARY_REPAIR_MOD = 1;
-    private static final int BASIC_DISASSEMBLE_MOD = 2;
-    private static final int PRIMARY_DISASSEMBLE_MOD = 2;
-    private static final int SECONDARY_DISASSEMBLE_MOD = 1;
-    private static final int BASIC_CRAFT_MOD = 1;
-    private static final int PRIMARY_CRAFT_MOD = 3;
-    private static final int SECONDARY_CRAFT_MOD = 2;
+    private static final float BASIC_REPAIR_MOD = 3;
+    private static final float PRIMARY_REPAIR_MOD = 2;
+    private static final float SECONDARY_REPAIR_MOD = 1;
+    private static final float BASIC_DISASSEMBLE_MOD = 2;
+    private static final float PRIMARY_DISASSEMBLE_MOD = 2;
+    private static final float SECONDARY_DISASSEMBLE_MOD = 1;
+    private static final float BASIC_CRAFT_MOD = 1;
+    private static final float PRIMARY_CRAFT_MOD = 3;
+    private static final float SECONDARY_CRAFT_MOD = 2;
 
     public static List<CraftingComponent> getComponentsForRepair(AugmentApplier augment) {
         List<CraftingComponent> neededComponents = new ArrayList<>();
@@ -97,37 +99,49 @@ public class AugmentPartsUtility {
         }
     }
 
+    public static boolean canDismantleAugment(AugmentApplier augment) {
+        return !isNull(augment);
+    }
+
+    public static void disassembleAugment(AugmentCargoWrapper augmentCargoWrapper) {
+        disassembleAugment(augmentCargoWrapper.getAugment());
+        CargoUtils.removeAugmentFromCargo(augmentCargoWrapper);
+    }
+
     public static void disassembleAugment(AugmentApplier augment) {
         List<CraftingComponent> disassembledComponents = new ArrayList<>();
 
         Random random = new Random();
         AugmentQuality quality = augment.getAugmentQuality();
-        float qualityModifier = quality.getModifier();
 
-        int baseCost = (int) Math.ceil(BASE_PART_AMOUNT * BASIC_DISASSEMBLE_MOD * qualityModifier);
+        int baseCost = (int) Math.ceil(BASE_PART_AMOUNT * BASIC_DISASSEMBLE_MOD);
         AugmentComponent baseComponent = new AugmentComponent(AugmentPartsManager.BASIC_COMPONENT, quality);
-        int addAmount = Math.round(baseCost + random.nextInt(Math.max(baseCost / 2, 1)) * (VT_Settings.partDisassemblePercentage / 100f));
+        int addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f)) + random.nextInt(Math.max(baseCost / 2, 1));
         baseComponent.addAmount(addAmount);
         disassembledComponents.add(baseComponent);
 
-        int primaryCost = (int) Math.ceil(BASE_PART_AMOUNT * PRIMARY_DISASSEMBLE_MOD * qualityModifier);
+        int primaryCost = (int) Math.ceil(BASE_PART_AMOUNT * PRIMARY_DISASSEMBLE_MOD);
         AugmentComponent primaryComponent = new AugmentComponent(augment.getPrimarySlot(), quality);
-        addAmount = Math.round(baseCost + random.nextInt(Math.max(primaryCost / 2, 1)) * (VT_Settings.partDisassemblePercentage / 100f));
+        addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f)) + random.nextInt(Math.max(primaryCost / 2, 1));
         primaryComponent.addAmount(addAmount);
         disassembledComponents.add(primaryComponent);
 
         for (SlotCategory secondarySlot : augment.getSecondarySlots()) {
             int secondaryCost = (int) Math.ceil(
-                    BASE_PART_AMOUNT * SECONDARY_DISASSEMBLE_MOD * qualityModifier / augment.getSecondarySlots().size());
+                    BASE_PART_AMOUNT * SECONDARY_DISASSEMBLE_MOD / augment.getSecondarySlots().size());
             AugmentComponent secondaryComponent = new AugmentComponent(secondarySlot, quality);
-            addAmount = Math.round(
-                    baseCost + random.nextInt(Math.max(secondaryCost / 2, 1)) * (VT_Settings.partDisassemblePercentage / 100f));
+            addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f))
+                    + random.nextInt(Math.max(secondaryCost / 2, 1));
             secondaryComponent.addAmount(addAmount);
             disassembledComponents.add(secondaryComponent);
         }
 
         for (CraftingComponent component : disassembledComponents) {
             AugmentPartsManager.getInstance().addParts(component);
+        }
+
+        if (!isNull(augment.getInstalledSlot())) {
+            augment.getInstalledSlot().removeAugment();
         }
     }
 }

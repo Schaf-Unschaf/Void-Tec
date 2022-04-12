@@ -14,7 +14,7 @@ public class ColorShifter {
     public ColorShifter(@Nullable Color color) {
         this.hueValue = isNull(color)
                         ? new Random().nextInt(360)
-                        : Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[0];
+                        : Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[0] * 360;
     }
 
     public float getNextHueValue(float shiftAmount) {

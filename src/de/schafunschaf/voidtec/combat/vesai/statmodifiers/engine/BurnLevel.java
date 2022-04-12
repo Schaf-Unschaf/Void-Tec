@@ -55,7 +55,7 @@ public class BurnLevel extends BaseStatMod {
     }
 
     @Override
-    public boolean isPercentage() {
+    public boolean isMult() {
         return false;
     }
 }

@@ -3,17 +3,27 @@ package de.schafunschaf.voidtec.campaign.intel;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.campaign.listeners.VT_CampaignListener;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
+import de.schafunschaf.voidtec.helper.DamagedAugmentData;
 import de.schafunschaf.voidtec.ids.VT_Colors;
+import de.schafunschaf.voidtec.ids.VT_Strings;
 import de.schafunschaf.voidtec.util.CargoUtils;
+import de.schafunschaf.voidtec.util.FormattingTools;
+import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
@@ -59,9 +69,7 @@ public class AugmentManagerIntel extends BaseIntel {
 
     @Override
     public void notifyPlayerAboutToOpenIntelScreen() {
-        selectedAugmentInCargo = null;
-        activeCategoryFilter = null;
-        selectedSlot = null;
+        reset();
     }
 
     @Override
@@ -125,11 +133,54 @@ public class AugmentManagerIntel extends BaseIntel {
 
     @Override
     public void reportPlayerClickedOn() {
-        super.reportPlayerClickedOn();
     }
 
     @Override
     public Color getTitleColor(ListInfoMode mode) {
         return VT_Colors.VT_COLOR_MAIN;
+    }
+
+    @Override
+    public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
+        if (mode == ListInfoMode.MESSAGES) {
+            createDamageReport(info);
+        } else {
+            super.createIntelInfo(info, mode);
+        }
+    }
+
+    private void createDamageReport(TooltipMakerAPI info) {
+        Map<String, Set<DamagedAugmentData>> damagedShipsInLastBattle = VT_CampaignListener.getDamagedShipsInLastBattle();
+        int damagedShipAmount = damagedShipsInLastBattle.size();
+        String text = info.addPara("%s %s took severe damage during battle:", 0f, Misc.getHighlightColor(),
+                                   String.valueOf(damagedShipAmount), FormattingTools.singularOrPlural(damagedShipAmount, "Ship"))
+                          .getText();
+        UIUtils.addHorizontalSeparator(info, info.computeStringWidth(text), 1f, Misc.getTextColor(), 0f);
+
+        info.setBulletedListMode(VT_Strings.BULLET_CHAR + " ");
+        for (String shipName : damagedShipsInLastBattle.keySet()) {
+            List<String> hlStrings = new ArrayList<>();
+            StringBuilder augmentListBuilder = new StringBuilder();
+            List<Color> hlColors = new ArrayList<>();
+
+            Set<DamagedAugmentData> damagedAugmentData = damagedShipsInLastBattle.get(shipName);
+            for (DamagedAugmentData augmentData : damagedAugmentData) {
+                hlStrings.add(augmentData.getAugmentName());
+                hlColors.add(augmentData.getSlotColor());
+                String semicolon = augmentListBuilder.length() > 0 ? " ," : "";
+                augmentListBuilder.append(semicolon).append(augmentData.getAugmentName());
+            }
+
+            info.addPara(String.format("%s (%s)", shipName, augmentListBuilder), 3f, hlColors.toArray(new Color[0]),
+                         hlStrings.toArray(new String[0]));
+        }
+    }
+
+    public static void reset() {
+        selectedSlot = null;
+        selectedInstalledAugment = null;
+        selectedAugmentInCargo = null;
+        activeCategoryFilter = null;
+        augmentsInCargo = null;
     }
 }

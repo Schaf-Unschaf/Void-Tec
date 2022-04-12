@@ -1,7 +1,5 @@
 package de.schafunschaf.voidtec.campaign.intel.buttons.shippanel;
 
-import com.fs.starfarer.api.campaign.CargoAPI;
-import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.ui.BaseTooltipCreator;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
@@ -15,8 +13,10 @@ import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.ids.VT_Strings;
+import de.schafunschaf.voidtec.util.CargoUtils;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
+import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;
@@ -42,7 +42,7 @@ public class EmptySlotButton extends DefaultButton {
                                               augmentFromCargo;
             boolean success = augmentSlot.installAugment(augmentToInstall);
             if (success) {
-                removeAugmentFromCargo();
+                CargoUtils.removeAugmentFromCargo(AugmentManagerIntel.getSelectedAugmentInCargo());
             }
 
             AugmentManagerIntel.setSelectedInstalledAugment(success ? augmentToInstall : null);
@@ -51,13 +51,13 @@ public class EmptySlotButton extends DefaultButton {
             AugmentManagerIntel.setSelectedSlot(null);
         } else {
             SlotCategory slotCategory = augmentSlot.getSlotCategory();
-            SlotCategory activeCategoryFilter = AugmentManagerIntel.getActiveCategoryFilter();
-            if (!isNull(activeCategoryFilter) && activeCategoryFilter == slotCategory) {
+            if (AugmentManagerIntel.getSelectedSlot() == augmentSlot) {
                 AugmentManagerIntel.setActiveCategoryFilter(null);
                 AugmentManagerIntel.setSelectedSlot(null);
             } else {
                 AugmentManagerIntel.setActiveCategoryFilter(slotCategory);
                 AugmentManagerIntel.setSelectedSlot(augmentSlot);
+                AugmentManagerIntel.setSelectedInstalledAugment(null);
             }
         }
     }
@@ -95,7 +95,14 @@ public class EmptySlotButton extends DefaultButton {
         float scaleFactor = getButtonScaleFactor();
         Color slotColor = Misc.scaleColor(slotCategory.getColor(), scaleFactor);
 
-        return ButtonUtils.addAugmentButton(tooltip, width, slotColor, slotColor, false, false, this);
+        ButtonAPI emptySlotButton = ButtonUtils.addAugmentButton(tooltip, width, slotColor, slotColor, false, false, this);
+        if (AugmentManagerIntel.getSelectedSlot() == augmentSlot) {
+            UIUtils.addBox(tooltip, "", null, null, width + 4, height + 4, 1, 0, null, augmentSlot.getSlotCategory().getColor(),
+                           new Color(0, 0, 0, 0), null)
+                   .getPosition().rightOfTop(emptySlotButton, -(width + 2)).setYAlignOffset(2);
+        }
+
+        return emptySlotButton;
     }
 
     @Override
@@ -142,22 +149,10 @@ public class EmptySlotButton extends DefaultButton {
                 }
                 break;
             case REPAIR:
-            case DISMANTLE:
             case MANUFACTURE:
                 return 0.1f;
         }
 
         return scaleFactor;
-    }
-
-    private void removeAugmentFromCargo() {
-        CargoAPI cargo = AugmentManagerIntel.getSelectedAugmentInCargo().getSourceCargo();
-        for (CargoStackAPI cargoStackAPI : cargo.getStacksCopy()) {
-            if (cargoStackAPI.getData() == AugmentManagerIntel.getSelectedAugmentInCargo().getAugmentCargoStack().getData()) {
-                cargoStackAPI.setSize(cargoStackAPI.getSize() - 1);
-                cargo.removeEmptyStacks();
-                return;
-            }
-        }
     }
 }

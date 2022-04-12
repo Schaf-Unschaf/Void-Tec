@@ -2,10 +2,12 @@ package de.schafunschaf.voidtec.campaign.intel.tabs;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
-import com.fs.starfarer.api.ui.*;
+import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.Fonts;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
-import de.schafunschaf.voidtec.campaign.intel.CargoPanel;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemPlugin;
 import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
@@ -43,9 +45,6 @@ public class DetailsTab {
         this.primaryPanelWidth = width * 0.375f;
         this.secondaryPanelWidth = width * 0.375f;
         this.augmentPanelYOffset = subHDOffset;
-
-        CargoPanel.showDestroyedAugments = false;
-        CargoPanel.showOnlyRepairable = false;
     }
 
     public void render(CustomPanelAPI mainPanel) {
@@ -106,7 +105,11 @@ public class DetailsTab {
 
         AugmentItemPlugin.addTechInfo(panelUIElement, selectedAugment, 6f, 0f);
         TextWithHighlights augmentDescription = selectedAugment.getDescription();
-        panelUIElement.addPara(augmentDescription.getDisplayString(), 6f, Misc.getHighlightColor(), augmentDescription.getHighlights());
+        if (!isNull(selectedAugment.getRightClickAction()) && selectedAugment.getRightClickAction().getActionObject() instanceof Color) {
+            augmentDescription.setHlColor(((Color) selectedAugment.getRightClickAction().getActionObject()));
+        }
+        panelUIElement.addPara(augmentDescription.getDisplayString(), 6f, augmentDescription.getHlColor(),
+                               augmentDescription.getHighlights());
         bodyPanel.addUIElement(panelUIElement);
 
         tooltip.addCustom(bodyPanel, 0f).getPosition()
@@ -125,10 +128,10 @@ public class DetailsTab {
                 selectedAugment.generateStatDescription(bodyUIElement, 0, isPrimary, Misc.getBasePlayerColor());
             } else {
                 for (FleetMemberAPI memberAPI : Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy()) {
-                    if (memberAPI.getId().equals(selectedAugment.getInstalledSlot().getHullmodManager().getFleetMemberID())) {
+                    if (memberAPI.getId().equals(selectedAugment.getInstalledSlot().getHullModManager().getFleetMemberID())) {
                         SlotCategory slotCategory = selectedAugment.getInstalledSlot().getSlotCategory();
                         selectedAugment.generateTooltip(memberAPI.getStats(), VoidTecEngineeringSuite.HULL_MOD_ID, bodyUIElement,
-                                                        panelWidth, slotCategory, false, true, slotCategory.getColor());
+                                                        panelWidth, slotCategory, slotCategory.getColor());
                         break;
                     }
                 }

@@ -7,6 +7,7 @@ import de.schafunschaf.voidtec.campaign.crafting.AugmentPartsUtility;
 import de.schafunschaf.voidtec.campaign.crafting.parts.CraftingComponent;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
 import de.schafunschaf.voidtec.campaign.intel.buttons.IntelButton;
+import de.schafunschaf.voidtec.campaign.intel.buttons.infopanel.repair.DismantleAugmentButton;
 import de.schafunschaf.voidtec.campaign.intel.buttons.infopanel.repair.RepairAugmentButton;
 import de.schafunschaf.voidtec.campaign.intel.buttons.infopanel.repair.ShowPrimaryButton;
 import de.schafunschaf.voidtec.campaign.intel.buttons.infopanel.repair.ShowSecondaryButton;
@@ -15,10 +16,13 @@ import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
+import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.helper.TextWithHighlights;
 import de.schafunschaf.voidtec.ids.VT_Strings;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
+import de.schafunschaf.voidtec.util.ui.UIUtils;
+import de.schafunschaf.voidtec.util.ui.plugins.GlowingBox;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,6 +36,10 @@ public class RepairTab {
     @Setter
     @Getter
     private static boolean showSecondary = false;
+    @Setter
+    @Getter
+    private static boolean installedAsPrimary = true;
+
 
     private final TooltipMakerAPI tooltip;
     private final float parentHeight;
@@ -58,10 +66,9 @@ public class RepairTab {
     }
 
     public void render(CustomPanelAPI mainPanel) {
-        if (isNull(selectedAugment) || !selectedAugment.isRepairable()) {
-            AugmentManagerIntel.setSelectedInstalledAugment(null);
+        if (isNull(selectedAugment)) {
             tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-            tooltip.addPara("No Repairable Augment Selected", Misc.getBasePlayerColor(), padding).setAlignment(Alignment.MID);
+            tooltip.addPara("No Augment Selected", Misc.getBasePlayerColor(), padding).setAlignment(Alignment.MID);
             tooltip.setParaFontDefault();
             return;
         }
@@ -70,7 +77,7 @@ public class RepairTab {
         float repairPanelWidth = isFHD ? this.repairPanelWidth : this.augmentPanelWidth + this.repairPanelWidth;
 
         CustomPanelAPI augmentInfoPanel = mainPanel.createCustomPanel(augmentPanelWidth, parentHeight + augmentPanelYOffset - padding,
-                                                                           null);
+                                                                      null);
         TooltipMakerAPI augmentUIElement = augmentInfoPanel.createUIElement(augmentPanelWidth,
                                                                             parentHeight + augmentPanelYOffset - padding, true);
         buildAugmentPanel(mainPanel, augmentUIElement);
@@ -158,14 +165,28 @@ public class RepairTab {
         boolean hasPrimaryStats = !selectedAugment.getPrimaryStatMods().isEmpty();
         boolean hasSecondaryStats = !selectedAugment.getSecondaryStatMods().isEmpty();
 
+        if (hasPrimaryStats && hasSecondaryStats) {
+            showSecondary = !selectedAugment.isInPrimarySlot();
+        }
+
         ButtonAPI primaryButton = new ShowPrimaryButton().addButton(buttonUIElement, 150f, 20f);
         primaryButton.getPosition().inTL(0f, 0f);
 
+        UIUtils.addBox(buttonUIElement, "", null, null, 15, 20, 1, 0, null,
+                       Misc.getBasePlayerColor(), new Color(0, 0, 0, 0), new GlowingBox(selectedAugment.getPrimarySlot().getColor()))
+               .getPosition()
+               .inTMid(0f);
         IntelButton repairAugmentButton = new RepairAugmentButton(selectedAugment);
-        repairAugmentButton.addTooltip(buttonUIElement);
         ButtonAPI repairButton = repairAugmentButton.addButton(buttonUIElement, 0f, 20f);
-        repairButton.getPosition().inTMid(0f);
-        repairButton.setEnabled(AugmentPartsUtility.canRepairAugment(selectedAugment));
+        repairAugmentButton.addTooltip(buttonUIElement);
+        repairButton.getPosition().inTMid(0f).setXAlignOffset(-(repairButton.getPosition().getWidth() / 2));
+
+        AugmentCargoWrapper selectedAugmentInCargo = AugmentManagerIntel.getSelectedAugmentInCargo();
+        IntelButton dismantleAugmentButton = isNull(selectedAugmentInCargo) ? new DismantleAugmentButton(selectedAugment) :
+                                             new DismantleAugmentButton(selectedAugmentInCargo);
+        dismantleAugmentButton.addTooltip(buttonUIElement);
+        ButtonAPI dismantleButton = dismantleAugmentButton.addButton(buttonUIElement, 0f, 20f);
+        dismantleButton.getPosition().inTMid(0f).setXAlignOffset((dismantleButton.getPosition().getWidth() / 2));
 
         ButtonAPI secondaryButton = new ShowSecondaryButton().addButton(buttonUIElement, 150f, 20f);
         secondaryButton.getPosition().inTR(0f, 0f);
@@ -229,7 +250,7 @@ public class RepairTab {
     private void addRepairStatElement(TooltipMakerAPI tooltip, StatModValue<Float, Float, Boolean, Boolean> statModValue,
                                       StatApplier statApplier, AugmentQuality curQuality, AugmentQuality maxQuality) {
         String displayName = String.format("%s %s", VT_Strings.BULLET_CHAR, statApplier.getDisplayName());
-        String percentageSign = statApplier.isPercentage() ? "%" : "";
+        String percentageSign = statApplier.isMult() ? "%" : "";
 
         float mult = 1f;
         if (statModValue.getsModified) {
@@ -274,7 +295,7 @@ public class RepairTab {
         }
 
         Color nextValColor;
-        if (curValMin == nextValMin && curValMax == nextValMax) {
+        if (curQuality.isGreaterOrEqualThen(AugmentQuality.DOMAIN) || curValMin == nextValMin && curValMax == nextValMax) {
             nextValColor = Misc.getGrayColor();
             nextValString = "---";
         } else if (hasNegativeEffect) {
@@ -284,7 +305,10 @@ public class RepairTab {
         }
 
         Color repValColor;
-        if (hasNegativeEffect) {
+        if (curQuality.isGreaterOrEqualThen(AugmentQuality.DOMAIN)) {
+            repValColor = Misc.getGrayColor();
+            repValString = "---";
+        } else if (hasNegativeEffect) {
             repValColor = Misc.getNegativeHighlightColor();
         } else {
             repValColor = Misc.getPositiveHighlightColor();

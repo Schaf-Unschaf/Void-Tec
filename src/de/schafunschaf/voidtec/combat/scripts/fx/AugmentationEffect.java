@@ -58,9 +58,9 @@ public class AugmentationEffect {
 
     private static void pickNextColor(ShipAPI ship, MutableStat stat) {
         WeightedRandomPicker<Color> colorPicker = new WeightedRandomPicker<>();
-        HullModManager hullmodManager = HullModDataStorage.getInstance().getHullModManager(ship.getFleetMemberId());
+        HullModManager hullModManager = HullModDataStorage.getInstance().getHullModManager(ship.getFleetMemberId());
 
-        for (AugmentSlot filledSlot : hullmodManager.getFilledSlots()) {
+        for (AugmentSlot filledSlot : hullModManager.getFilledSlots()) {
             colorPicker.add(filledSlot.getSlotCategory().getColor());
         }
 

@@ -10,7 +10,7 @@ public class AugmentComponent implements CraftingComponent {
     private final String name;
     private final SlotCategory partCategory;
     private final AugmentQuality partQuality;
-    private int amount;
+    private int amount = 0;
 
     public AugmentComponent(String partName, AugmentQuality quality) {
         this.name = partName;

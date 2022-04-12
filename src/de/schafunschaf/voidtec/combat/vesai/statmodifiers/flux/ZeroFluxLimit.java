@@ -68,7 +68,7 @@ public class ZeroFluxLimit extends BaseStatMod {
     }
 
     @Override
-    public boolean isPercentage() {
+    public boolean isMult() {
         return false;
     }
 }

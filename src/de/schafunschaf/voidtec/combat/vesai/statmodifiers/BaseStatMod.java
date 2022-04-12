@@ -61,7 +61,7 @@ public abstract class BaseStatMod implements StatApplier {
 
     @Override
     public void collectStatValue(float value, AugmentApplier parentAugment) {
-        parentAugment.getInstalledSlot().getHullmodManager().addStatModifier(statID, value);
+        parentAugment.getInstalledSlot().getHullModManager().addStatModifier(statID, value, isMult());
     }
 
     @Override
@@ -70,13 +70,13 @@ public abstract class BaseStatMod implements StatApplier {
     }
 
     @Override
-    public boolean isPercentage() {
+    public boolean isMult() {
         return true;
     }
 
     protected void generateTooltip(TooltipMakerAPI tooltip, MutableStat.StatMod statMod, String description, Color bulletColor,
                                    AugmentApplier parentAugment) {
-        int value = isPercentage() ? (int) (100 * statMod.value) - 100 : (int) statMod.value;
+        int value = isMult() ? (int) (100 * statMod.value) - 100 : (int) statMod.value;
 
         if (isNull(tooltip)) {
             collectStatValue(value, parentAugment);
@@ -87,7 +87,7 @@ public abstract class BaseStatMod implements StatApplier {
     }
 
     private void generateTooltip(TooltipMakerAPI tooltip, int value, String text, Color bulletColor) {
-        String percentageSign = isPercentage() ? "%" : "";
+        String percentageSign = isMult() ? "%" : "";
         boolean isPositive = value >= 0;
         String incDec = isPositive ? "increased" : "decreased";
 
@@ -105,7 +105,7 @@ public abstract class BaseStatMod implements StatApplier {
     protected LabelAPI generateStatDescription(TooltipMakerAPI tooltip, String description, String incDecText, Color bulletColor,
                                                float minValue, float maxValue, boolean isPositive, String... highlights) {
         setBulletMode(tooltip, bulletColor);
-        String percentageSign = isPercentage() ? "%" : "";
+        String percentageSign = isMult() ? "%" : "";
         int roundedMinValue = Math.round(Math.abs(minValue));
         int roundedMaxValue = Math.round(Math.abs(maxValue));
         String minValueString = roundedMinValue + percentageSign;

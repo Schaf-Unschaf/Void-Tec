@@ -29,7 +29,9 @@ public class RepairAugmentButton extends DefaultButton {
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
-        AugmentPartsUtility.repairAugment(augment, 1);
+        if (augment.isRepairable() && AugmentPartsUtility.canRepairAugment(augment)) {
+            AugmentPartsUtility.repairAugment(augment, 1);
+        }
     }
 
     @Override
@@ -39,29 +41,41 @@ public class RepairAugmentButton extends DefaultButton {
                         new Color[]{Misc.getTextColor(), augment.getAugmentQuality().getColor(), nextQuality.getColor()},
                         augment.getName(), augment.getAugmentQuality().getName(), nextQuality.getName());
 
-        tooltip.addPara("This will cost you %s in addition to the following materials:", 3f, Misc.getHighlightColor(),
+        tooltip.addPara("This will cost you %s in addition to the following materials:", 10f, Misc.getHighlightColor(),
                         Misc.getDGSCredits(VoidTecUtils.calcNeededCreditsForRepair(augment)));
         tooltip.addSpacer(3f);
-        tooltip.setBulletedListMode(String.format("  %s ", VT_Strings.BULLET_CHAR));
+        tooltip.setBulletedListMode(String.format(" %s ", VT_Strings.BULLET_CHAR));
         for (CraftingComponent component : AugmentPartsUtility.getComponentsForRepair(augment)) {
-            Color amountColor = AugmentPartsUtility.hasEnough(component) ? Misc.getHighlightColor() : Misc.getGrayColor();
+            Color hasEnoughColor = AugmentPartsUtility.hasEnough(component) ? Misc.getPositiveHighlightColor() : Color.RED;
             Color compCatColor = isNull(component.getPartCategory()) ? Misc.getTextColor() : component.getPartCategory().getColor();
             int storedAmount = AugmentPartsManager.getInstance().getPart(component).getAmount();
+            tooltip.setBulletColor(hasEnoughColor);
             tooltip.addPara("%s %s %s-Parts (%s in storage)", 0f,
-                            new Color[]{amountColor, nextQuality.getColor(), compCatColor, Misc.getHighlightColor()},
+                            new Color[]{Misc.getHighlightColor(), nextQuality.getColor(), compCatColor, Misc.getHighlightColor()},
                             String.valueOf(component.getAmount()), nextQuality.getName(), component.getName(),
                             String.valueOf(storedAmount));
+        }
+
+        if (!AugmentPartsUtility.canRepairAugment(augment)) {
+            tooltip.setBulletedListMode("");
+            tooltip.addPara("You need more materials to perform the repair.", Misc.getNegativeHighlightColor(), 10f);
+            tooltip.setParaFontDefault();
+            tooltip.addPara("To get more parts, try dismantling no longer needed Augments.", Misc.getGrayColor(), 3f).italicize();
         }
     }
 
     @Override
     public boolean doesButtonHaveConfirmDialog() {
-        return true;
+        return augment.isRepairable();
     }
 
     @Override
     public String getConfirmText() {
-        return "Repair";
+        if (AugmentPartsUtility.canRepairAugment(augment)) {
+            return "Repair";
+        } else {
+            return "Return";
+        }
     }
 
     @Override
@@ -71,15 +85,15 @@ public class RepairAugmentButton extends DefaultButton {
 
     @Override
     public String getName() {
-        return String.format("Repair Augment (%s)", repairAmount);
+        return augment.isRepairable() ? String.format("Repair (%s)", repairAmount) : "------";
     }
 
     @Override
     public ButtonAPI addButton(TooltipMakerAPI tooltip, float width, float height) {
-        float buttonWidth = width != 0 ? width : tooltip.computeStringWidth(getName()) + 20f;
+        Color bgColor = Misc.scaleColorOnly(Misc.getPositiveHighlightColor(), 0.25f);
 
-        return ButtonUtils.addLabeledButton(tooltip, buttonWidth, height, 0f,
-                                            Misc.getBasePlayerColor(), Misc.getDarkPlayerColor(), CutStyle.TOP, this);
+        return ButtonUtils.addLabeledButton(tooltip, 90, height, 0f,
+                                            Misc.getPositiveHighlightColor(), bgColor, CutStyle.TL_BR, this);
     }
 
     @Override
@@ -92,7 +106,7 @@ public class RepairAugmentButton extends DefaultButton {
         tooltip.addTooltipToPrevious(new BaseTooltipCreator() {
             @Override
             public boolean isTooltipExpandable(Object tooltipParam) {
-                return true;
+                return false;
             }
 
             @Override
@@ -102,8 +116,7 @@ public class RepairAugmentButton extends DefaultButton {
 
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                tooltip.addPara(tooltipString, 0f,
-                                Misc.getHighlightColor(), String.valueOf(repairAmount));
+                tooltip.addPara(tooltipString, 0f, Misc.getHighlightColor(), String.valueOf(repairAmount));
                 if (expanded) {
                     tooltip.addPara("Repair is free.. for now", Misc.getGrayColor(), 6f);
                 }

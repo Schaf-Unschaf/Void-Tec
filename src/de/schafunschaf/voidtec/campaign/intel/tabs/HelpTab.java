@@ -21,7 +21,8 @@ public class HelpTab {
     }
 
     public void render(CustomPanelAPI mainPanel) {
-
+        addLeftPanel();
+        addRightPanel();
     }
 
     private void addLeftPanel() {

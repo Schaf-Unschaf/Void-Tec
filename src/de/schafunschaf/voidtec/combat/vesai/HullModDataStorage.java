@@ -41,8 +41,8 @@ public class HullModDataStorage {
         return dataStorage.get(fleetMemberID);
     }
 
-    public void storeShipID(String fleetMemberID, HullModManager hullmodManager) {
-        dataStorage.put(fleetMemberID, hullmodManager);
+    public void storeShipID(String fleetMemberID, HullModManager hullModManager) {
+        dataStorage.put(fleetMemberID, hullModManager);
     }
 
     public void cleanDataStorage() {

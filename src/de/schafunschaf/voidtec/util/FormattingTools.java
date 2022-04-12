@@ -1,5 +1,8 @@
 package de.schafunschaf.voidtec.util;
 
+import com.fs.starfarer.api.impl.campaign.ids.Strings;
+import com.fs.starfarer.api.util.Misc;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -22,5 +25,11 @@ public class FormattingTools {
 
     public static String capitalizeFirst(String string) {
         return string.substring(0, 1).toUpperCase() + string.substring(1);
+    }
+
+    public static String formatCredits(float creditValue) {
+        boolean toLarge = creditValue > 1_000_000_000;
+        String postFix = toLarge ? "k " : "";
+        return Misc.getFormat().format((int) creditValue / (toLarge ? 1_000 : 1)) + postFix + Strings.C;
     }
 }

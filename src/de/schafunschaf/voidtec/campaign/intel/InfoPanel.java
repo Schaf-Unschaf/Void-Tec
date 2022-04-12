@@ -6,13 +6,15 @@ import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.crafting.AugmentPartsManager;
 import de.schafunschaf.voidtec.campaign.crafting.parts.CraftingComponent;
 import de.schafunschaf.voidtec.campaign.intel.buttons.IntelButton;
-import de.schafunschaf.voidtec.campaign.intel.buttons.infopanel.*;
+import de.schafunschaf.voidtec.campaign.intel.buttons.infopanel.DetailsTabButton;
+import de.schafunschaf.voidtec.campaign.intel.buttons.infopanel.HelpTabButton;
+import de.schafunschaf.voidtec.campaign.intel.buttons.infopanel.ManufactureTabButton;
+import de.schafunschaf.voidtec.campaign.intel.buttons.infopanel.RepairTabButton;
 import de.schafunschaf.voidtec.campaign.intel.tabs.DetailsTab;
-import de.schafunschaf.voidtec.campaign.intel.tabs.DisassembleTab;
-import de.schafunschaf.voidtec.campaign.intel.tabs.HelpTab;
 import de.schafunschaf.voidtec.campaign.intel.tabs.RepairTab;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
+import de.schafunschaf.voidtec.util.FormattingTools;
 import de.schafunschaf.voidtec.util.ui.BorderBox;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import de.schafunschaf.voidtec.util.ui.UIUtils;
@@ -83,11 +85,11 @@ public class InfoPanel {
                                                       .borderSize(borderSize).margin(panelMargin).title(title);
 
         // Workaround for a weird behaviour when the dismantle tab is open with an augment selected
-        boolean hasAugmentSelected = !isNull(AugmentManagerIntel.getSelectedInstalledAugment())
-                || !isNull(AugmentManagerIntel.getSelectedAugmentInCargo());
-        if (selectedTab == InfoTabs.DISMANTLE && hasAugmentSelected) {
-            borderBox.marginTop(panelMargin - 1f);
-        }
+        //        boolean hasAugmentSelected = !isNull(AugmentManagerIntel.getSelectedInstalledAugment())
+        //                || !isNull(AugmentManagerIntel.getSelectedAugmentInCargo());
+        //        if (selectedTab == InfoTabs.DISMANTLE && hasAugmentSelected) {
+        //            borderBox.marginTop(panelMargin - 1f);
+        //        }
 
         CustomPanelAPI boxBodyPanel = borderBox.getBodyPanel();
         TooltipMakerAPI boxBodyElement = boxBodyPanel.createUIElement(boxBodyPanel.getPosition().getWidth(),
@@ -118,13 +120,10 @@ public class InfoPanel {
             case REPAIR:
                 new RepairTab(boxBodyElement, tabWidth, tabHeight, tabPadding, subFHDOffset, buttonPanelWidth).render(mainPanel);
                 break;
-            case DISMANTLE:
-                new DisassembleTab(boxBodyElement, tabWidth, tabHeight, tabPadding).render(mainPanel);
-                break;
             case MANUFACTURE:
                 break;
             case HELP:
-                new HelpTab(boxBodyElement, tabWidth, tabHeight, tabPadding).render(mainPanel);
+//                new HelpTab(boxBodyElement, tabWidth, tabHeight, tabPadding).render(mainPanel);
                 break;
         }
 
@@ -133,7 +132,7 @@ public class InfoPanel {
     }
 
     private void addInfoBoxHeadElements(CustomPanelAPI mainPanel, TooltipMakerAPI tooltip) {
-        final String creditValue = Misc.getDGSCredits(Global.getSector().getPlayerFleet().getCargo().getCredits().get());
+        final String creditValue = FormattingTools.formatCredits(Global.getSector().getPlayerFleet().getCargo().getCredits().get());
         final String playerCreditsText = String.format("Credits: %s", creditValue);
         final String storyPoints = String.valueOf(Global.getSector().getPlayerStats().getStoryPoints());
         final String playerSPText = String.format("SP: %s", storyPoints);
@@ -179,13 +178,13 @@ public class InfoPanel {
         BaseTooltipCreator partsTooltip = new BaseTooltipCreator() {
             @Override
             public float getTooltipWidth(Object tooltipParam) {
-                return 380f;
+                return 335f;
             }
 
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                 tooltip.beginTable(Misc.getBasePlayerColor(), Color.BLACK, Color.black, 18f,
-                                   "Category", 100f, "COM", 45f, "MIL", 45f, "EXP", 45f, "EXO", 45f, "DOM", 45f, "CUS", 45f);
+                                   "Category", 100f, "COM", 45f, "MIL", 45f, "EXP", 45f, "EXO", 45f, "DOM", 45f);
 
                 addComponentRow(tooltip, partsManager.getPartsOfCategory(null));
                 for (SlotCategory slotCategory : SlotCategory.values) {
@@ -194,7 +193,7 @@ public class InfoPanel {
 
                 tooltip.addTable("", 0, 0f);
                 tooltip.getPrev().getPosition().inTL(0, 0);
-                ButtonUtils.addSeparatorLine(tooltip, 380f, Misc.getDarkPlayerColor(), 0f).getPosition()
+                ButtonUtils.addSeparatorLine(tooltip, 335f, Misc.getDarkPlayerColor(), 0f).getPosition()
                            .inTL(5f, 20f);
             }
         };
@@ -227,7 +226,8 @@ public class InfoPanel {
     }
 
     private void addVertSeparator(TooltipMakerAPI tooltip, UIComponentAPI prevComponent) {
-        LabelAPI verticalSeparator = UIUtils.addVerticalSeparator(tooltip, borderSize, vertSeparatorHeight, Misc.getDarkPlayerColor());
+        UIComponentAPI verticalSeparator = UIUtils.addVerticalSeparator(tooltip, borderSize, vertSeparatorHeight,
+                                                                        Misc.getDarkPlayerColor());
         verticalSeparator.getPosition().rightOfMid(prevComponent, textMargin);
     }
 
@@ -287,11 +287,6 @@ public class InfoPanel {
         ButtonAPI repairUIButton = repairButton.addButton(tabButtonElement, repairWidth, tabHeight);
         repairButton.addTooltip(tabButtonElement);
 
-        IntelButton dismantleButton = new DismantleTabButton(destroyedAugments);
-        float dismantleWidth = tabButtonElement.computeStringWidth(dismantleButton.getName()) + buttonMargin;
-        ButtonAPI dismantleUIButton = dismantleButton.addButton(tabButtonElement, dismantleWidth, tabHeight);
-        dismantleButton.addTooltip(tabButtonElement);
-
         IntelButton manufactureButton = new ManufactureTabButton();
         float manufactureWidth = tabButtonElement.computeStringWidth(manufactureButton.getName()) + buttonMargin;
         ButtonAPI manufactureUIButton = manufactureButton.addButton(tabButtonElement, manufactureWidth, tabHeight);
@@ -304,14 +299,13 @@ public class InfoPanel {
 
         helpUIButton.getPosition().inTR(tabPadding, panelMargin);
         manufactureUIButton.getPosition().leftOfTop(helpUIButton, tabPadding);
-        dismantleUIButton.getPosition().leftOfTop(manufactureUIButton, tabPadding);
-        repairUIButton.getPosition().leftOfTop(dismantleUIButton, tabPadding);
+        repairUIButton.getPosition().leftOfTop(manufactureUIButton, tabPadding);
         detailsUIButton.getPosition().leftOfTop(repairUIButton, tabPadding);
 
         tabButtonPanel.addUIElement(tabButtonElement).inTMid(0);
 
         this.buttonPanelWidth =
-                detailsWidth + repairWidth + dismantleWidth + manufactureWidth + helpWidth + 2 * panelMargin + 5 * tabPadding;
+                detailsWidth + repairWidth + manufactureWidth + helpWidth + 2 * panelMargin + 5 * tabPadding;
 
         return tabButtonPanel;
     }
@@ -321,9 +315,7 @@ public class InfoPanel {
             case DETAILS:
                 return "Display information and install Augments";
             case REPAIR:
-                return "Repair damaged Augments";
-            case DISMANTLE:
-                return "Disassemble Augments for spare parts";
+                return "Repair damaged Augments or dismantle them for spare parts";
             case MANUFACTURE:
                 return "Manufacture new Augments";
             case HELP:
@@ -336,7 +328,6 @@ public class InfoPanel {
     public enum InfoTabs {
         DETAILS,
         REPAIR,
-        DISMANTLE,
         MANUFACTURE,
         HELP
     }

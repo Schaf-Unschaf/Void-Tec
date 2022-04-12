@@ -140,4 +140,16 @@ public class CargoUtils {
 
         return ((AugmentItemData) cargoStack.getData()).getAugment();
     }
+
+    public static void removeAugmentFromCargo(AugmentCargoWrapper augmentCargoWrapper) {
+        CargoAPI sourceCargo = augmentCargoWrapper.getSourceCargo();
+
+        for (CargoStackAPI cargoStackAPI : sourceCargo.getStacksCopy()) {
+            if (cargoStackAPI.getData() == augmentCargoWrapper.getAugmentCargoStack().getData()) {
+                cargoStackAPI.setSize(cargoStackAPI.getSize() - 1);
+                sourceCargo.removeEmptyStacks();
+                return;
+            }
+        }
+    }
 }

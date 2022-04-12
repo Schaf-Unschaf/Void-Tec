@@ -20,6 +20,7 @@ import de.schafunschaf.voidtec.ids.VT_MemoryKeys;
 import de.schafunschaf.voidtec.ids.VT_Settings;
 import de.schafunschaf.voidtec.imported.CustomFactionCategories;
 import de.schafunschaf.voidtec.imported.SpecialShips;
+import de.schafunschaf.voidtec.util.MathUtils;
 import de.schafunschaf.voidtec.util.ShipUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -118,12 +119,12 @@ public class AugmentGenerator {
             FactionAPI preferredFaction = isNull(prefFactionObject)
                                           ? ship.getFleetData().getFleet().getFaction()
                                           : Global.getSector().getFaction(((String) prefFactionObject));
-            fillUnlockedSlots(hullModManager, ship, preferredFaction, qualityRange, random);
+            fillUnlockedSlots(hullModManager, ship, preferredFaction, qualityRange, scaledProb, random);
         }
     }
 
     public static void fillUnlockedSlots(HullModManager hullModManager, FleetMemberAPI ship, FactionAPI preferredFaction,
-                                         String[] qualityRange, Random random) {
+                                         String[] qualityRange, int scaledProbability, Random random) {
         if (VT_Settings.sheepDebug) {
             log.info(String.format("Generating random augments for [%s]", ShipUtils.generateShipNameWithClass(ship)));
         }
@@ -133,7 +134,7 @@ public class AugmentGenerator {
         }
 
         for (AugmentSlot shipAugmentSlot : hullModManager.getUnlockedSlots()) {
-            if (!shipAugmentSlot.isEmpty()) {
+            if (!shipAugmentSlot.isEmpty() && !MathUtils.rollSuccessful(scaledProbability, random)) {
                 continue;
             }
 

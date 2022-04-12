@@ -6,7 +6,6 @@ import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
-import de.schafunschaf.voidtec.campaign.intel.CargoPanel;
 import de.schafunschaf.voidtec.campaign.intel.InfoPanel;
 import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
 
@@ -16,8 +15,6 @@ public class HelpTabButton extends DefaultButton {
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
-        CargoPanel.showDestroyedAugments = false;
-        CargoPanel.showOnlyRepairable = false;
         AugmentManagerIntel.setShowingManufacturingPanel(false);
         InfoPanel.setSelectedTab(InfoPanel.InfoTabs.HELP);
     }
@@ -35,6 +32,7 @@ public class HelpTabButton extends DefaultButton {
         ButtonAPI areaCheckbox = tooltip.addAreaCheckbox(getName(), this, hlColor, bgColor,
                                                          textColor, width, height, 0f);
         areaCheckbox.setChecked(isSelected());
+        areaCheckbox.setEnabled(false); //TODO implement
 
         return areaCheckbox;
     }

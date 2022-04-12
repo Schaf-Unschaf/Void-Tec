@@ -6,6 +6,7 @@ import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.FilterByCategor
 import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.SelectAugmentButton;
 import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.SortOrderButton;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemPlugin;
+import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
@@ -13,11 +14,11 @@ import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.helper.RainbowString;
 import de.schafunschaf.voidtec.ids.VT_Icons;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
+import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.List;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
@@ -27,16 +28,13 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNullOrEmpty;
 @AllArgsConstructor
 public class CargoPanel {
 
-    public static boolean showDestroyedAugments = false;
-    public static boolean showOnlyRepairable = false;
-
     private final float panelWidth;
     private final float panelHeight;
     private final float padding;
 
     private final float headerHeight = 20f;
     private final float sorterHeight = 68f;
-    private final float elementHeight = 24f;
+    private final float elementHeight = 28f;
     private final float filterButtonSize = 24f;
     private final float itemSpacing = 3f;
     private final float listSpacing = 64f;
@@ -48,7 +46,7 @@ public class CargoPanel {
 
     private void addHeader(CustomPanelAPI mainPanel) {
         TooltipMakerAPI headerElement = mainPanel.createUIElement(panelWidth, 0f, false);
-        String headerText = showOnlyRepairable ? "Damaged Augments" : "Available Augments";
+        String headerText = "Available Augments";
         headerElement.addSectionHeading(headerText, Misc.getBrightPlayerColor(), Misc.getDarkPlayerColor(), Alignment.MID, 0f);
         mainPanel.addUIElement(headerElement).inTR(0f, headerHeight);
 
@@ -95,8 +93,8 @@ public class CargoPanel {
 
     private void addAugmentList(CustomPanelAPI mainPanel) {
         TooltipMakerAPI uiElement = mainPanel.createUIElement(panelWidth, panelHeight - headerHeight - sorterHeight + 7f, true);
-        List<CustomPanelAPI> panelList = new ArrayList<>();
 
+        uiElement.addSpacer(5f);
         boolean hasSelectedAugmentInList = false;
         for (AugmentCargoWrapper augmentCargoWrapper : AugmentManagerIntel.getAugmentsInCargo()) {
             final AugmentApplier augmentInStack = augmentCargoWrapper.getAugment();
@@ -104,29 +102,20 @@ public class CargoPanel {
                 continue;
             }
 
-            if (showOnlyRepairable && !augmentInStack.isRepairable()) {
-                continue;
-            }
-
-            if (!showDestroyedAugments && augmentInStack.getAugmentQuality() == AugmentQuality.DESTROYED) {
+            if (augmentInStack.getAugmentQuality() == AugmentQuality.DESTROYED) {
                 continue;
             }
 
             CustomPanelAPI cargoPanel = mainPanel.createCustomPanel(panelWidth, elementHeight, null);
             TooltipMakerAPI cargoElement = cargoPanel.createUIElement(panelWidth, elementHeight, false);
-            generateAugmentForPanel(cargoElement, panelWidth, augmentCargoWrapper);
+            generateAugmentForPanel(mainPanel, cargoElement, panelWidth, augmentCargoWrapper);
 
-            cargoPanel.addUIElement(cargoElement);
-            panelList.add(cargoPanel);
+            cargoPanel.addUIElement(cargoElement).setXAlignOffset(-10f);
+            uiElement.addCustom(cargoPanel, 0f);
 
             if (!hasSelectedAugmentInList && !isNull(AugmentManagerIntel.getSelectedAugmentInCargo())) {
                 hasSelectedAugmentInList = augmentInStack == AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
             }
-        }
-
-        for (int i = 0; i < panelList.size(); i++) {
-            CustomPanelAPI customPanelAPI = panelList.get(i);
-            uiElement.addCustom(customPanelAPI, i == 0 ? itemSpacing + 10f : itemSpacing).getPosition().setXAlignOffset(0f);
         }
 
         if (!hasSelectedAugmentInList) {
@@ -141,18 +130,21 @@ public class CargoPanel {
             return false;
         }
 
-        boolean matchesPrimarySlot = !isNull(
-                AugmentManagerIntel.getActiveCategoryFilter()) && AugmentManagerIntel.getActiveCategoryFilter() == augment.getPrimarySlot();
-        boolean matchesSecondarySlot = !isNull(AugmentManagerIntel.getActiveCategoryFilter()) && !isNullOrEmpty(
-                augment.getSecondarySlots()) && augment.getSecondarySlots().contains(AugmentManagerIntel.getActiveCategoryFilter());
+        SlotCategory activeCategoryFilter = AugmentManagerIntel.getActiveCategoryFilter();
+        AugmentSlot selectedSlot = AugmentManagerIntel.getSelectedSlot();
+        boolean matchesPrimarySlot = !isNull(activeCategoryFilter) && activeCategoryFilter == augment.getPrimarySlot();
+        boolean matchesSecondarySlot = !isNull(activeCategoryFilter)
+                && !isNullOrEmpty(augment.getSecondarySlots()) && augment.getSecondarySlots().contains(activeCategoryFilter);
+        boolean isAlreadyInstalled = !isNull(selectedSlot) && selectedSlot.getHullModManager().hasSameAugmentSlotted(augment);
 
-        return matchesPrimarySlot || matchesSecondarySlot;
+        return (matchesPrimarySlot || matchesSecondarySlot) && !isAlreadyInstalled;
     }
 
-    private void generateAugmentForPanel(final TooltipMakerAPI cargoElement, final float width,
-                                         final AugmentCargoWrapper augmentCargoWrapper) {
+    private void generateAugmentForPanel(CustomPanelAPI mainPanel, final TooltipMakerAPI cargoElement,
+                                         final float width, final AugmentCargoWrapper augmentCargoWrapper) {
         float buttonWidth = 24f;
         float buttonHeight = 24f;
+        float selectionBoxHeight = 30f;
         float iconSize = 24f;
         float itemSpacing = 12f;
         float itemPadding = 4f;
@@ -176,15 +168,32 @@ public class CargoPanel {
                     "this Augment for installation.";
         }
 
-        cargoElement.setButtonFontVictor14();
-        ButtonUtils.addCheckboxButton(cargoElement, buttonWidth, buttonHeight, 0f, baseColor, bgColor,
+        CustomPanelAPI elementPanel = mainPanel.createCustomPanel(width, selectionBoxHeight, null);
+        final TooltipMakerAPI uiElement = elementPanel.createUIElement(width, selectionBoxHeight, false);
+
+        uiElement.setButtonFontVictor14();
+
+        // Select Checkbox
+        ButtonUtils.addCheckboxButton(uiElement, buttonWidth, buttonHeight, 0f, baseColor, bgColor,
                                       augment.getAugmentQuality().getColor(), new SelectAugmentButton(augmentCargoWrapper))
                    .setChecked(true);
-        UIComponentAPI buttonComponent = cargoElement.getPrev();
-        cargoElement.addTooltipToPrevious(new BaseTooltipCreator() {
+        UIComponentAPI buttonComponent = uiElement.getPrev();
+
+        // Selection Box when Augment is selected
+        if (!isNull(AugmentManagerIntel.getSelectedAugmentInCargo())) {
+            if (augment == AugmentManagerIntel.getSelectedAugmentInCargo().getAugment()) {
+                UIUtils.addBox(uiElement, "", null, null, width - 8, buttonHeight + itemPadding, 1, 0, null, Misc.getHighlightColor(),
+                               Misc.scaleAlpha(Misc.getHighlightColor(), 0.15f), null)
+                       .getPosition()
+                       .rightOfTop(buttonComponent, -buttonWidth - 2)
+                       .setYAlignOffset(2f);
+            }
+        }
+
+        uiElement.addTooltipToPrevious(new BaseTooltipCreator() {
             @Override
             public float getTooltipWidth(Object tooltipParam) {
-                return cargoElement.computeStringWidth(selectButtonTooltipText);
+                return uiElement.computeStringWidth(selectButtonTooltipText);
             }
 
             @Override
@@ -193,7 +202,8 @@ public class CargoPanel {
             }
         }, TooltipMakerAPI.TooltipLocation.LEFT);
 
-        TooltipMakerAPI imageWithText = cargoElement.beginImageWithText(VT_Icons.AUGMENT_ITEM_ICON, iconSize);
+        // Image with Name
+        TooltipMakerAPI imageWithText = uiElement.beginImageWithText(VT_Icons.AUGMENT_ITEM_ICON, iconSize);
         if (augment.getName().toLowerCase().contains("rainbow")) {
             RainbowString rainbowString = new RainbowString(augment.getName(), Color.RED, 20);
             imageWithText.addPara(
@@ -205,17 +215,27 @@ public class CargoPanel {
                                   augment.getAugmentQuality().getColor(), 3f);
         }
         imageWithText.getPrev().getPosition().setXAlignOffset(-6f);
-        cargoElement.addImageWithText(-itemSpacing);
-        cargoElement.addTooltipToPrevious(new BaseTooltipCreator() {
+        uiElement.addImageWithText(-itemSpacing);
+        uiElement.addTooltipToPrevious(new BaseTooltipCreator() {
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                 AugmentItemPlugin augmentItemPlugin = (AugmentItemPlugin) augmentCargoWrapper.getAugmentCargoStack().getPlugin();
                 augmentItemPlugin.createTooltip(tooltip, true, null, AugmentManagerIntel.STACK_SOURCE);
             }
         }, TooltipMakerAPI.TooltipLocation.LEFT);
-        UIComponentAPI imageWithTextComponent = cargoElement.getPrev();
+        UIComponentAPI imageWithTextComponent = uiElement.getPrev();
         imageWithTextComponent.getPosition().rightOfMid(buttonComponent, itemPadding).setYAlignOffset(3f);
 
+        // Damage indicators
+        int damageAmount = augment.getInitialQuality().ordinal() - augment.getAugmentQuality().ordinal();
+        if (damageAmount > 0) {
+            UIUtils.addIndicatorBars(uiElement, damageAmount, 2, 5, Misc.getNegativeHighlightColor())
+                   .getPosition()
+                   .leftOfTop(imageWithTextComponent, -iconSize + itemPadding)
+                   .setYAlignOffset(-5f);
+        }
+
+        // Slot indicators
         List<SlotCategory> secondarySlots = augment.getSecondarySlots();
         int numSecondarySlots = secondarySlots.size();
 
@@ -227,20 +247,24 @@ public class CargoPanel {
         float overhang = slotIndicatorWidth - totalIndicatorWidth;
         primarySlotWidth = primarySlotWidth * 2 + overhang;
 
-        ButtonAPI primarySlotLine = ButtonUtils.addSeparatorLine(cargoElement, primarySlotWidth,
+        ButtonAPI primarySlotLine = ButtonUtils.addSeparatorLine(uiElement, primarySlotWidth,
                                                                  augment.getPrimarySlot().getColor(),
                                                                  0f);
         primarySlotLine.getPosition().belowLeft(buttonComponent, -5f).setXAlignOffset(buttonWidth + itemPadding / 2);
 
         ButtonAPI lastLine = primarySlotLine;
         for (SlotCategory slot : secondarySlots) {
-            ButtonAPI secondarySlotLine = ButtonUtils.addSeparatorLine(cargoElement, secondarySlotWidths, slot.getColor(), 0f);
-            UIComponentAPI uiComponent = cargoElement.getPrev();
+            ButtonAPI secondarySlotLine = ButtonUtils.addSeparatorLine(uiElement, secondarySlotWidths, slot.getColor(), 0f);
+            UIComponentAPI uiComponent = uiElement.getPrev();
             uiComponent.getPosition().rightOfMid(lastLine, 1f);
             lastLine = secondarySlotLine;
         }
 
-        ButtonAPI separatorLine = ButtonUtils.addSeparatorLine(cargoElement, totalLineWidth, Misc.getDarkPlayerColor(), 0f);
+        // Bottom line
+        ButtonAPI separatorLine = ButtonUtils.addSeparatorLine(uiElement, totalLineWidth, Misc.getDarkPlayerColor(), 0f);
         separatorLine.getPosition().belowLeft(buttonComponent, -1f).setXAlignOffset(buttonWidth);
+
+        elementPanel.addUIElement(uiElement).inTL(0f, 0f);
+        cargoElement.addCustom(elementPanel, 0f);
     }
 }

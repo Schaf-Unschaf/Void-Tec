@@ -33,5 +33,5 @@ public interface StatApplier {
     // true if a negative (ex: -10 overload duration) value grants a benefit
     boolean hasNegativeValueAsBenefit();
 
-    boolean isPercentage();
+    boolean isMult();
 }

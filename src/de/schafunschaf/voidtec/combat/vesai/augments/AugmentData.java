@@ -1,6 +1,5 @@
 package de.schafunschaf.voidtec.combat.vesai.augments;
 
-import de.schafunschaf.voidtec.combat.vesai.AfterCreationEffect;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
@@ -29,14 +28,13 @@ public class AugmentData {
     protected List<StatApplier> secondaryStatMods = new ArrayList<>();
     protected List<StatModValue<Float, Float, Boolean, Boolean>> secondaryStatValues = new ArrayList<>();
     protected String[] augmentQualityRange;
-    protected TextWithHighlights combatScriptDescription = null;
     protected TextWithHighlights additionalDescription = null;
     protected boolean equalQualityRoll = false;
+    protected String beforeCreationEffectPath = null;
+    protected String afterCreationEffectPath = null;
     protected String combatScriptPath = null;
-    protected AfterCreationEffect afterCreationEffect = null;
     protected String rightClickActionPath = null;
     protected boolean uniqueMod = false;
-    protected boolean stackable = true;
 
     protected void storeAugment() {
         AugmentDataManager.storeAugmentData(augmentID, this);

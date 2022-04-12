@@ -13,6 +13,7 @@ import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
+import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;
@@ -27,15 +28,13 @@ public class FilledSlotButton extends DefaultButton {
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
-        if (InfoPanel.getSelectedTab() == InfoPanel.InfoTabs.REPAIR && !augment.isRepairable()) {
-            return;
-        }
-
         if (isSelected()) {
             AugmentManagerIntel.setSelectedInstalledAugment(null);
         } else {
             AugmentManagerIntel.setSelectedInstalledAugment(augment);
             AugmentManagerIntel.setSelectedAugmentInCargo(null);
+            AugmentManagerIntel.setSelectedSlot(null);
+            AugmentManagerIntel.setActiveCategoryFilter(null);
         }
     }
 
@@ -50,7 +49,17 @@ public class FilledSlotButton extends DefaultButton {
         float scaleFactor = getButtonScaleFactor();
         Color slotColor = Misc.scaleColorOnly(slotCategory.getColor(), scaleFactor);
 
-        return ButtonUtils.addAugmentButton(tooltip, width, slotColor, slotColor, true, augment.isUniqueMod(), this);
+        ButtonAPI augmentButton = ButtonUtils.addAugmentButton(tooltip, width, slotColor, slotColor, true, augment.isUniqueMod(), this);
+
+        int damageAmount = augment.getInitialQuality().ordinal() - augment.getAugmentQuality().ordinal();
+        if (InfoPanel.getSelectedTab() == InfoPanel.InfoTabs.REPAIR && damageAmount > 0) {
+            UIUtils.addIndicatorBars(tooltip, damageAmount, 2, 5, Misc.scaleColorOnly(Misc.getNegativeHighlightColor(), scaleFactor))
+                   .getPosition()
+                   .leftOfTop(augmentButton, -width + 8f)
+                   .setYAlignOffset(-3f);
+        }
+
+        return augmentButton;
     }
 
     @Override
@@ -65,8 +74,10 @@ public class FilledSlotButton extends DefaultButton {
 
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
+                tooltip.addPara(augment.getName(), augment.getAugmentQuality().getColor(), 0f);
+                tooltip.addSpacer(3f);
                 augment.generateTooltip(fleetMember.getStats(), VoidTecEngineeringSuite.HULL_MOD_ID, tooltip, getTooltipWidth(this),
-                                        slotCategory, false, false, null);
+                                        slotCategory, null);
             }
         }, TooltipMakerAPI.TooltipLocation.BELOW);
     }
@@ -79,38 +90,18 @@ public class FilledSlotButton extends DefaultButton {
         boolean augmentInCargoSelected = !isNull(AugmentManagerIntel.getSelectedAugmentInCargo());
         boolean augmentInSlotSelected = !isNull(AugmentManagerIntel.getSelectedInstalledAugment());
         boolean matchesFilter = activeCategoryFilter == augment.getInstalledSlot().getSlotCategory();
-        boolean matchesSelection = AugmentManagerIntel.getSelectedAugment() == augment;
 
-        switch (InfoPanel.getSelectedTab()) {
-            case DETAILS:
-                if (augmentInSlotSelected) {
-                    if (filterActive && matchesFilter) {
-                        return isSelected() ? 1f : 0.5f;
-                    }
-                    return isSelected() ? 1f : 0.1f;
-                }
-                if (augmentInCargoSelected) {
-                    return 0.1f;
-                }
-                if (filterActive) {
-                    return matchesFilter ? 1f : 0.1f;
-                }
-                break;
-            case REPAIR:
-                if (augmentInSlotSelected) {
-                    if (matchesSelection) {
-                        return augment.isRepairable() ? 1f : 0.1f;
-                    }
-                    return augment.isRepairable() ? 0.3f : 0.1f;
-                }
-                if (augmentInCargoSelected) {
-                    return augment.isRepairable() ? 0.3f : 0.1f;
-                }
-                return augment.isRepairable() ? 1f : 0.1f;
-            case DISMANTLE:
-                break;
-            case MANUFACTURE:
-                break;
+        if (augmentInSlotSelected) {
+            if ((filterActive && matchesFilter) || InfoPanel.getSelectedTab() == InfoPanel.InfoTabs.REPAIR) {
+                return isSelected() ? 1f : 0.5f;
+            }
+            return isSelected() ? 1f : 0.1f;
+        }
+        if (augmentInCargoSelected) {
+            return 0.1f;
+        }
+        if (filterActive) {
+            return matchesFilter ? 1f : 0.1f;
         }
 
         return scaleFactor;

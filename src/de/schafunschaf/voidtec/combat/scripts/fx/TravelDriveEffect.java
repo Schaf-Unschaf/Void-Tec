@@ -4,9 +4,12 @@ import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.combat.ShipEngineControllerAPI;
 import de.schafunschaf.voidtec.combat.vesai.CombatScriptRunner;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
-import de.schafunschaf.voidtec.combat.vesai.augments.engine.VT_TravelDrives;
+
+import java.awt.Color;
 
 public class TravelDriveEffect implements CombatScriptRunner {
+
+    private final Color engineColor = new Color(200, 0, 255, 255);
 
     @Override
     public void run(ShipAPI ship, float amount, AugmentApplier augment) {
@@ -15,7 +18,7 @@ public class TravelDriveEffect implements CombatScriptRunner {
             float effectLevel = modifier - 0.5f;
             ShipEngineControllerAPI engineController = ship.getEngineController();
             engineController.extendFlame(augment.getAugmentID(), effectLevel, effectLevel, effectLevel);
-            engineController.fadeToOtherColor(augment.getAugmentID(), VT_TravelDrives.engineColor, null, 1f, 0.5f);
+            engineController.fadeToOtherColor(augment.getAugmentID(), engineColor, null, 1f, 0.5f);
         }
     }
 }

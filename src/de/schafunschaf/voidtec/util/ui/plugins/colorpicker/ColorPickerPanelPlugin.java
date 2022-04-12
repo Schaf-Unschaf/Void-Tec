@@ -1,9 +1,8 @@
-package de.schafunschaf.voidtec.campaign.dialog.ui;
+package de.schafunschaf.voidtec.util.ui.plugins.colorpicker;
 
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
-import de.schafunschaf.voidtec.campaign.dialog.VT_ColorPickerDialog;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
@@ -12,9 +11,9 @@ import java.util.List;
 public class ColorPickerPanelPlugin implements CustomUIPanelPlugin {
 
     private PositionAPI p;
-    private final VT_ColorPickerDialog colorPickerDialog;
+    private final ColorPickerDialog colorPickerDialog;
 
-    public ColorPickerPanelPlugin(VT_ColorPickerDialog colorPickerDialog) {
+    public ColorPickerPanelPlugin(ColorPickerDialog colorPickerDialog) {
         this.colorPickerDialog = colorPickerDialog;
     }
 
@@ -55,6 +54,4 @@ public class ColorPickerPanelPlugin implements CustomUIPanelPlugin {
 
     public void renderBelow(float alphaMult) {
     }
-
-
 }

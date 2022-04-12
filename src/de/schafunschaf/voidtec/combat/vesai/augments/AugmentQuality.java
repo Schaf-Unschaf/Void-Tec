@@ -154,6 +154,10 @@ public enum AugmentQuality {
         return highestQuality;
     }
 
+    public boolean isGreaterOrEqualThen(AugmentQuality otherQuality) {
+        return this.ordinal() >= otherQuality.ordinal();
+    }
+
     public AugmentQuality getHigherQuality() {
         return ordinal() == values.length - 1 ? this : values[ordinal() + 1];
     }

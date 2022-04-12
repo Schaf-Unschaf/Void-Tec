@@ -169,11 +169,11 @@ public class ShipPanel {
 
         boolean hasVESAI = true;
         boolean isSelected = false;
-        HullModManager hullmodManager = HullModDataStorage.getInstance().getHullModManager(ship.getId());
-        if (isNull(hullmodManager)) {
+        HullModManager hullModManager = HullModDataStorage.getInstance().getHullModManager(ship.getId());
+        if (isNull(hullModManager)) {
             hasVESAI = false;
         } else {
-            for (AugmentSlot augmentSlot : hullmodManager.getUnlockedSlots()) {
+            for (AugmentSlot augmentSlot : hullModManager.getUnlockedSlots()) {
                 AugmentApplier selectedAugment = AugmentManagerIntel.getSelectedInstalledAugment();
                 AugmentSlot selectedSlot = AugmentManagerIntel.getSelectedSlot();
                 AugmentApplier slottedAugment = augmentSlot.getSlottedAugment();
@@ -189,7 +189,7 @@ public class ShipPanel {
 
             if (isSelected) {
                 UIComponentAPI box = UIUtils.addBox(shipElement, "", null, null, shipElementWidth + 8, shipElementHeight + 2, 1f, 0f,
-                                                    null, Misc.getHighlightColor(), Misc.setAlpha(Misc.getHighlightColor(), 15));
+                                                    null, Misc.getHighlightColor(), Misc.setAlpha(Misc.getHighlightColor(), 15), null);
                 box.getPosition().inTL(1f, -2f);
             }
         }
@@ -206,7 +206,7 @@ public class ShipPanel {
 
         if (hasVESAI) {
             ButtonAPI lastScriptRunnerButton = null;
-            for (AugmentSlot augmentSlot : hullmodManager.getUniqueSlots()) {
+            for (AugmentSlot augmentSlot : hullModManager.getUniqueSlots()) {
                 ButtonAPI specialSlotButton = createAugmentSlotButton(shipElement, augmentSlot, ship);
 
                 if (isNull(lastScriptRunnerButton)) {
@@ -232,7 +232,7 @@ public class ShipPanel {
             }
 
             ButtonAPI lastAugmentButton = null;
-            for (final AugmentSlot augmentSlot : hullmodManager.getSlotsForDisplay()) {
+            for (final AugmentSlot augmentSlot : hullModManager.getSlotsForDisplay()) {
                 ButtonAPI augmentSlotButton = createAugmentSlotButton(shipElement, augmentSlot, ship);
 
                 if (isNull(lastAugmentButton)) {
@@ -260,11 +260,11 @@ public class ShipPanel {
                                               FleetMemberAPI ship) {
         AugmentCargoWrapper selectedAugmentInCargo = AugmentManagerIntel.getSelectedAugmentInCargo();
         AugmentApplier slottedAugment = augmentSlot.getSlottedAugment();
-        HullModManager hullmodManager = augmentSlot.getHullmodManager();
+        HullModManager hullModManager = augmentSlot.getHullModManager();
 
         boolean isCompatible = false;
         if (!isNull(selectedAugmentInCargo)) {
-            isCompatible = hullmodManager.isAugmentCompatible(augmentSlot, selectedAugmentInCargo.getAugment());
+            isCompatible = hullModManager.isAugmentCompatible(augmentSlot, selectedAugmentInCargo.getAugment());
         }
 
         IntelButton intelButton;

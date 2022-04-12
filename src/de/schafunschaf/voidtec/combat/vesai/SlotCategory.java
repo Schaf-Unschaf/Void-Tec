@@ -22,7 +22,7 @@ public enum SlotCategory {
     REACTOR("Reactor", new Color(170, 70, 225), 2),
     ENGINE("Engine", new Color(255, 200, 0), 2),
     SYSTEM("System", new Color(0, 100, 255), 2),
-    COSMETIC("Cosmetic", new Color(200, 200, 200), 0),
+    COSMETIC("Cosmetic", new Color(255, 0, 255), 0),
     SPECIAL("Special", new Color(0, 200, 150), 0);
 
     public static final SlotCategory[] values = values();
@@ -44,14 +44,15 @@ public enum SlotCategory {
         return allowedCategories;
     }
 
-    public static SlotCategory getRandomCategory(Random random) {
+    public static SlotCategory getRandomCategory(Random random, boolean ignoreWeighting) {
         if (isNull(random)) {
             random = new Random();
         }
 
         WeightedRandomPicker<SlotCategory> picker = new WeightedRandomPicker<>(random);
         for (SlotCategory slotCategory : getAllowedCategories()) {
-            picker.add(slotCategory, slotCategory.weighting);
+            int weight = ignoreWeighting ? 1 : slotCategory.weighting;
+            picker.add(slotCategory, weight);
         }
 
         return picker.pick();
@@ -63,7 +64,7 @@ public enum SlotCategory {
         }
 
         if (isNull(allowedCategories) || allowedCategories.isEmpty()) {
-            return getRandomCategory(random);
+            return getRandomCategory(random, false);
         }
 
         WeightedRandomPicker<SlotCategory> picker = new WeightedRandomPicker<>(random);

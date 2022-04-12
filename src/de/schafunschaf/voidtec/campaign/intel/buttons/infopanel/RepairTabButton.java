@@ -6,7 +6,6 @@ import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
-import de.schafunschaf.voidtec.campaign.intel.CargoPanel;
 import de.schafunschaf.voidtec.campaign.intel.InfoPanel;
 import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +19,6 @@ public class RepairTabButton extends DefaultButton {
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
-        CargoPanel.showDestroyedAugments = false;
-        CargoPanel.showOnlyRepairable = true;
         AugmentManagerIntel.setShowingManufacturingPanel(false);
         AugmentManagerIntel.setSelectedSlot(null);
         InfoPanel.setSelectedTab(InfoPanel.InfoTabs.REPAIR);
@@ -29,7 +26,7 @@ public class RepairTabButton extends DefaultButton {
 
     @Override
     public String getName() {
-        return numAugments > 0 ? String.format("(%s) Repair", numAugments) : "Repair";
+        return (numAugments > 0 ? String.format("(%s) Repair", numAugments) : "Repair") + " / Dismantle";
     }
 
     @Override
@@ -46,7 +43,8 @@ public class RepairTabButton extends DefaultButton {
 
     @Override
     public void addTooltip(TooltipMakerAPI tooltip) {
-        final String tooltipText = "Lets you repair damaged and degraded Augments.\n" +
+        final String tooltipText = "Lets you repair damaged and degraded Augments or\n" +
+                "dismantle no longer needed ones for spare parts.\n" +
                 "Depending on the severity you may need additional\n" +
                 "resources and multiple tries to restore their full power.";
         final float tooltipWidth = tooltip.computeStringWidth(tooltipText);

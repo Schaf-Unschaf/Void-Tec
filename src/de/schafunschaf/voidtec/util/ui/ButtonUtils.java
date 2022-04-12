@@ -38,9 +38,9 @@ public class ButtonUtils {
 
         if (isUnique) {
             UIComponentAPI border = UIUtils.addBox(tooltip, "", null, null, size - 2, size - 2, 4f, 5f,
-                                                   Misc.getTextColor(), Color.BLACK, Color.BLACK);
+                                                   Misc.getTextColor(), Color.BLACK, Color.BLACK, null);
             UIComponentAPI stripe = UIUtils.addBox(tooltip, "", null, null, size - 2, size / 4, 1f, 0f,
-                                                   Misc.getTextColor(), Color.BLACK, new Color(0, 0, 0, 150));
+                                                   Misc.getTextColor(), Color.BLACK, new Color(0, 0, 0, 150), null);
 
             border.getPosition().rightOfMid(prev, -size + 1);
             stripe.getPosition().rightOfMid(prev, -size + 1);
@@ -58,9 +58,9 @@ public class ButtonUtils {
 
         if (isUnique) {
             UIComponentAPI border = UIUtils.addBox(tooltip, "", null, null, size - 2, size - 2, 4f, 5f,
-                                                   Misc.getTextColor(), Color.BLACK, Color.BLACK);
+                                                   Misc.getTextColor(), Color.BLACK, Color.BLACK, null);
             UIComponentAPI stripe = UIUtils.addBox(tooltip, "", null, null, size - 2, size / 4, 1f, 0f,
-                                                   Misc.getTextColor(), Color.BLACK, new Color(0, 0, 0, 150));
+                                                   Misc.getTextColor(), Color.BLACK, new Color(0, 0, 0, 150), null);
 
             border.getPosition().rightOfMid(prev, -size + 1);
             stripe.getPosition().rightOfMid(prev, -size + 1);

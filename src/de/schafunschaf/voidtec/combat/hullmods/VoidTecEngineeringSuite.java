@@ -42,13 +42,14 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
         disableVanillaSModInstallation(stats, id);
 
         HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
-        HullModManager hullmodManager = hullModDataStorage.getHullModManager(fleetMember.getId());
+        HullModManager hullModManager = hullModDataStorage.getHullModManager(fleetMember.getId());
 
-        if (isNull(hullmodManager)) {
-            hullmodManager = new HullModManager(fleetMember);
+        if (isNull(hullModManager)) {
+            hullModManager = new HullModManager(fleetMember);
         }
 
-        hullmodManager.applySlotEffects(stats, id);
+        hullModManager.applySlotEffects(stats, id);
+        hullModManager.applyBeforeCreation(stats, id);
     }
 
     @Override
@@ -59,16 +60,16 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
         }
 
         HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
-        HullModManager hullmodManager = hullModDataStorage.getHullModManager(fleetMember.getId());
-        if (isNull(hullmodManager)) {
+        HullModManager hullModManager = hullModDataStorage.getHullModManager(fleetMember.getId());
+        if (isNull(hullModManager)) {
             return;
         }
 
-        for (AugmentSlot augmentSlot : hullmodManager.getFilledSlots()) {
-            augmentSlot.getSlottedAugment().runCustomScript(ship, amount);
+        for (AugmentSlot augmentSlot : hullModManager.getFilledSlots()) {
+            augmentSlot.getSlottedAugment().runCombatScript(ship, amount);
         }
 
-        hullmodManager.getShipStatEffectManager().runScripts(ship, amount);
+        hullModManager.getShipStatEffectManager().runScripts(ship, amount);
         AugmentationEffect.run(ship, amount, this);
     }
 
@@ -86,12 +87,12 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
         }
 
         HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
-        HullModManager hullmodManager = hullModDataStorage.getHullModManager(fleetMember.getId());
-        if (isNull(hullmodManager)) {
+        HullModManager hullModManager = hullModDataStorage.getHullModManager(fleetMember.getId());
+        if (isNull(hullModManager)) {
             return;
         }
 
-        hullmodManager.generateTooltip(fleetMember.getStats(), HULL_MOD_ID, tooltip, width);
+        hullModManager.generateTooltip(fleetMember.getStats(), HULL_MOD_ID, tooltip, width);
     }
 
     @Override
@@ -102,12 +103,12 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
         }
 
         HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
-        HullModManager hullmodManager = hullModDataStorage.getHullModManager(fleetMember.getId());
-        if (isNull(hullmodManager)) {
+        HullModManager hullModManager = hullModDataStorage.getHullModManager(fleetMember.getId());
+        if (isNull(hullModManager)) {
             return;
         }
 
-        hullmodManager.applyFighterEffects(fighter, id);
+        hullModManager.applyFighterEffects(fighter, id);
     }
 
     @Override

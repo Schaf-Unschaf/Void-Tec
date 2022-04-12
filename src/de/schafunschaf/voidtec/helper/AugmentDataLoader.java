@@ -86,9 +86,11 @@ public class AugmentDataLoader {
                                                               new TextWithHighlights(row.optString("description"), null),
                                                               row.optInt("rarity"), SlotCategory.getEnum(row.getString("primarySlot")),
                                                               primaryStatMods, primaryStatValues, secondarySlots, secondaryStatMods,
-                                                              secondaryStatValues, augmentQuality, null, null,
-                                                              row.optBoolean("equalQualityRoll"), null, null, null,
-                                                              row.optBoolean("uniqueMod"), true);
+                                                              secondaryStatValues, augmentQuality,
+                                                              new TextWithHighlights(row.optString("additionalDescription"), null),
+                                                              row.optBoolean("equalQualityRoll"), row.optString("beforeCreationScript"),
+                                                              row.optString("afterCreationScript"), row.optString("combatScript"),
+                                                              row.optString("rightClickScript"), row.optBoolean("uniqueMod"));
 
                     AugmentDataManager.storeAugmentData(augmentID, augmentData);
                 } catch (JSONException error) {
@@ -105,7 +107,9 @@ public class AugmentDataLoader {
 
         for (String statModAsString : statModKeys) {
             StatApplier statMod = StatModProvider.getStatMod(statModAsString.toLowerCase().trim());
-            if (!isNull(statMod)) {
+            if (isNull(statMod)) {
+                log.warn(String.format("VT: Error while parsing '%s' - No matching StatMod found", statModAsString));
+            } else {
                 statMods.add(statMod);
             }
         }

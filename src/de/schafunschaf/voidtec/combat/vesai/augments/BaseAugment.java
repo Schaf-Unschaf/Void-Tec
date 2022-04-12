@@ -4,19 +4,15 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.MutableShipStatsAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.combat.vesai.*;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatApplier;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
-import de.schafunschaf.voidtec.helper.RainbowString;
 import de.schafunschaf.voidtec.helper.TextWithHighlights;
 import de.schafunschaf.voidtec.ids.VT_Strings;
-import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -26,7 +22,6 @@ import java.util.Objects;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
-@Log4j
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -44,16 +39,16 @@ public class BaseAugment implements AugmentApplier {
     protected List<StatApplier> secondaryStatMods;
     protected List<StatModValue<Float, Float, Boolean, Boolean>> secondaryStatValues;
     protected AugmentQuality augmentQuality;
-    protected TextWithHighlights combatScriptDescription;
-    protected CombatScriptRunner combatScriptRunner;
     protected TextWithHighlights additionalDescription;
+    protected BeforeCreationEffect beforeCreationEffect;
     protected AfterCreationEffect afterCreationEffect;
+    protected CombatScriptRunner combatScriptRunner;
     protected RightClickAction rightClickAction;
-    protected AugmentQuality initialQuality;
-    protected AugmentSlot installedSlot;
     protected Map<String, Float> appliedFighterValues;
     protected boolean uniqueMod;
     protected boolean stackable;
+    protected AugmentQuality initialQuality;
+    protected AugmentSlot installedSlot;
 
     public BaseAugment(AugmentData augmentData, AugmentQuality augmentQuality) {
         this.augmentID = augmentData.getAugmentID();
@@ -72,40 +67,32 @@ public class BaseAugment implements AugmentApplier {
                                                                        augmentData.isEqualQualityRoll())
                               : augmentQuality;
         this.initialQuality = augmentQuality;
-        this.combatScriptDescription = augmentData.getCombatScriptDescription();
-        this.combatScriptRunner = ((CombatScriptRunner) createInstanceFromPath(augmentData.getCombatScriptPath()));
         this.additionalDescription = augmentData.getAdditionalDescription();
-        this.afterCreationEffect = augmentData.getAfterCreationEffect();
+        this.beforeCreationEffect = ((BeforeCreationEffect) createInstanceFromPath(augmentData.getBeforeCreationEffectPath()));
+        this.afterCreationEffect = ((AfterCreationEffect) createInstanceFromPath(augmentData.getAfterCreationEffectPath()));
+        this.combatScriptRunner = ((CombatScriptRunner) createInstanceFromPath(augmentData.getCombatScriptPath()));
         this.rightClickAction = ((RightClickAction) createInstanceFromPath(augmentData.getRightClickActionPath()));
         this.appliedFighterValues = new HashMap<>();
         this.uniqueMod = augmentData.isUniqueMod();
-        this.stackable = augmentData.isStackable();
+        this.stackable = isNull(rightClickAction);
     }
 
+    @SuppressWarnings("deprecation")
     @SneakyThrows
     private Object createInstanceFromPath(String rightClickActionPath) {
-        if (isNull(rightClickActionPath)) {
+        if (isNull(rightClickActionPath) || rightClickActionPath.isEmpty()) {
             return null;
         }
 
         try {
             Class<?> aClass = Global.getSettings().getScriptClassLoader().loadClass(rightClickActionPath);
-            Object newInstance = aClass.newInstance();
-            log.info(rightClickActionPath + "\n" + newInstance);
 
-            return newInstance;
+            return aClass.newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
             e.printStackTrace();
         }
 
         return null;
-    }
-
-    @Override
-    public void applyAfterCreation(ShipAPI ship, String id) {
-        if (!isNull(afterCreationEffect)) {
-            afterCreationEffect.applyAfterCreation(ship, id);
-        }
     }
 
     @Override
@@ -145,33 +132,7 @@ public class BaseAugment implements AugmentApplier {
 
     @Override
     public void generateTooltip(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, float width, SlotCategory slotCategory,
-                                boolean isItemTooltip, boolean onlyStats, Color bulletColorOverride) {
-        if (!onlyStats) {
-            if (getName().toLowerCase().contains("rainbow")) {
-                RainbowString rainbowString = new RainbowString(getName(), Color.RED, 20);
-                tooltip.addPara(rainbowString.getConvertedString(), 0f, rainbowString.getHlColors(), rainbowString.getHlStrings());
-            } else {
-                String uniqueText = "Unique Modification";
-                String uniqueString = isUniqueMod() ? uniqueText + " - " : "";
-                String text = String.format("%s%s (%s)", uniqueString, getName(), getAugmentQuality().getName());
-                tooltip.addPara(text, 0f, new Color[]{Misc.getHighlightColor(), getAugmentQuality().getColor()},
-                                uniqueText, getAugmentQuality().getName());
-            }
-
-            UIUtils.addHorizontalSeparator(tooltip, width, 1f, slotCategory.getColor(), 3f);
-            tooltip.addSpacer(3f);
-        }
-
-        if (isItemTooltip || slotCategory == SlotCategory.SPECIAL || slotCategory == SlotCategory.COSMETIC) {
-            Color highlightColor = Misc.getHighlightColor();
-
-            if (!isNull(rightClickAction) && rightClickAction.getActionObject() instanceof Color) {
-                highlightColor = ((Color) rightClickAction.getActionObject());
-            }
-
-            tooltip.addPara(getDescription().getDisplayString(), 0f, highlightColor, getDescription().getHighlights());
-        }
-
+                                Color bulletColorOverride) {
         List<StatApplier> statMods = isInPrimarySlot() ? getPrimaryStatMods() : getSecondaryStatMods();
         if (!isNull(statMods) && !statMods.isEmpty()) {
             Color bulletColor = isNull(bulletColorOverride) ? primarySlot.getColor() : bulletColorOverride;
@@ -189,7 +150,7 @@ public class BaseAugment implements AugmentApplier {
             }
         }
 
-        addAdditionalDescriptions(tooltip);
+        addAdditionalDescription(tooltip);
     }
 
     @Override
@@ -210,7 +171,7 @@ public class BaseAugment implements AugmentApplier {
         List<StatApplier> statMods = inPrimarySlot ? getPrimaryStatMods() : getSecondaryStatMods();
         if (isNull(statMods) || statMods.isEmpty()) {
             if (isPrimary) {
-                addAdditionalDescriptions(tooltip);
+                addAdditionalDescription(tooltip);
             }
 
             return;
@@ -242,12 +203,26 @@ public class BaseAugment implements AugmentApplier {
 
         if (isPrimary) {
             tooltip.addSpacer(6f);
-            addAdditionalDescriptions(tooltip);
+            addAdditionalDescription(tooltip);
         }
     }
 
     @Override
-    public void runCustomScript(ShipAPI ship, float amount) {
+    public void applyBeforeCreation(MutableShipStatsAPI stats, String id) {
+        if (!isNull(beforeCreationEffect)) {
+            beforeCreationEffect.applyBeforeCreation(stats, id);
+        }
+    }
+
+    @Override
+    public void applyAfterCreation(ShipAPI ship, String id) {
+        if (!isNull(afterCreationEffect)) {
+            afterCreationEffect.applyAfterCreation(ship, id);
+        }
+    }
+
+    @Override
+    public void runCombatScript(ShipAPI ship, float amount) {
         if (!isNull(combatScriptRunner)) {
             combatScriptRunner.run(ship, amount, this);
         }
@@ -274,7 +249,7 @@ public class BaseAugment implements AugmentApplier {
 
     @Override
     public boolean isRepairable() {
-        return !isDestroyed() && augmentQuality != initialQuality;
+        return !isDestroyed() && augmentQuality != AugmentQuality.CUSTOMISED && augmentQuality != initialQuality && augmentQuality != AugmentQuality.DOMAIN;
     }
 
     @Override
@@ -284,6 +259,10 @@ public class BaseAugment implements AugmentApplier {
 
     @Override
     public AugmentApplier damageAugment(int numLevelsDamaged) {
+        if (augmentQuality == AugmentQuality.CUSTOMISED) {
+            return this;
+        }
+
         for (int i = 0; i < numLevelsDamaged; i++) {
             augmentQuality = augmentQuality.getLowerQuality();
         }
@@ -308,7 +287,7 @@ public class BaseAugment implements AugmentApplier {
     }
 
     @Override
-    public void removeAugment() {
+    public void uninstall() {
         installedSlot = null;
     }
 
@@ -331,20 +310,13 @@ public class BaseAugment implements AugmentApplier {
         return installedSlot.getSlotCategory() == primarySlot;
     }
 
-    private void addAdditionalDescriptions(TooltipMakerAPI tooltip) {
-        Color highlightColor = Misc.getHighlightColor();
-
+    private void addAdditionalDescription(TooltipMakerAPI tooltip) {
         if (!isNull(rightClickAction) && rightClickAction.getActionObject() instanceof Color) {
-            highlightColor = ((Color) rightClickAction.getActionObject());
-        }
-
-        if (!isNull(combatScriptDescription) && !combatScriptDescription.getDisplayString().isEmpty()) {
-            tooltip.addPara(getCombatScriptDescription().getDisplayString(), 3f, highlightColor,
-                            getCombatScriptDescription().getHighlights());
+            getAdditionalDescription().setHlColor(((Color) rightClickAction.getActionObject()));
         }
 
         if (!isNull(additionalDescription) && !additionalDescription.getDisplayString().isEmpty()) {
-            tooltip.addPara(getAdditionalDescription().getDisplayString(), 3f, highlightColor,
+            tooltip.addPara(getAdditionalDescription().getDisplayString(), 3f, getAdditionalDescription().getHlColor(),
                             getAdditionalDescription().getHighlights());
         }
     }

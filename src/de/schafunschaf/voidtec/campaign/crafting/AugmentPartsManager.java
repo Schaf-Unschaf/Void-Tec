@@ -8,7 +8,6 @@ import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
@@ -20,23 +19,21 @@ public class AugmentPartsManager {
 
     public AugmentPartsManager() {
         for (AugmentQuality augmentQuality : AugmentQuality.values) {
-            if (augmentQuality == AugmentQuality.DESTROYED || augmentQuality == AugmentQuality.DEGRADED) {
+            if (augmentQuality == AugmentQuality.DESTROYED || augmentQuality == AugmentQuality.DEGRADED || augmentQuality == AugmentQuality.CUSTOMISED) {
                 continue;
             }
 
             AugmentComponent component = new AugmentComponent(BASIC_COMPONENT, augmentQuality);
-            component.addAmount(new Random().nextInt(50)+50);
             componentInventory.add(component);
         }
 
         for (SlotCategory category : SlotCategory.values) {
             for (AugmentQuality augmentQuality : AugmentQuality.values) {
-                if (augmentQuality == AugmentQuality.DESTROYED || augmentQuality == AugmentQuality.DEGRADED) {
+                if (augmentQuality == AugmentQuality.DESTROYED || augmentQuality == AugmentQuality.DEGRADED || augmentQuality == AugmentQuality.CUSTOMISED) {
                     continue;
                 }
 
                 AugmentComponent component = new AugmentComponent(category, augmentQuality);
-                component.addAmount(new Random().nextInt(20)+20);
                 componentInventory.add(component);
             }
         }

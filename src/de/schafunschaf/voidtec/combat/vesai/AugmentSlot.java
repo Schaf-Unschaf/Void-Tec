@@ -15,27 +15,35 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 @Getter
 public class AugmentSlot {
 
-    private final HullModManager hullmodManager;
+    private final HullModManager hullModManager;
     private final SlotCategory slotCategory;
     private AugmentApplier slottedAugment;
     private boolean isUnlocked;
 
-    public AugmentSlot(HullModManager hullmodManager, Random random, boolean unlocked) {
-        this.hullmodManager = hullmodManager;
-        this.slotCategory = SlotCategory.getRandomCategory(random);
+    public AugmentSlot(HullModManager hullModManager, Random random, boolean unlocked) {
+        this.hullModManager = hullModManager;
+        this.slotCategory = SlotCategory.getRandomCategory(random, false);
         this.isUnlocked = unlocked;
     }
 
-    public AugmentSlot(HullModManager hullmodManager, SlotCategory slotCategory, boolean unlocked) {
-        this.hullmodManager = hullmodManager;
+    public AugmentSlot(HullModManager hullModManager, SlotCategory slotCategory, boolean unlocked) {
+        this.hullModManager = hullModManager;
         this.slotCategory = slotCategory;
         this.isUnlocked = unlocked;
     }
 
-    public AugmentSlot(HullModManager hullmodManager, Map<SlotCategory, Integer> allowedCategories, Random random, boolean unlocked) {
-        this.hullmodManager = hullmodManager;
+    public AugmentSlot(HullModManager hullModManager, Map<SlotCategory, Integer> allowedCategories, Random random, boolean unlocked) {
+        this.hullModManager = hullModManager;
         this.slotCategory = SlotCategory.getRandomCategory(random, allowedCategories);
         this.isUnlocked = unlocked;
+    }
+
+    public void applyBeforeCreation(MutableShipStatsAPI stats, String id) {
+        if (isNull(slottedAugment)) {
+            return;
+        }
+
+        slottedAugment.applyBeforeCreation(stats, id);
     }
 
     public void applyAfterCreation(ShipAPI ship, String id) {
@@ -51,7 +59,7 @@ public class AugmentSlot {
             return;
         }
 
-        hullmodManager.getShipStatEffectManager().addAll(slottedAugment.getActiveStatMods());
+        hullModManager.getShipStatEffectManager().addAll(slottedAugment.getActiveStatMods());
 
         slottedAugment.applyToShip(stats, id, slotIndex);
     }
@@ -69,7 +77,7 @@ public class AugmentSlot {
             return;
         }
 
-        slottedAugment.generateTooltip(stats, id, tooltip, width, slotCategory, isItemTooltip, false, null);
+        slottedAugment.generateTooltip(stats, id, tooltip, width, slotCategory, null);
     }
 
     public void unlockSlot() {
@@ -77,7 +85,7 @@ public class AugmentSlot {
     }
 
     public boolean installAugment(AugmentApplier augment) {
-        return hullmodManager.installAugment(this, augment);
+        return hullModManager.installAugment(this, augment);
     }
 
     protected boolean insertAugment(AugmentApplier augment) {
@@ -90,7 +98,7 @@ public class AugmentSlot {
     }
 
     public void removeAugment() {
-        slottedAugment.removeAugment();
+        slottedAugment.uninstall();
         slottedAugment = null;
     }
 

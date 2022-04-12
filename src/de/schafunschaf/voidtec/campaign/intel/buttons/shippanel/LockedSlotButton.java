@@ -29,7 +29,7 @@ public class LockedSlotButton extends DefaultButton {
 
     public LockedSlotButton(AugmentSlot augmentSlot) {
         this.augmentSlot = augmentSlot;
-        this.unlockedSlots = augmentSlot.getHullmodManager().getUnlockedSlots().size();
+        this.unlockedSlots = augmentSlot.getHullModManager().getUnlockedSlots().size();
         this.canUnlockWithCredits = unlockedSlots < VT_Settings.maxNumSlotsForCreditUnlock;
     }
 
