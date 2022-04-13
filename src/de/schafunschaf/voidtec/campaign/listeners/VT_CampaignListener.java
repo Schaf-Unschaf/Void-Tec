@@ -82,6 +82,10 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
 
     @Override
     public void reportBattleOccurred(CampaignFleetAPI primaryWinner, BattleAPI battle) {
+        if (!battle.isPlayerInvolved()) {
+            return;
+        }
+
         AugmentManagerIntel augmentManagerIntel = AugmentManagerIntel.getInstance();
         Global.getSector()
               .getCampaignUI()

@@ -4,9 +4,9 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
-import de.schafunschaf.voidtec.campaign.items.chests.BaseChestData;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
@@ -56,7 +56,7 @@ public class VoidTecUtils {
         }
     }
 
-    public static void addChestToFleetCargo(BaseChestData baseChestData) {
+    public static void addChestToFleetCargo(SpecialItemData baseChestData) {
         CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
         cargo.addSpecial(baseChestData, 1f);
     }

@@ -34,7 +34,7 @@ public class ColorPickerDialog implements CustomDialogDelegate {
         uiElement.addPara("Pick a new color", 0f).setAlignment(Alignment.MID);
         uiElement.getPrev().getPosition().setYAlignOffset(-5f);
         UIUtils.addVerticalSeparator(uiElement, 200, 1, Misc.getBasePlayerColor()).getPosition().setXAlignOffset(-5f).setYAlignOffset(-3f);
-        uiElement.addSpacer(0f).getPosition().setXAlignOffset(-10f).setYAlignOffset(5f);
+        uiElement.addSpacer(0f).getPosition().setXAlignOffset(-5f).setYAlignOffset(5f);
         fieldRed = addColorField("Red (0-255)", currentColor.getRed(), Color.RED, uiElement);
         fieldGreen = addColorField("Green (0-255)", currentColor.getGreen(), Color.GREEN, uiElement);
         fieldBlue = addColorField("Blue (0-255)", currentColor.getBlue(), Color.BLUE, uiElement);

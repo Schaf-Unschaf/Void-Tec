@@ -16,42 +16,57 @@ import de.schafunschaf.voidtec.util.VoidTecUtils;
 import de.schafunschaf.voidtec.util.ui.ProgressBar;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VT_BaseChestStorageListener implements CargoPickerListener {
 
-    protected final StorageChestPlugin storageChestPlugin;
-    protected final CargoAPI targetStorage;
-    protected final StorageChestData storageChestData;
+    protected final StorageChestPlugin chestPlugin;
+    protected final StorageChestData chestData;
+    protected final CargoAPI chestInventory;
     protected final InteractionDialogAPI dialog;
     protected boolean loadedChestCargo = false;
 
-    public VT_BaseChestStorageListener(StorageChestPlugin storageChestPlugin, CargoAPI targetStorage, InteractionDialogAPI dialog) {
-        this.storageChestPlugin = storageChestPlugin;
-        this.targetStorage = targetStorage;
-        this.storageChestData = storageChestPlugin.getChestData();
+    private final List<CargoStackAPI> addToChestItems = new ArrayList<>();
+    private final List<CargoStackAPI> removeFromChestItems = new ArrayList<>();
+    private final List<CargoStackAPI> addToPlayerItems = new ArrayList<>();
+    private final List<CargoStackAPI> removeFromPlayerItems = new ArrayList<>();
+
+    public VT_BaseChestStorageListener(StorageChestPlugin chestPlugin, InteractionDialogAPI dialog) {
+        this.chestPlugin = chestPlugin;
+        this.chestData = chestPlugin.getChestData();
+        this.chestInventory = chestData.getChestStorage();
         this.dialog = dialog;
     }
 
     @Override
     public void pickedCargo(CargoAPI cargo) {
-        cargo.removeAll(storageChestData.getChestStorage());
         int sumCargoAffected = 0;
 
         for (CargoStackAPI stack : cargo.getStacksCopy()) {
             sumCargoAffected += (int) stack.getSize();
         }
 
-        if (storageChestData.getCurrentSize() + sumCargoAffected > storageChestData.getMaxSize()) {
+        // Enough space to store items?
+        if (chestData.getCurrentSize() + sumCargoAffected > chestData.getMaxSize()) {
             return;
         }
 
-        storageChestPlugin.addToSize(sumCargoAffected);
+        chestPlugin.addToSize(sumCargoAffected);
 
-        targetStorage.addAll(cargo);
+        processInventoryChanges(cargo);
 
         CargoUtils.adjustItemInCargo(cargo, Global.getSector().getPlayerFleet().getCargo());
+        cargo.removeAll(chestData.getChestStorage());
 
         closeChest();
+    }
+
+    private void processInventoryChanges(CargoAPI cargo) {
+        List<CargoStackAPI> currentChestStacks = chestInventory.getStacksCopy();
+        List<CargoStackAPI> newChestStacks = cargo.getStacksCopy();
+
+
     }
 
     @Override
@@ -62,21 +77,26 @@ public class VT_BaseChestStorageListener implements CargoPickerListener {
     @Override
     public void recreateTextPanel(TooltipMakerAPI panel, CargoAPI cargo, CargoStackAPI pickedUp, boolean pickedUpFromSource,
                                   CargoAPI combined) {
+        // cargo = initial chest inventory
+        // combined = current chest inventory
+        CargoAPI chestStorage = chestData.getChestStorage();
+
         if (!loadedChestCargo) {
-            cargo.addAll(storageChestData.getChestStorage());
+            cargo.addAll(chestStorage);
             loadedChestCargo = true;
         }
-        combined.removeAll(storageChestData.getChestStorage());
 
         int sumCargoAffected = 0;
         for (CargoStackAPI stack : combined.getStacksCopy()) {
-            sumCargoAffected += (int) stack.getSize();
+            if (stack != pickedUp) {
+                sumCargoAffected += (int) stack.getSize();
+            }
         }
 
-        float maxSize = storageChestData.getMaxSize();
-        float currentSize = storageChestData.getCurrentSize() + sumCargoAffected;
+        float maxSize = chestData.getMaxSize();
+        float currentSize = sumCargoAffected;
 
-        Color manufacturerColor = VoidTecUtils.getManufacturerColor(storageChestData.getManufacturer());
+        Color manufacturerColor = VoidTecUtils.getManufacturerColor(chestData.getManufacturer());
 
         UIComponentAPI storageMeter = ProgressBar.addBarLTR(panel, String.format("%s / %s", (int) currentSize, (int) maxSize),
                                                             Alignment.MID, Fonts.ORBITRON_16, 300f, 26f, 2f, 3f,
@@ -84,12 +104,12 @@ public class VT_BaseChestStorageListener implements CargoPickerListener {
                                                             Misc.getTextColor(), manufacturerColor, Color.BLACK,
                                                             Misc.scaleColorOnly(manufacturerColor, 0.3f));
 
-        storageChestPlugin.createTooltip(panel, false, null, null);
+        chestPlugin.createTooltip(panel, false, null, null);
         panel.addPara("Allowed Items", Misc.getHighlightColor(), 10f);
         panel.addButton("", null, Color.BLACK, Misc.getBasePlayerColor(), Alignment.MID, CutStyle.ALL,
                         panel.computeStringWidth("Allowed Items"), 0f, 3f);
         panel.addSpacer(6f);
-        for (String item : storageChestData.getAllowedItemsString()) {
+        for (String item : chestData.getAllowedItemsString()) {
             panel.addPara(String.format(" - %s", item), 0f);
         }
 

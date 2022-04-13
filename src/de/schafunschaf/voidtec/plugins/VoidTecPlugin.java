@@ -2,6 +2,13 @@ package de.schafunschaf.voidtec.plugins;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CargoAPI;
+import com.fs.starfarer.api.campaign.CargoStackAPI;
+import com.fs.starfarer.api.campaign.SpecialItemData;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
 import de.schafunschaf.voidtec.campaign.items.chests.AugmentChestData;
 import de.schafunschaf.voidtec.combat.vesai.HullModDataStorage;
@@ -16,6 +23,8 @@ import de.schafunschaf.voidtec.util.VoidTecUtils;
 import lombok.extern.log4j.Log4j;
 
 import java.util.Random;
+
+import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @Log4j
 public class VoidTecPlugin extends BaseModPlugin {
@@ -48,8 +57,23 @@ public class VoidTecPlugin extends BaseModPlugin {
         VT_Settings.isIndEvoActive = Global.getSettings().getModManager().isModEnabled("IndEvo");
 
         // TODO remove before final release
-        if (!Global.getSector().getMemoryWithoutUpdate().contains(DEV_CHEST)) {
+        MemoryAPI memoryAPI = Global.getSector().getMemoryWithoutUpdate();
+        if (!memoryAPI.contains(DEV_CHEST)) {
+            for (MarketAPI marketAPI : Global.getSector().getEconomy().getMarketsCopy()) {
+                SubmarketAPI submarket = marketAPI.getSubmarket(Submarkets.SUBMARKET_STORAGE);
+                if (isNull(submarket)) {
+                    continue;
+                }
+                CargoAPI submarketCargo = submarket.getCargo();
+                if (isNull(submarketCargo)) {
+                    continue;
+                }
+                removeFaultyChests(submarketCargo);
+            }
+            removeFaultyChests(Global.getSector().getPlayerFleet().getCargo());
+
             VoidTecUtils.addChestToFleetCargo(new AugmentChestData(VT_Items.STORAGE_CHEST_XS, null, "Augment Storage Chest", 200));
+            memoryAPI.set(DEV_CHEST, 1);
         }
 
         if (VT_Settings.sheepDebug) {
@@ -69,6 +93,19 @@ public class VoidTecPlugin extends BaseModPlugin {
                                                                              AugmentQuality.DOMAIN, null, null);
                 augment.damageAugment(new Random().nextInt(6));
                 VoidTecUtils.addAugmentToFleetCargo(augment);
+            }
+        }
+    }
+
+    private void removeFaultyChests(CargoAPI cargoAPI) {
+        for (CargoStackAPI cargoStackAPI : cargoAPI.getStacksCopy()) {
+            SpecialItemData specialItemData = cargoStackAPI.getSpecialDataIfSpecial();
+            if (isNull(specialItemData)) {
+                continue;
+            }
+
+            if (specialItemData.getId().contains(VT_Items.STORAGE_CHEST_ID) && specialItemData.getData() == null) {
+                cargoAPI.removeStack(cargoStackAPI);
             }
         }
     }

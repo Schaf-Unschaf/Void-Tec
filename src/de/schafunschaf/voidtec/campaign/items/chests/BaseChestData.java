@@ -38,6 +38,9 @@ public class BaseChestData extends SpecialItemData implements StorageChestData {
     public BaseChestData(String id, String data, String name, String manufacturer, int maxSize,
                          CargoAPI chestInventory, boolean isLocked) {
         super(id, data);
+        if (isNull(data)) {
+            setData(Misc.genUID());
+        }
         this.name = name;
         this.manufacturer = manufacturer;
         this.chestStorage = isNull(chestInventory) ? Global.getFactory().createCargo(true) : chestInventory;
@@ -63,11 +66,6 @@ public class BaseChestData extends SpecialItemData implements StorageChestData {
         int result = super.hashCode();
         result = prime * result + ((chestStorage == null) ? 0 : chestStorage.hashCode());
         return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return false;
     }
 
     @Getter
@@ -170,7 +168,7 @@ public class BaseChestData extends SpecialItemData implements StorageChestData {
             case OPEN:
             default:
                 dialog.showCargoPickerDialog(getTitle(), "Store", "Cancel", false, 110f, getAllowedCargo(),
-                                             new VT_BaseChestStorageListener(storageChestPlugin, chestStorage, dialog));
+                                             new VT_BaseChestStorageListener(storageChestPlugin, dialog));
                 break;
             case RENAME:
                 CustomDialogDelegate delegate = new VT_ChestRenameDialog(dialog, storageChestPlugin);
