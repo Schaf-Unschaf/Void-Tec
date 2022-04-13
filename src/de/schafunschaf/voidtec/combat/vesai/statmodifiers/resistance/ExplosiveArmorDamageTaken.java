@@ -40,7 +40,7 @@ public class ExplosiveArmorDamageTaken extends BaseStatMod {
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getHighExplosiveDamageTakenMult().getMultStatMod(id);
 
-        String description = "Explosive damage taken by armor and hull %s by %s";
+        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {

@@ -28,7 +28,7 @@ public abstract class BaseStatMod implements StatApplier {
 
     public static void generateStatTooltip(TooltipMakerAPI tooltip, String statID, int value) {
         BaseStatMod statMod = StatModProvider.getStatMod(statID);
-        String text = statMod.displayName + " %s by %s";
+        String text = "%s %s by %s";
         statMod.generateTooltip(tooltip, value, text, null);
     }
 
@@ -60,7 +60,7 @@ public abstract class BaseStatMod implements StatApplier {
     public void runCombatScript(ShipAPI ship, float amount, AugmentApplier augment) {}
 
     @Override
-    public void collectStatValue(float value, AugmentApplier parentAugment) {
+    public void collectStatValue(float value, AugmentApplier parentAugment, boolean negativeBenefits) {
         parentAugment.getInstalledSlot().getHullModManager().addStatModifier(statID, value, isMult());
     }
 
@@ -79,7 +79,7 @@ public abstract class BaseStatMod implements StatApplier {
         int value = isMult() ? (int) (100 * statMod.value) - 100 : (int) statMod.value;
 
         if (isNull(tooltip)) {
-            collectStatValue(value, parentAugment);
+            collectStatValue(value, parentAugment, hasNegativeValueAsBenefit());
             return;
         }
 
@@ -87,6 +87,7 @@ public abstract class BaseStatMod implements StatApplier {
     }
 
     private void generateTooltip(TooltipMakerAPI tooltip, int value, String text, Color bulletColor) {
+        BaseStatMod statMod = StatModProvider.getStatMod(statID);
         String percentageSign = isMult() ? "%" : "";
         boolean isPositive = value >= 0;
         String incDec = isPositive ? "increased" : "decreased";
@@ -98,7 +99,8 @@ public abstract class BaseStatMod implements StatApplier {
         Color hlColor = isPositive ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor();
 
         setBulletMode(tooltip, isNull(bulletColor) ? hlColor : bulletColor);
-        tooltip.addPara(text, 0f, new Color[]{hlColor, hlColor}, incDec, Math.abs(value) + percentageSign);
+        tooltip.addPara(text, 0f, new Color[]{hlColor, Misc.getTextColor(), hlColor}, statMod.displayName, incDec,
+                        Math.abs(value) + percentageSign);
         unindent(tooltip);
     }
 

@@ -40,7 +40,7 @@ public class WeaponRepair extends BaseStatMod {
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getCombatWeaponRepairTimeMult().getMultStatMod(id);
 
-        String description = "Engine repair time %s by %s";
+        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {

@@ -28,7 +28,7 @@ public interface StatApplier {
 
     String getDisplayName();
 
-    void collectStatValue(float value, AugmentApplier parentAugment);
+    void collectStatValue(float value, AugmentApplier parentAugment, boolean negativeBenefits);
 
     // true if a negative (ex: -10 overload duration) value grants a benefit
     boolean hasNegativeValueAsBenefit();

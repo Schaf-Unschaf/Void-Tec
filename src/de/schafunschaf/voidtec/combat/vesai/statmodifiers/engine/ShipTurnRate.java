@@ -40,7 +40,7 @@ public class ShipTurnRate extends BaseStatMod {
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getTurnAcceleration().getMultStatMod(id);
 
-        String description = "Ship turn rate %s by %s";
+        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {

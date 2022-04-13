@@ -91,13 +91,13 @@ public class StatLoader {
         map.put(SENSOR_STRENGTH, new SensorStrength(SENSOR_STRENGTH, "Sensor strength"));
         map.put(SIGHT_RADIUS, new SightRadius(SIGHT_RADIUS, "Sight radius"));
 
-        map.put(SHIELD_ABSORPTION, new ShieldAbsorbtion(SHIELD_ABSORPTION, "Shield damage absorption"));
+        map.put(SHIELD_ABSORPTION, new ShieldAbsorbtion(SHIELD_ABSORPTION, "Shield damage taken"));
         map.put(SHIELD_ARC, new ShieldArc(SHIELD_ARC, "Shield arc"));
         map.put(SHIELD_TURN, new ShieldTurnRate(SHIELD_TURN, "Shield turn rate"));
         map.put(SHIELD_UNFOLD, new ShieldUnfold(SHIELD_UNFOLD, "Shield unfold rate"));
         map.put(SHIELD_UPKEEP, new ShieldUpkeep(SHIELD_UPKEEP, "Shield upkeep per second"));
 
-        map.put(MOD_SLOT, new SModSlot(MOD_SLOT, "Number SMod-Slots"));
+        map.put(MOD_SLOT, new SModSlot(MOD_SLOT, "Number of SMod-Slots"));
         map.put(TIME_MULT, new TimeMult(TIME_MULT, "Time-Flow"));
 
         map.put(SYSTEM_COOLDOWN, new SystemCooldown(SYSTEM_COOLDOWN, "System cooldown"));

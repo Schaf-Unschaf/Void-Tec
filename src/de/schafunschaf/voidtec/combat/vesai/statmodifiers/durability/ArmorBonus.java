@@ -38,7 +38,7 @@ public class ArmorBonus extends BaseStatMod {
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getArmorBonus().getMultBonus(id);
-        String description = "Base armor strength %s by %s";
+        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {

@@ -40,7 +40,7 @@ public class ProjectileSpeed extends BaseStatMod {
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getBallisticProjectileSpeedMult().getMultStatMod(id);
 
-        String description = "Projectile speed %s by %s";
+        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {

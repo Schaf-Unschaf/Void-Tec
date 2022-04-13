@@ -40,7 +40,7 @@ public class CriticalMalfunction extends BaseStatMod {
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getCriticalMalfunctionChance().getMultStatMod(id);
 
-        String description = "Critical malfunction chance %s by %s";
+        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {

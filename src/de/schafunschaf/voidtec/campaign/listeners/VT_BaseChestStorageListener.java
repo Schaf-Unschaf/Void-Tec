@@ -11,31 +11,25 @@ import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.items.chests.StorageChestData;
 import de.schafunschaf.voidtec.campaign.items.chests.StorageChestPlugin;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DialogHelperLeaveToCargo;
-import de.schafunschaf.voidtec.util.CargoUtils;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import de.schafunschaf.voidtec.util.ui.ProgressBar;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 
 public class VT_BaseChestStorageListener implements CargoPickerListener {
 
     protected final StorageChestPlugin chestPlugin;
     protected final StorageChestData chestData;
     protected final CargoAPI chestInventory;
+    protected final CargoAPI allowedCargo;
     protected final InteractionDialogAPI dialog;
     protected boolean loadedChestCargo = false;
 
-    private final List<CargoStackAPI> addToChestItems = new ArrayList<>();
-    private final List<CargoStackAPI> removeFromChestItems = new ArrayList<>();
-    private final List<CargoStackAPI> addToPlayerItems = new ArrayList<>();
-    private final List<CargoStackAPI> removeFromPlayerItems = new ArrayList<>();
-
-    public VT_BaseChestStorageListener(StorageChestPlugin chestPlugin, InteractionDialogAPI dialog) {
+    public VT_BaseChestStorageListener(StorageChestPlugin chestPlugin, CargoAPI allowedCargo, InteractionDialogAPI dialog) {
         this.chestPlugin = chestPlugin;
         this.chestData = chestPlugin.getChestData();
         this.chestInventory = chestData.getChestStorage();
+        this.allowedCargo = allowedCargo;
         this.dialog = dialog;
     }
 
@@ -52,21 +46,11 @@ public class VT_BaseChestStorageListener implements CargoPickerListener {
             return;
         }
 
-        chestPlugin.addToSize(sumCargoAffected);
-
-        processInventoryChanges(cargo);
-
-        CargoUtils.adjustItemInCargo(cargo, Global.getSector().getPlayerFleet().getCargo());
-        cargo.removeAll(chestData.getChestStorage());
+        chestPlugin.setSize(sumCargoAffected);
+        chestInventory.clear();
+        chestInventory.addAll(cargo);
 
         closeChest();
-    }
-
-    private void processInventoryChanges(CargoAPI cargo) {
-        List<CargoStackAPI> currentChestStacks = chestInventory.getStacksCopy();
-        List<CargoStackAPI> newChestStacks = cargo.getStacksCopy();
-
-
     }
 
     @Override
@@ -118,6 +102,10 @@ public class VT_BaseChestStorageListener implements CargoPickerListener {
     }
 
     protected void closeChest() {
+        CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
+        playerCargo.addAll(allowedCargo);
+        playerCargo.sort();
+
         Global.getSector().addTransientScript(new VT_DialogHelperLeaveToCargo());
         dialog.dismiss();
     }

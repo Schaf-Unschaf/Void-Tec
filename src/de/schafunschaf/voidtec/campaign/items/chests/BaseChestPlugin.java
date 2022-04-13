@@ -129,10 +129,9 @@ public class BaseChestPlugin extends BaseSpecialItemPlugin implements StorageChe
         return super.getDesignType();
     }
 
-    public void addToSize(int num) {
+    public void setSize(int num) {
         StorageChestData augmentChestData = getChestData();
-        int currentSize = augmentChestData.getCurrentSize();
-        augmentChestData.setCurrentSize(currentSize + num);
+        augmentChestData.setCurrentSize(num);
     }
 
     public StorageChestData getChestData() {

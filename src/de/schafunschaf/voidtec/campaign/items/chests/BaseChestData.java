@@ -9,6 +9,7 @@ import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.dialog.VT_ChestRenameDialog;
 import de.schafunschaf.voidtec.campaign.listeners.VT_BaseChestStorageListener;
 import de.schafunschaf.voidtec.ids.VT_Icons;
+import de.schafunschaf.voidtec.ids.VT_Settings;
 import de.schafunschaf.voidtec.ids.VT_Strings;
 import de.schafunschaf.voidtec.util.CargoUtils;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
@@ -76,6 +77,7 @@ public class BaseChestData extends SpecialItemData implements StorageChestData {
         LOCKED(Misc.getNegativeHighlightColor());
 
         private final Color color;
+        public static final UseMode[] values = values();
 
         public UseMode cycleNextMode() {
             if (this != LOCKED) {
@@ -130,8 +132,9 @@ public class BaseChestData extends SpecialItemData implements StorageChestData {
         }
 
         FactionAPI faction = Global.getSector().getFaction(manufacturer);
-        SpriteAPI flag = Global.getSettings().getSprite(faction.getCrest());
         if (!isNull(faction)) {
+            SpriteAPI flag = Global.getSettings().getSprite(faction.getCrest());
+
             float tlX = -26f;
             float tlY = 12f;
             float blX = -33f;
@@ -141,8 +144,7 @@ public class BaseChestData extends SpecialItemData implements StorageChestData {
             float brX = -13f;
             float brY = -12f;
 
-            boolean displayOnFront = false;
-            if (displayOnFront) {
+            if (VT_Settings.alternativeChestFlagDisplay) {
                 blX = 4f;
                 blY = -18f;
                 tlX = 4f;
@@ -166,9 +168,9 @@ public class BaseChestData extends SpecialItemData implements StorageChestData {
         dialog.getTextPanel().addPara(VT_Strings.VT_SHEEP_WIKI);
         switch (currentMode) {
             case OPEN:
-            default:
-                dialog.showCargoPickerDialog(getTitle(), "Store", "Cancel", false, 110f, getAllowedCargo(),
-                                             new VT_BaseChestStorageListener(storageChestPlugin, dialog));
+                CargoAPI allowedCargo = getAllowedCargo();
+                dialog.showCargoPickerDialog(getTitle(), "Store", "Cancel", false, 110f, allowedCargo,
+                                             new VT_BaseChestStorageListener(storageChestPlugin, allowedCargo, dialog));
                 break;
             case RENAME:
                 CustomDialogDelegate delegate = new VT_ChestRenameDialog(dialog, storageChestPlugin);

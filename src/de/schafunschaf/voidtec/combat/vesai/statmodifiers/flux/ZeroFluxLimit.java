@@ -39,7 +39,7 @@ public class ZeroFluxLimit extends BaseStatMod {
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getZeroFluxMinimumFluxLevel().getFlatStatMod(id);
 
-        String description = "Zero flux limit %s by %s";
+        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {

@@ -24,6 +24,7 @@ import de.schafunschaf.voidtec.ids.VT_Settings;
 import de.schafunschaf.voidtec.ids.VT_Strings;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import lombok.Getter;
+import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -205,7 +206,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
     public int getPrice(MarketAPI market, SubmarketAPI submarket) {
         float modifier = getAugmentItemData().getAugment().getAugmentQuality().getModifier();
         int modifiedPrice = Math.round(spec.getBasePrice() * modifier * modifier);
-        return Math.max(modifiedPrice, 1);
+        return Math.max(modifiedPrice, 400);
     }
 
     @Override
@@ -228,6 +229,27 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
         if (augment.getAugmentQuality() == AugmentQuality.DESTROYED) {
             glowColor = Misc.scaleColorOnly(augment.getAugmentQuality().getColor(), 0.3f);
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+            Color color = AugmentQuality.DESTROYED.getColor();
+
+            GL11.glColor4ub((byte) color.getRed(),
+                            (byte) color.getGreen(),
+                            (byte) color.getBlue(),
+                            (byte) 150);
+
+            int boxSize = 10;
+            int margin = 5;
+            GL11.glBegin(GL11.GL_QUADS);
+            {
+                GL11.glVertex2f(x + margin, y + h - margin - boxSize); // BL
+                GL11.glVertex2f(x + margin, y + h - margin); // TL
+                GL11.glVertex2f(x + margin + boxSize, y + h - margin); // TR
+                GL11.glVertex2f(x + margin + boxSize, y + h - margin - boxSize); // BR
+            }
+            GL11.glEnd();
         }
 
         Color coverColor = augment.getAugmentQuality() == AugmentQuality.DESTROYED ? Color.LIGHT_GRAY : Color.WHITE;

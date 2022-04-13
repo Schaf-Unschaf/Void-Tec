@@ -40,7 +40,7 @@ public class FragmentationShieldDamageTaken extends BaseStatMod {
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getFragmentationShieldDamageTakenMult().getMultStatMod(id);
 
-        String description = "Fragmentation damage taken by shields %s by %s";
+        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {

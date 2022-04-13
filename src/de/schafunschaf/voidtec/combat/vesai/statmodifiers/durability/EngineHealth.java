@@ -39,7 +39,7 @@ public class EngineHealth extends BaseStatMod {
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getEngineHealthBonus().getMultBonus(id);
-        String description = "Engine health %s by %s";
+        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {

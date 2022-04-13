@@ -40,7 +40,7 @@ public class KineticShieldDamageTaken extends BaseStatMod {
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getKineticShieldDamageTakenMult().getMultStatMod(id);
 
-        String description = "Kinetic damage taken by shields %s by %s";
+        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {

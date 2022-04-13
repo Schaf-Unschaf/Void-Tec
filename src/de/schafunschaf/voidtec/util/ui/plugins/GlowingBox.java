@@ -4,6 +4,7 @@ import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import de.schafunschaf.voidtec.helper.ColorShifter;
+import lombok.Setter;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
@@ -13,6 +14,8 @@ public class GlowingBox implements CustomUIPanelPlugin {
 
     private PositionAPI p;
     private final ColorShifter colorShifter;
+    @Setter
+    private boolean staticColor = false;
 
     public GlowingBox(Color startingColor) {
         this.colorShifter = new ColorShifter(startingColor);

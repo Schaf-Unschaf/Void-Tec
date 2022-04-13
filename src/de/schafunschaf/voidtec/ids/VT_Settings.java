@@ -21,6 +21,7 @@ public class VT_Settings {
     public static int partDisassemblePercentage = 25;
 
     public static boolean iconFlicker = true;
+    public static boolean alternativeChestFlagDisplay = false;
 
     public static boolean isIndEvoActive;
 }

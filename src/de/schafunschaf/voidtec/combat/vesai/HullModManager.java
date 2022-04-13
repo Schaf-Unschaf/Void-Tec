@@ -13,6 +13,7 @@ import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.BaseStatMod;
+import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModProvider;
 import de.schafunschaf.voidtec.helper.TextWithHighlights;
 import de.schafunschaf.voidtec.ids.VT_Icons;
 import de.schafunschaf.voidtec.ids.VT_Settings;
@@ -36,7 +37,7 @@ public class HullModManager {
     private final ShipStatEffectManager shipStatEffectManager = new ShipStatEffectManager();
     @Getter
     private final String fleetMemberID;
-    private final Map<String, Float> appliedModifiers = new HashMap<>();
+    private final Map<String, Object[]> appliedModifiers = new HashMap<>();
     @Getter
     private long randomSeed;
 
@@ -154,12 +155,30 @@ public class HullModManager {
         }
 
         List<String> modifierList = new ArrayList<>(appliedModifiers.keySet());
+        List<String> positiveModList = new ArrayList<>();
+        List<String> negativeModList = new ArrayList<>();
         Collections.sort(modifierList);
         for (String key : modifierList) {
-            int value = appliedModifiers.get(key).intValue();
-            if (value != 0) {
-                BaseStatMod.generateStatTooltip(tooltip, key, value);
+            Object[] value = appliedModifiers.get(key);
+            int statValue = ((Float) value[0]).intValue();
+            boolean hasNegativeValueAsBenefit = (boolean) value[1];
+            if (statValue != 0) {
+                if (hasNegativeValueAsBenefit && statValue < 0 || !hasNegativeValueAsBenefit && statValue > 0) {
+                    positiveModList.add(key);
+                } else {
+                    negativeModList.add(key);
+                }
             }
+        }
+
+        for (String key : positiveModList) {
+            Object[] value = appliedModifiers.get(key);
+            BaseStatMod.generateStatTooltip(tooltip, key, ((Float) value[0]).intValue());
+        }
+
+        for (String key : negativeModList) {
+            Object[] value = appliedModifiers.get(key);
+            BaseStatMod.generateStatTooltip(tooltip, key, ((Float) value[0]).intValue());
         }
 
         appliedModifiers.clear();
@@ -419,15 +438,21 @@ public class HullModManager {
     }
 
     public void addStatModifier(String statID, float value, boolean isMult) {
-        if (appliedModifiers.containsKey(statID)) {
-            float newValue = isMult ? appliedModifiers.get(statID) * value : appliedModifiers.get(statID) + value;
-            appliedModifiers.put(statID, newValue);
-        } else {
-            appliedModifiers.put(statID, value);
-        }
-    }
+        BaseStatMod statMod = StatModProvider.getStatMod(statID);
 
-    public void rollNewRandomSeed() {
-        randomSeed = Misc.genRandomSeed();
+        if (appliedModifiers.containsKey(statID)) {
+            float newValue;
+            int storedValue = ((Float) appliedModifiers.get(statID)[0]).intValue();
+            if (isMult) {
+                float v1 = 1 + storedValue / 100f;
+                float v2 = 1 + value / 100;
+                newValue = (v1 * v2 - 1) * 100;
+            } else {
+                newValue = storedValue + value;
+            }
+            appliedModifiers.put(statID, new Object[]{newValue, statMod.hasNegativeValueAsBenefit()});
+        } else {
+            appliedModifiers.put(statID, new Object[]{value, statMod.hasNegativeValueAsBenefit()});
+        }
     }
 }

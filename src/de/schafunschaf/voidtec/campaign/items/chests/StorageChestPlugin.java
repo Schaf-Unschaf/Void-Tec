@@ -5,7 +5,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 public interface StorageChestPlugin {
 
-    void addToSize(int num);
+    void setSize(int num);
 
     StorageChestData getChestData();
 

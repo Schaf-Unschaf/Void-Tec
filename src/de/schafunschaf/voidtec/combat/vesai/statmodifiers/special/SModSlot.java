@@ -47,7 +47,7 @@ public class SModSlot extends BaseStatMod {
             return;
         }
 
-        String description = "Permanent Build-In slots %s by %s";
+        String description = "%s %s by %s";
 
         generateTooltip(tooltip, statMod, description, bulletColor, parentAugment);
     }

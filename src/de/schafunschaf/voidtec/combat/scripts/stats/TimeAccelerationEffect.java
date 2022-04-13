@@ -36,11 +36,11 @@ public class TimeAccelerationEffect implements CombatScriptRunner {
         boolean isDebuff = timeAcceleration < 100;
         Color afterimageColor = isDebuff ? AFTERIMAGE_COLOR_NEGATIVE : AFTERIMAGE_COLOR_POSITIVE;
 
-        Global.getCombatEngine().maintainStatusForPlayerShip(scriptID, HUD_ICON,
-                                                             "Time Acceleration",
-                                                             String.format("Total acceleration at %s%%",
-                                                                           timeAcceleration),
-                                                             isDebuff);
+        if (ship == Global.getCombatEngine().getPlayerShip()) {
+            Global.getCombatEngine()
+                  .maintainStatusForPlayerShip(scriptID, HUD_ICON, "Time Acceleration",
+                                               String.format("Total acceleration at %s%%", timeAcceleration), isDebuff);
+        }
 
         MutableStat.StatMod statMod = stat.getFlatStatMod(scriptID);
         if (isNull(statMod)) {

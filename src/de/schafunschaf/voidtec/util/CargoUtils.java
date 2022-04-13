@@ -104,6 +104,7 @@ public class CargoUtils {
             }
         }
 
+        playerCargo.removeAll(cargo);
         return cargo;
     }
 
@@ -122,15 +123,8 @@ public class CargoUtils {
             }
         }
 
+        playerCargo.removeAll(cargo);
         return cargo;
-    }
-
-    public static void adjustItemInCargo(CargoAPI sourceCargo, CargoAPI cargoToAdjust) {
-        List<CargoStackAPI> sourceCargoStacks = sourceCargo.getStacksCopy();
-
-        for (CargoStackAPI sourceCargoStack : sourceCargoStacks) {
-            cargoToAdjust.removeItems(sourceCargoStack.getType(), sourceCargoStack.getData(), sourceCargoStack.getSize());
-        }
     }
 
     public static AugmentApplier getAugmentFromStack(CargoStackAPI cargoStack) {

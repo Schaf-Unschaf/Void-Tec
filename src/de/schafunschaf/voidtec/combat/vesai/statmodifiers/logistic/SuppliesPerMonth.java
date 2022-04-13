@@ -32,7 +32,7 @@ public class SuppliesPerMonth extends BaseStatMod {
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getSuppliesPerMonth().getMultStatMod(id);
-        String description = "Supply use per month %s by %s";
+        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             return;
         }
