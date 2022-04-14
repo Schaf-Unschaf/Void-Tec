@@ -109,32 +109,7 @@ public class AugmentPartsUtility {
     }
 
     public static void disassembleAugment(AugmentApplier augment) {
-        List<CraftingComponent> disassembledComponents = new ArrayList<>();
-
-        Random random = new Random();
-        AugmentQuality quality = augment.getAugmentQuality();
-
-        int baseCost = (int) Math.ceil(BASE_PART_AMOUNT * BASIC_DISASSEMBLE_MOD);
-        AugmentComponent baseComponent = new AugmentComponent(AugmentPartsManager.BASIC_COMPONENT, quality);
-        int addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f)) + random.nextInt(Math.max(baseCost / 2, 1));
-        baseComponent.addAmount(addAmount);
-        disassembledComponents.add(baseComponent);
-
-        int primaryCost = (int) Math.ceil(BASE_PART_AMOUNT * PRIMARY_DISASSEMBLE_MOD);
-        AugmentComponent primaryComponent = new AugmentComponent(augment.getPrimarySlot(), quality);
-        addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f)) + random.nextInt(Math.max(primaryCost / 2, 1));
-        primaryComponent.addAmount(addAmount);
-        disassembledComponents.add(primaryComponent);
-
-        for (SlotCategory secondarySlot : augment.getSecondarySlots()) {
-            int secondaryCost = (int) Math.ceil(
-                    BASE_PART_AMOUNT * SECONDARY_DISASSEMBLE_MOD / augment.getSecondarySlots().size());
-            AugmentComponent secondaryComponent = new AugmentComponent(secondarySlot, quality);
-            addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f))
-                    + random.nextInt(Math.max(secondaryCost / 2, 1));
-            secondaryComponent.addAmount(addAmount);
-            disassembledComponents.add(secondaryComponent);
-        }
+        List<CraftingComponent> disassembledComponents = getComponentsForDismantling(augment);
 
         for (CraftingComponent component : disassembledComponents) {
             AugmentPartsManager.getInstance().addParts(component);
@@ -143,5 +118,35 @@ public class AugmentPartsUtility {
         if (!isNull(augment.getInstalledSlot())) {
             augment.getInstalledSlot().removeAugment();
         }
+    }
+
+    public static List<CraftingComponent> getComponentsForDismantling(AugmentApplier augment) {
+        List<CraftingComponent> possibleComponents = new ArrayList<>();
+
+        Random random = new Random(augment.hashCode());
+        AugmentQuality quality = augment.getAugmentQuality();
+
+        int baseCost = (int) Math.ceil(BASE_PART_AMOUNT * BASIC_DISASSEMBLE_MOD);
+        AugmentComponent baseComponent = new AugmentComponent(AugmentPartsManager.BASIC_COMPONENT, quality);
+        int addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f)) + random.nextInt(Math.max(baseCost / 2, 1));
+        baseComponent.addAmount(addAmount);
+        possibleComponents.add(baseComponent);
+
+        int primaryCost = (int) Math.ceil(BASE_PART_AMOUNT * PRIMARY_DISASSEMBLE_MOD);
+        AugmentComponent primaryComponent = new AugmentComponent(augment.getPrimarySlot(), quality);
+        addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f)) + random.nextInt(Math.max(primaryCost / 2, 1));
+        primaryComponent.addAmount(addAmount);
+        possibleComponents.add(primaryComponent);
+
+        for (SlotCategory secondarySlot : augment.getSecondarySlots()) {
+            int secondaryCost = (int) Math.ceil(
+                    BASE_PART_AMOUNT * SECONDARY_DISASSEMBLE_MOD / augment.getSecondarySlots().size());
+            AugmentComponent secondaryComponent = new AugmentComponent(secondarySlot, quality);
+            addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f))
+                    + random.nextInt(Math.max(secondaryCost / 2, 1));
+            secondaryComponent.addAmount(addAmount);
+            possibleComponents.add(secondaryComponent);
+        }
+        return possibleComponents;
     }
 }

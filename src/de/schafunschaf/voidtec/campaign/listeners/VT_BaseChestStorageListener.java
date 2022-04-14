@@ -42,13 +42,11 @@ public class VT_BaseChestStorageListener implements CargoPickerListener {
         }
 
         // Enough space to store items?
-        if (chestData.getCurrentSize() + sumCargoAffected > chestData.getMaxSize()) {
-            return;
+        if (chestData.getCurrentSize() + sumCargoAffected < chestData.getMaxSize()) {
+            chestPlugin.setSize(sumCargoAffected);
+            chestInventory.clear();
+            chestInventory.addAll(cargo);
         }
-
-        chestPlugin.setSize(sumCargoAffected);
-        chestInventory.clear();
-        chestInventory.addAll(cargo);
 
         closeChest();
     }

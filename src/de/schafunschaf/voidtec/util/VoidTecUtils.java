@@ -5,9 +5,12 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
+import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
+import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
@@ -72,5 +75,22 @@ public class VoidTecUtils {
         Global.getSector().addTransientScript(transientScript);
         robot.keyPress(KeyEvent.VK_ESCAPE);
         robot.keyRelease(KeyEvent.VK_ESCAPE);
+    }
+
+    public static boolean checkIfFighterStat(AugmentApplier augment) {
+        AugmentSlot installedSlot = augment.getInstalledSlot();
+        return !isNull(installedSlot) && installedSlot.getSlotCategory() == SlotCategory.FLIGHT_DECK
+                || augment.getPrimarySlot() == SlotCategory.FLIGHT_DECK;
+    }
+
+    public static long getBonusXPForInstalling(FleetMemberAPI fleetMember) {
+        int numSMods = fleetMember.getVariant().getPermaMods().size();
+        long xpForLevelUp = Global.getSettings().getLevelupPlugin().getXPForLevel(Global.getSector().getPlayerStats().getLevel() + 1);
+        return xpForLevelUp / 3 * numSMods;
+    }
+
+    public static int getBonusXPPercentage(long bonusXP) {
+        long xpForLevelUp = Global.getSettings().getLevelupPlugin().getXPForLevel(Global.getSector().getPlayerStats().getLevel() + 1);
+        return Math.round(100f / xpForLevelUp * bonusXP);
     }
 }

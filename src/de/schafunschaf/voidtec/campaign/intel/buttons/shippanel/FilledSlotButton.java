@@ -12,6 +12,8 @@ import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
 import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
+import de.schafunschaf.voidtec.ids.VT_Icons;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.RequiredArgsConstructor;
@@ -48,11 +50,17 @@ public class FilledSlotButton extends DefaultButton {
         SlotCategory slotCategory = augment.getInstalledSlot().getSlotCategory();
         float scaleFactor = getButtonScaleFactor();
         Color slotColor = Misc.scaleColorOnly(slotCategory.getColor(), scaleFactor);
+        if (augment.getAugmentQuality() == AugmentQuality.DESTROYED) {
+            slotColor = Misc.scaleColorOnly(slotColor, 0.5f);
+        }
 
         ButtonAPI augmentButton = ButtonUtils.addAugmentButton(tooltip, width, slotColor, slotColor, true, augment.isUniqueMod(), this);
 
         int damageAmount = augment.getInitialQuality().ordinal() - augment.getAugmentQuality().ordinal();
-        if (InfoPanel.getSelectedTab() == InfoPanel.InfoTabs.REPAIR && damageAmount > 0) {
+        if (augment.getAugmentQuality() == AugmentQuality.DESTROYED) {
+            tooltip.addImage(VT_Icons.LOCKED_SLOT_ICON, width, height, 0f);
+            tooltip.getPrev().getPosition().rightOfTop(augmentButton, -width);
+        } else if (InfoPanel.getSelectedTab() == InfoPanel.InfoTabs.REPAIR && damageAmount > 0) {
             UIUtils.addIndicatorBars(tooltip, damageAmount, 2, 5, Misc.scaleColorOnly(Misc.getNegativeHighlightColor(), scaleFactor))
                    .getPosition()
                    .leftOfTop(augmentButton, -width + 8f)

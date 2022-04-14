@@ -44,7 +44,7 @@ public class BeamDamage extends BaseStatMod {
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {
-                description = "(Fighter) " + description;
+                
                 statMod = new MutableStat.StatMod(id + "_" + statID, null, fighterStatValue);
             } else {
                 return;
@@ -54,14 +54,16 @@ public class BeamDamage extends BaseStatMod {
     }
 
     @Override
-    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
+    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue,
+                                            boolean isFighterStat) {
         boolean isPositive = minValue >= 0;
         String incDec = isPositive ? "Enhances" : "Lowers";
         String hlString1 = "damage dealt";
         String hlString2 = "beam weapons";
         String description = String.format("the %s by all %s", hlString1, hlString2);
 
-        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, hlString1,
+        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, isFighterStat,
+                                       hlString1,
                                        hlString2);
     }
 

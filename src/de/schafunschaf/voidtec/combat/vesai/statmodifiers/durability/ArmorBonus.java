@@ -19,8 +19,8 @@ public class ArmorBonus extends BaseStatMod {
     }
 
     @Override
-    public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean, Boolean> statModValue, long randomSeed,
-                            AugmentApplier parentAugment) {
+    public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean, Boolean> statModValue,
+                            long randomSeed, AugmentApplier parentAugment) {
         if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
             parentAugment.updateFighterStatValue(id + "_" + statID,
                                                  1f + generateModValue(statModValue, randomSeed, parentAugment.getAugmentQuality()) / 100f);
@@ -42,7 +42,7 @@ public class ArmorBonus extends BaseStatMod {
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {
-                description = "(Fighter) " + description;
+
                 statMod = new MutableStat.StatMod(id + "_" + statID, null, fighterStatValue);
             } else {
                 return;
@@ -52,13 +52,15 @@ public class ArmorBonus extends BaseStatMod {
     }
 
     @Override
-    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
+    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue,
+                                            boolean isFighterStat) {
         boolean isPositive = minValue >= 0;
         String incDec = isPositive ? "Improves" : "Lowers";
         String hlString = "base armor strength";
-        String description = String.format("the ships %s", hlString);
+        String description = String.format("the %s", hlString);
 
-        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, hlString);
+        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, isFighterStat,
+                                       hlString);
     }
 
     @Override

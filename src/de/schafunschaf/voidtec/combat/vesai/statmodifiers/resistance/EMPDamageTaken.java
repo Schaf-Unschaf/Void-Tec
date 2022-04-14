@@ -44,7 +44,7 @@ public class EMPDamageTaken extends BaseStatMod {
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {
-                description = "(Fighter) " + description;
+                
                 statMod = new MutableStat.StatMod(id + "_" + statID, null, fighterStatValue);
             } else {
                 return;
@@ -54,14 +54,16 @@ public class EMPDamageTaken extends BaseStatMod {
     }
 
     @Override
-    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
+    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue,
+                                            boolean isFighterStat) {
         boolean isPositive = minValue <= 0;
         String incDec = isPositive ? "Reduces" : "Increases";
         String hlString1 = "damage taken";
         String hlString2 = "EMP";
         String description = String.format("the %s from all %s sources", hlString1, hlString2);
 
-        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, hlString1,
+        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, isFighterStat,
+                                       hlString1,
                                        hlString2);
     }
 

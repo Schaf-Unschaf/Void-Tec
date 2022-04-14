@@ -194,7 +194,7 @@ public class ShipPanel {
             }
         }
 
-        shipElement.addPara(shipElement.shortenString(ship.getShipName(), shipElementWidth), Misc.getBasePlayerColor(), 0f)
+        shipElement.addPara(shipElement.shortenString(ship.getShipName(), shipElementWidth - 28), Misc.getBasePlayerColor(), 0f)
                    .getPosition()
                    .inTL(5f, 0);
         shipElement.addShipList(1, 1, shipIconSize, Misc.getDarkPlayerColor(), Collections.singletonList(ship), 10f);

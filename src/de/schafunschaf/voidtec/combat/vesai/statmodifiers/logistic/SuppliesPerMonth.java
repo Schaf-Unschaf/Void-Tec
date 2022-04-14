@@ -41,13 +41,15 @@ public class SuppliesPerMonth extends BaseStatMod {
     }
 
     @Override
-    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
+    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue,
+                                            boolean isFighterStat) {
         boolean isPositive = minValue <= 0;
         String incDec = isPositive ? "Reduces" : "Increases";
         String hlString = "supplies used per month";
-        String description = String.format("the ships %s", hlString);
+        String description = String.format("the %s", hlString);
 
-        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, hlString);
+        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, isFighterStat,
+                                       hlString);
     }
 
     @Override

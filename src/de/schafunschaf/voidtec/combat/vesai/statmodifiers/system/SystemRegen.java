@@ -44,7 +44,7 @@ public class SystemRegen extends BaseStatMod {
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {
-                description = "(Fighter) " + description;
+                
                 statMod = new MutableStat.StatMod(id + "_" + statID, null, fighterStatValue);
             } else {
                 return;
@@ -54,14 +54,15 @@ public class SystemRegen extends BaseStatMod {
     }
 
     @Override
-    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
+    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue,
+                                            boolean isFighterStat) {
         boolean isPositive = minValue >= 0;
         String incDec = isPositive ? "Increases" : "Lowers";
-        String hlString = "charge regeneration";
-        String hlString2 = "system ability";
-        String description = String.format("the %s of the ships %s", hlString, hlString2);
+        String hlString = "regeneration speed";
+        String hlString2 = "system abilities charges";
+        String description = String.format("the %s of %s", hlString, hlString2);
 
-        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, hlString,
+        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, isFighterStat, hlString,
                                        hlString2);
     }
 }

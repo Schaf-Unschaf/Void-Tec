@@ -44,7 +44,7 @@ public class AutofireAccuracy extends BaseStatMod {
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {
-                description = "(Fighter) " + description;
+                
                 statMod = new MutableStat.StatMod(id + "_" + statID, null, fighterStatValue);
             } else {
                 return;
@@ -54,12 +54,14 @@ public class AutofireAccuracy extends BaseStatMod {
     }
 
     @Override
-    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue) {
+    public LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue,
+                                            boolean isFighterStat) {
         boolean isPositive = minValue >= 0;
         String incDec = isPositive ? "Increases" : "Lowers";
         String hlString = "autofire accuracy";
-        String description = String.format("the ships %s for all weapons", hlString);
+        String description = String.format("the %s for all weapons", hlString);
 
-        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, hlString);
+        return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, isFighterStat,
+                                       hlString);
     }
 }

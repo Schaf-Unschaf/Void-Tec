@@ -162,14 +162,8 @@ public class RepairTab {
 
         CustomPanelAPI buttonPanel = mainPanel.createCustomPanel(repairPanelWidth - 12f, buttonPanelHeight, null);
         TooltipMakerAPI buttonUIElement = buttonPanel.createUIElement(repairPanelWidth - 12f, buttonPanelHeight, false);
-        boolean hasPrimaryStats = !selectedAugment.getPrimaryStatMods().isEmpty();
-        boolean hasSecondaryStats = !selectedAugment.getSecondaryStatMods().isEmpty();
 
-        if (hasPrimaryStats && hasSecondaryStats) {
-            showSecondary = !selectedAugment.isInPrimarySlot();
-        }
-
-        ButtonAPI primaryButton = new ShowPrimaryButton().addButton(buttonUIElement, 150f, 20f);
+        ButtonAPI primaryButton = new ShowPrimaryButton(selectedAugment).addButton(buttonUIElement, 150f, 20f);
         primaryButton.getPosition().inTL(0f, 0f);
 
         UIUtils.addBox(buttonUIElement, "", null, null, 15, 20, 1, 0, null,
@@ -188,21 +182,10 @@ public class RepairTab {
         ButtonAPI dismantleButton = dismantleAugmentButton.addButton(buttonUIElement, 0f, 20f);
         dismantleButton.getPosition().inTMid(0f).setXAlignOffset((dismantleButton.getPosition().getWidth() / 2));
 
-        ButtonAPI secondaryButton = new ShowSecondaryButton().addButton(buttonUIElement, 150f, 20f);
+        ButtonAPI secondaryButton = new ShowSecondaryButton(selectedAugment).addButton(buttonUIElement, 150f, 20f);
         secondaryButton.getPosition().inTR(0f, 0f);
 
         ButtonUtils.addSeparatorLine(buttonUIElement, repairPanelWidth - 12f, Misc.getDarkPlayerColor(), 0f).getPosition().inTMid(19f);
-
-        if (!hasPrimaryStats) {
-            primaryButton.setEnabled(false);
-            primaryButton.setChecked(false);
-            showSecondary = true;
-        }
-        if (!hasSecondaryStats) {
-            secondaryButton.setEnabled(false);
-            secondaryButton.setChecked(false);
-            showSecondary = false;
-        }
 
         buttonPanel.addUIElement(buttonUIElement).inTL(-5f, 1f);
         tooltip.addCustom(buttonPanel, 0f);
@@ -233,8 +216,7 @@ public class RepairTab {
                                   "", statDescriptionWidth, "Current", 78f, "Next", 78f, "Repaired", 78f);
 
         for (int i = 0; i < statAppliers.size(); i++) {
-            addRepairStatElement(tableUIElement, statModValues.get(i), statAppliers.get(i),
-                                 selectedAugment.getAugmentQuality(), selectedAugment.getInitialQuality());
+            addRepairStatElement(tableUIElement, statModValues.get(i), statAppliers.get(i), selectedAugment);
         }
 
         tableUIElement.addTable("", 0, 0);
@@ -248,8 +230,11 @@ public class RepairTab {
     }
 
     private void addRepairStatElement(TooltipMakerAPI tooltip, StatModValue<Float, Float, Boolean, Boolean> statModValue,
-                                      StatApplier statApplier, AugmentQuality curQuality, AugmentQuality maxQuality) {
-        String displayName = String.format("%s %s", VT_Strings.BULLET_CHAR, statApplier.getDisplayName());
+                                      StatApplier statApplier, AugmentApplier augment) {
+        AugmentQuality curQuality = augment.getAugmentQuality();
+        AugmentQuality maxQuality = augment.getInitialQuality();
+        String fighterString = VoidTecUtils.checkIfFighterStat(augment) ? "(Fighter) " : "";
+        String displayName = String.format("%s %s%s", VT_Strings.BULLET_CHAR, fighterString, statApplier.getDisplayName());
         String percentageSign = statApplier.isMult() ? "%" : "";
 
         float mult = 1f;

@@ -20,7 +20,7 @@ public interface StatApplier {
     void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                               AugmentApplier parentAugment);
 
-    LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue);
+    LabelAPI generateStatDescription(TooltipMakerAPI tooltip, Color bulletColor, float minValue, float maxValue, boolean isFighterStat);
 
     void runCombatScript(ShipAPI ship, float amount, AugmentApplier augment);
 

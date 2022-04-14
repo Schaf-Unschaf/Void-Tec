@@ -9,6 +9,7 @@ import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.ids.VT_Strings;
+import de.schafunschaf.voidtec.util.VoidTecUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -26,10 +27,10 @@ public abstract class BaseStatMod implements StatApplier {
     protected final String statID;
     protected final String displayName;
 
-    public static void generateStatTooltip(TooltipMakerAPI tooltip, String statID, int value) {
+    public static void generateStatTooltip(TooltipMakerAPI tooltip, String statID, int value, boolean isFighterStat) {
         BaseStatMod statMod = StatModProvider.getStatMod(statID);
         String text = "%s %s by %s";
-        statMod.generateTooltip(tooltip, value, text, null);
+        statMod.generateTooltip(tooltip, value, text, null, isFighterStat);
     }
 
     protected int generateModValue(StatModValue<Float, Float, Boolean, Boolean> statModValue, long randomSeed, AugmentQuality quality) {
@@ -61,7 +62,9 @@ public abstract class BaseStatMod implements StatApplier {
 
     @Override
     public void collectStatValue(float value, AugmentApplier parentAugment, boolean negativeBenefits) {
-        parentAugment.getInstalledSlot().getHullModManager().addStatModifier(statID, value, isMult());
+        parentAugment.getInstalledSlot()
+                     .getHullModManager()
+                     .addStatModifier(statID, value, isMult(), VoidTecUtils.checkIfFighterStat(parentAugment));
     }
 
     @Override
@@ -83,14 +86,17 @@ public abstract class BaseStatMod implements StatApplier {
             return;
         }
 
-        generateTooltip(tooltip, value, description, bulletColor);
+        boolean isFighterStat = VoidTecUtils.checkIfFighterStat(parentAugment);
+
+        generateTooltip(tooltip, value, description, bulletColor, isFighterStat);
     }
 
-    private void generateTooltip(TooltipMakerAPI tooltip, int value, String text, Color bulletColor) {
+    private void generateTooltip(TooltipMakerAPI tooltip, int value, String text, Color bulletColor, boolean isFighterStat) {
         BaseStatMod statMod = StatModProvider.getStatMod(statID);
         String percentageSign = isMult() ? "%" : "";
         boolean isPositive = value >= 0;
         String incDec = isPositive ? "increased" : "decreased";
+        String fighterString = isFighterStat ? "(Fighter) " : "";
 
         if (hasNegativeValueAsBenefit()) {
             isPositive = !isPositive;
@@ -99,13 +105,14 @@ public abstract class BaseStatMod implements StatApplier {
         Color hlColor = isPositive ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor();
 
         setBulletMode(tooltip, isNull(bulletColor) ? hlColor : bulletColor);
-        tooltip.addPara(text, 0f, new Color[]{hlColor, Misc.getTextColor(), hlColor}, statMod.displayName, incDec,
+        tooltip.addPara(fighterString + text, 0f, new Color[]{hlColor, Misc.getTextColor(), hlColor}, statMod.displayName, incDec,
                         Math.abs(value) + percentageSign);
         unindent(tooltip);
     }
 
     protected LabelAPI generateStatDescription(TooltipMakerAPI tooltip, String description, String incDecText, Color bulletColor,
-                                               float minValue, float maxValue, boolean isPositive, String... highlights) {
+                                               float minValue, float maxValue, boolean isPositive, boolean isFighterStat,
+                                               String... highlights) {
         setBulletMode(tooltip, bulletColor);
         String percentageSign = isMult() ? "%" : "";
         int roundedMinValue = Math.round(Math.abs(minValue));
@@ -117,6 +124,10 @@ public abstract class BaseStatMod implements StatApplier {
         List<String> hlStrings = new ArrayList<>();
         List<Color> hlColors = new ArrayList<>();
 
+        String forFighterString = "";
+        if (isFighterStat) {
+            forFighterString = "(Fighter) ";
+        }
         hlColors.add(incDecColor);
         hlStrings.add(incDecText);
         for (String highlight : highlights) {
@@ -131,13 +142,13 @@ public abstract class BaseStatMod implements StatApplier {
         LabelAPI generatedLabel;
 
         if (roundedMinValue == roundedMaxValue) {
-            generatedLabel = tooltip.addPara(String.format("%s %s by %s", incDecText, description, minValueString + percentageSign), 0f,
-                                             hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
+            generatedLabel = tooltip.addPara(
+                    String.format("%s%s %s by %s", forFighterString, incDecText, description, minValueString + percentageSign), 0f,
+                    hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
         } else {
-            generatedLabel = tooltip.addPara(String.format("%s %s between %s and %s", incDecText, description,
-                                                           minValueString + percentageSign,
-                                                           maxValueString + percentageSign), 0f, hlColors.toArray(new Color[0]),
-                                             hlStrings.toArray(new String[0]));
+            generatedLabel = tooltip.addPara(
+                    String.format("%s%s %s between %s and %s", forFighterString, incDecText, description, minValueString + percentageSign,
+                                  maxValueString + percentageSign), 0f, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
         }
 
         unindent(tooltip);

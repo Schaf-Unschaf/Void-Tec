@@ -138,7 +138,7 @@ public class AugmentDataLoader {
     private static List<StatModValue<Float, Float, Boolean, Boolean>> getStatValuesFromString(String statModValueString) {
         List<StatModValue<Float, Float, Boolean, Boolean>> statModValues = new ArrayList<>();
 
-        for (String statModValue : statModValueString.split("\\s*(_\\s*)+")) {
+        for (String statModValue : statModValueString.split("\\s*(\\|\\s*)+")) {
             if (!isNull(statModValue) && !statModValue.isEmpty()) {
                 statModValues.add(getStatModValueDataFromString(statModValue.trim()));
             }

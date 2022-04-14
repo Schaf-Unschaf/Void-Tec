@@ -14,6 +14,7 @@ import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModProvider;
+import de.schafunschaf.voidtec.helper.AppliedStatModifier;
 import de.schafunschaf.voidtec.helper.TextWithHighlights;
 import de.schafunschaf.voidtec.ids.VT_Icons;
 import de.schafunschaf.voidtec.ids.VT_Settings;
@@ -37,9 +38,9 @@ public class HullModManager {
     private final ShipStatEffectManager shipStatEffectManager = new ShipStatEffectManager();
     @Getter
     private final String fleetMemberID;
-    private final Map<String, Object[]> appliedModifiers = new HashMap<>();
+    private final List<AppliedStatModifier> appliedModifiers = new ArrayList<>();
     @Getter
-    private long randomSeed;
+    private final long randomSeed;
 
     public HullModManager(FleetMemberAPI fleetMember) {
         this.fleetMemberID = fleetMember.getId();
@@ -86,7 +87,7 @@ public class HullModManager {
         tooltip.addSectionHeading("VESAI Slot Status", Alignment.MID, 6f);
         tooltip.addSpacer(3f);
         showSlots(tooltip, width);
-        tooltip.addSectionHeading("Modified Stats", Alignment.MID, 3f);
+        tooltip.addSectionHeading("Modified Ship Stats", Alignment.MID, 3f);
         tooltip.addSpacer(3f);
         listAppliedStats(tooltip, id, stats);
         addAdditionalDescriptions(tooltip);
@@ -112,7 +113,11 @@ public class HullModManager {
                     || augmentSlot.getSlotCategory() == SlotCategory.SPECIAL;
             boolean isBetweenCategories = lastWasUniqueSlot && !isUniqueSlot
                     || !augmentSlot.isUnlocked() && !lastWasLockedSlot;
+            boolean hasDestroyedAugment = !augmentSlot.isEmpty() && augmentSlot.getSlottedAugment().isDestroyed();
             Color slotColor = augmentSlot.isUnlocked() ? augmentSlot.getSlotCategory().getColor() : Misc.getGrayColor();
+            if (hasDestroyedAugment) {
+                slotColor = Misc.scaleColorOnly(slotColor, 0.5f);
+            }
             ButtonAPI currentButton;
 
             currentButton = ButtonUtils.addFakeAugmentButton(slotPanelElement, buttonSize, slotColor, slotColor,
@@ -136,6 +141,10 @@ public class HullModManager {
                 slotPanelElement.addImage(VT_Icons.LOCKED_SLOT_ICON, buttonSize, 0);
                 slotPanelElement.getPrev().getPosition().rightOfTop(currentButton, -buttonSize);
             }
+            if (hasDestroyedAugment) {
+                slotPanelElement.addImage(VT_Icons.LOCKED_SLOT_ICON, buttonSize, 0);
+                slotPanelElement.getPrev().getPosition().rightOfTop(currentButton, -buttonSize);
+            }
 
             panelSize += buttonSize;
             lastButton = currentButton;
@@ -154,31 +163,62 @@ public class HullModManager {
             filledSlot.collectAppliedStats(stats, id);
         }
 
-        List<String> modifierList = new ArrayList<>(appliedModifiers.keySet());
-        List<String> positiveModList = new ArrayList<>();
-        List<String> negativeModList = new ArrayList<>();
-        Collections.sort(modifierList);
-        for (String key : modifierList) {
-            Object[] value = appliedModifiers.get(key);
-            int statValue = ((Float) value[0]).intValue();
-            boolean hasNegativeValueAsBenefit = (boolean) value[1];
+        List<AppliedStatModifier> positiveModList = new ArrayList<>();
+        List<AppliedStatModifier> negativeModList = new ArrayList<>();
+        List<AppliedStatModifier> positiveFighterModList = new ArrayList<>();
+        List<AppliedStatModifier> negativeFighterModList = new ArrayList<>();
+        Collections.sort(appliedModifiers, new Comparator<AppliedStatModifier>() {
+            @Override
+            public int compare(AppliedStatModifier o1, AppliedStatModifier o2) {
+                int isFighterStat = Boolean.compare(o1.isFighterStat(), o2.isFighterStat());
+
+                if (isFighterStat == 0) {
+                    return o1.getStatID().compareTo(o2.getStatID());
+                } else {
+                    return isFighterStat;
+                }
+            }
+        });
+
+        for (AppliedStatModifier asm : appliedModifiers) {
+            int statValue = asm.getValue();
+            boolean hasNegativeValueAsBenefit = asm.isHasNegativeAsBenefit();
             if (statValue != 0) {
                 if (hasNegativeValueAsBenefit && statValue < 0 || !hasNegativeValueAsBenefit && statValue > 0) {
-                    positiveModList.add(key);
+                    if (asm.isFighterStat()) {
+                        positiveFighterModList.add(asm);
+                    } else {
+                        positiveModList.add(asm);
+                    }
                 } else {
-                    negativeModList.add(key);
+                    if (asm.isFighterStat()) {
+                        negativeFighterModList.add(asm);
+                    } else {
+                        negativeModList.add(asm);
+                    }
                 }
             }
         }
 
-        for (String key : positiveModList) {
-            Object[] value = appliedModifiers.get(key);
-            BaseStatMod.generateStatTooltip(tooltip, key, ((Float) value[0]).intValue());
+        for (AppliedStatModifier asm : positiveModList) {
+            BaseStatMod.generateStatTooltip(tooltip, asm.getStatID(), asm.getValue(), asm.isFighterStat());
         }
 
-        for (String key : negativeModList) {
-            Object[] value = appliedModifiers.get(key);
-            BaseStatMod.generateStatTooltip(tooltip, key, ((Float) value[0]).intValue());
+        for (AppliedStatModifier asm : negativeModList) {
+            BaseStatMod.generateStatTooltip(tooltip, asm.getStatID(), asm.getValue(), asm.isFighterStat());
+        }
+
+        if (!positiveFighterModList.isEmpty() || !negativeFighterModList.isEmpty()) {
+            tooltip.addSectionHeading("Modified Fighter Stats", Alignment.MID, 3f);
+            tooltip.addSpacer(3f);
+
+            for (AppliedStatModifier asm : positiveFighterModList) {
+                BaseStatMod.generateStatTooltip(tooltip, asm.getStatID(), asm.getValue(), asm.isFighterStat());
+            }
+
+            for (AppliedStatModifier asm : negativeFighterModList) {
+                BaseStatMod.generateStatTooltip(tooltip, asm.getStatID(), asm.getValue(), asm.isFighterStat());
+            }
         }
 
         appliedModifiers.clear();
@@ -437,22 +477,22 @@ public class HullModManager {
         }
     }
 
-    public void addStatModifier(String statID, float value, boolean isMult) {
-        BaseStatMod statMod = StatModProvider.getStatMod(statID);
+    public void addStatModifier(String statID, float value, boolean isMult, boolean isFighterStat) {
+        boolean hasNegativeValueAsBenefit = StatModProvider.getStatMod(statID).hasNegativeValueAsBenefit();
+        AppliedStatModifier nextASM = new AppliedStatModifier(statID, (int) value, isMult, isFighterStat, hasNegativeValueAsBenefit);
+        boolean foundExistingASM = false;
 
-        if (appliedModifiers.containsKey(statID)) {
-            float newValue;
-            int storedValue = ((Float) appliedModifiers.get(statID)[0]).intValue();
-            if (isMult) {
-                float v1 = 1 + storedValue / 100f;
-                float v2 = 1 + value / 100;
-                newValue = (v1 * v2 - 1) * 100;
-            } else {
-                newValue = storedValue + value;
+        for (AppliedStatModifier asm : appliedModifiers) {
+            if (asm.equals(nextASM)) {
+                asm.update(nextASM.getValue());
+                foundExistingASM = true;
             }
-            appliedModifiers.put(statID, new Object[]{newValue, statMod.hasNegativeValueAsBenefit()});
-        } else {
-            appliedModifiers.put(statID, new Object[]{value, statMod.hasNegativeValueAsBenefit()});
+
+            if (foundExistingASM) {
+                return;
+            }
         }
+
+        appliedModifiers.add(nextASM);
     }
 }

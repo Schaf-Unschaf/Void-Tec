@@ -1,6 +1,7 @@
 package de.schafunschaf.voidtec.campaign.intel.buttons.shippanel;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.characters.MutableCharacterStatsAPI;
 import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.ui.ButtonAPI;
@@ -32,12 +33,15 @@ public class InstallHullmodButton extends DefaultButton {
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
         ShipVariantAPI memberVariant = fleetMember.getVariant();
+        MutableCharacterStatsAPI playerStats = Global.getSector().getPlayerStats();
+        long bonusXP = VoidTecUtils.getBonusXPForInstalling(fleetMember);
+        playerStats.addBonusXP(bonusXP, false, null, false);
+
         memberVariant.clearPermaMods();
 
         memberVariant.addPermaMod(VoidTecEngineeringSuite.HULL_MOD_ID);
-
         if (hullmodInstallationWithSP) {
-            Global.getSector().getPlayerStats().addStoryPoints(-installCostSP);
+            playerStats.addStoryPoints(-installCostSP);
         } else {
             Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(installCostCredits * hullSizeMult);
         }
@@ -47,14 +51,20 @@ public class InstallHullmodButton extends DefaultButton {
     public void createConfirmationPrompt(TooltipMakerAPI tooltip) {
         String installCost = Misc.getDGSCredits(installCostCredits * hullSizeMult);
         Color hlColor = Misc.getHighlightColor();
+        int bonusPercent = VoidTecUtils.getBonusXPPercentage(VoidTecUtils.getBonusXPForInstalling(fleetMember));
         if (hullmodInstallationWithSP) {
             installCost = installCostSP + " Story " + FormattingTools.singularOrPlural(installCostSP, "Point");
             hlColor = Misc.getStoryOptionColor();
         }
 
         tooltip.addPara("Do you want to install the VoidTec Engineering Suite on your ship?", 0f);
-        tooltip.addPara(String.format("This will cost you %s and remove all installed permanent hullmods.", installCost), 3f, hlColor,
+        tooltip.addPara(String.format("This will cost %s and remove all installed SMods.", installCost), 6f, hlColor,
                         installCost);
+        if (bonusPercent > 0) {
+            String bonusString = String.format("%s%% Bonus XP", bonusPercent);
+            tooltip.addPara("You will gain an additional %s for the removed SMods as compensation.", 6f, Misc.getStoryOptionColor(),
+                            bonusString);
+        }
     }
 
     @Override

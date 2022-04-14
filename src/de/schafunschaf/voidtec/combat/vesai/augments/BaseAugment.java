@@ -181,9 +181,11 @@ public class BaseAugment implements AugmentApplier {
                                                                            ? getPrimaryStatValues()
                                                                            : getSecondaryStatValues();
         Color bulletColor = isNull(bulletColorOverride) ? primarySlot.getColor() : bulletColorOverride;
+        boolean isFighterAugment = primarySlot == SlotCategory.FLIGHT_DECK;
 
         if (isNull(bulletColorOverride) && !isNull(installedSlot)) {
             bulletColor = installedSlot.getSlotCategory().getColor();
+            isFighterAugment = installedSlot.getSlotCategory() == SlotCategory.FLIGHT_DECK;
         }
 
         for (int i = 0; i < statMods.size(); i++) {
@@ -198,7 +200,7 @@ public class BaseAugment implements AugmentApplier {
             float minValue = statModValue.minValue * mult;
             float maxValue = statModValue.maxValue * mult;
             tooltip.addSpacer(3f);
-            statApplier.generateStatDescription(tooltip, bulletColor, minValue, maxValue);
+            statApplier.generateStatDescription(tooltip, bulletColor, minValue, maxValue, isFighterAugment);
         }
 
         if (isPrimary) {
@@ -323,7 +325,7 @@ public class BaseAugment implements AugmentApplier {
 
     @Override
     public int hashCode() {
-        return Objects.hash(augmentID, augmentQuality);
+        return Objects.hash(augmentID, augmentQuality, initialQuality);
     }
 
     @Override
