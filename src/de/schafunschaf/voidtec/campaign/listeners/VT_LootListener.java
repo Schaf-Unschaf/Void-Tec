@@ -215,7 +215,7 @@ public class VT_LootListener implements ShowLootListener {
             int damageAmount = salvageRandom.nextInt(maxDamage + 1);
 
             AugmentQuality augmentQuality = AugmentQuality.getRandomQualityInRange(qualityRange, salvageRandom, false);
-            AugmentApplier augment = AugmentDataManager.getRandomAugment(slotCategory, augmentQuality, null, salvageRandom);
+            AugmentApplier augment = AugmentDataManager.getRandomAugment(slotCategory, augmentQuality, null, null, salvageRandom, false);
             if (isNull(augment)) {
                 continue;
             }

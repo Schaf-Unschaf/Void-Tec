@@ -50,7 +50,7 @@ public class MissileRange extends BaseStatMod {
                 return;
             }
         }
-        generateTooltip(tooltip, statMod, description, bulletColor, parentAugment);
+        generateTooltip(tooltip, statMod, bulletColor, parentAugment);
     }
 
     @Override

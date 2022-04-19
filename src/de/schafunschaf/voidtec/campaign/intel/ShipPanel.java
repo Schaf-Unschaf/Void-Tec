@@ -14,6 +14,7 @@ import de.schafunschaf.voidtec.combat.vesai.HullModManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Settings;
+import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.RequiredArgsConstructor;
 
@@ -205,6 +206,14 @@ public class ShipPanel {
         }
 
         if (hasVESAI) {
+            if (VT_Settings.enableRemoveHullmodButton) {
+                shipElement.setButtonFontVictor10();
+                ButtonUtils.addLabeledButton(shipElement, shipIconSize - augmentButtonPadding * 2, 10f, 0f, Misc.getTextColor(),
+                                             Misc.getDarkPlayerColor(), CutStyle.ALL, new RemoveHullmodButton(ship))
+                           .getPosition().setYAlignOffset(1f).setXAlignOffset(4f);
+                shipElement.setButtonFontDefault();
+            }
+
             ButtonAPI lastScriptRunnerButton = null;
             for (AugmentSlot augmentSlot : hullModManager.getUniqueSlots()) {
                 ButtonAPI specialSlotButton = createAugmentSlotButton(shipElement, augmentSlot, ship);

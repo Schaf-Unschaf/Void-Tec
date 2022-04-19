@@ -39,10 +39,10 @@ public class DismantleAugmentButton extends DefaultButton {
     public void buttonPressConfirmed(IntelUIAPI ui) {
         if (!(!isNull(augmentCargoWrapper) && augment.getAugmentQuality() == AugmentQuality.CUSTOMISED)) {
             if (!isNull(augmentCargoWrapper)) {
-                AugmentPartsUtility.disassembleAugment(augmentCargoWrapper);
+                AugmentPartsUtility.dismantleAugment(augmentCargoWrapper);
                 AugmentManagerIntel.setSelectedAugmentInCargo(null);
             } else {
-                AugmentPartsUtility.disassembleAugment(augment);
+                AugmentPartsUtility.dismantleAugment(augment);
                 AugmentManagerIntel.setSelectedInstalledAugment(null);
             }
         }

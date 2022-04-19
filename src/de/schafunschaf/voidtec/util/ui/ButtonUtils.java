@@ -8,9 +8,9 @@ import java.awt.Color;
 
 public class ButtonUtils {
 
-    public static ButtonAPI addLabeledButton(TooltipMakerAPI info, float width, float height, float padding, Color textColor, Color bgColor,
+    public static ButtonAPI addLabeledButton(TooltipMakerAPI tooltip, float width, float height, float padding, Color textColor, Color bgColor,
                                              CutStyle cutStyle, IntelButton intelButton) {
-        ButtonAPI button = info.addButton(intelButton.getName(), intelButton, textColor, bgColor, Alignment.MID, cutStyle, width, height,
+        ButtonAPI button = tooltip.addButton(intelButton.getName(), intelButton, textColor, bgColor, Alignment.MID, cutStyle, width, height,
                                           padding);
         if (intelButton.getShortcut() > 0) {
             button.setShortcut(intelButton.getShortcut(), false);

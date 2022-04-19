@@ -10,6 +10,7 @@ import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.BaseStatMod;
@@ -47,6 +48,15 @@ public class HullModManager {
         this.randomSeed = fleetMemberID.hashCode();
         HullModDataStorage.getInstance().storeShipID(fleetMemberID, this);
         generateSlotsForShip(fleetMember);
+    }
+
+    public void removeHullMod(FleetMemberAPI fleetMember) {
+        if (!fleetMemberID.equals(fleetMember.getId())) {
+            return;
+        }
+
+        fleetMember.getVariant().removePermaMod(VoidTecEngineeringSuite.HULL_MOD_ID);
+        HullModDataStorage.getInstance().getDataStorage().remove(fleetMemberID);
     }
 
     public void applyBeforeCreation(MutableShipStatsAPI stats, String id) {

@@ -39,7 +39,6 @@ public class CRPeak extends BaseStatMod {
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getPeakCRDuration().getMultBonus(id);
 
-        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {
@@ -49,7 +48,7 @@ public class CRPeak extends BaseStatMod {
                 return;
             }
         }
-        generateTooltip(tooltip, statMod, description, bulletColor, parentAugment);
+        generateTooltip(tooltip, statMod, bulletColor, parentAugment);
     }
 
     @Override

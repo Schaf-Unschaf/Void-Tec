@@ -35,6 +35,9 @@ public class AugmentData {
     protected String combatScriptPath = null;
     protected String rightClickActionPath = null;
     protected boolean uniqueMod = false;
+    protected List<String> allowedFactions = new ArrayList<>();
+    protected List<String> forbiddenFactions = new ArrayList<>();
+    protected List<String> tags = new ArrayList<>();
 
     protected void storeAugment() {
         AugmentDataManager.storeAugmentData(augmentID, this);

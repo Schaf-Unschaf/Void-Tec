@@ -18,6 +18,7 @@ import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.ids.VT_MemoryKeys;
 import de.schafunschaf.voidtec.ids.VT_Settings;
+import de.schafunschaf.voidtec.ids.VT_Tags;
 import de.schafunschaf.voidtec.imported.CustomFactionCategories;
 import de.schafunschaf.voidtec.imported.SpecialShips;
 import de.schafunschaf.voidtec.util.MathUtils;
@@ -27,6 +28,8 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
@@ -134,14 +137,19 @@ public class AugmentGenerator {
         }
 
         for (AugmentSlot shipAugmentSlot : hullModManager.getUnlockedSlots()) {
-            if (!shipAugmentSlot.isEmpty() && !MathUtils.rollSuccessful(scaledProbability, random)) {
+            if (!shipAugmentSlot.isEmpty() || !MathUtils.rollSuccessful(scaledProbability, random)) {
                 continue;
             }
 
             SlotCategory slotCategory = shipAugmentSlot.getSlotCategory();
             AugmentQuality augmentQuality = AugmentQuality.getRandomQualityInRange(qualityRange, random, false);
+            List<String> shipTags = new ArrayList<>();
 
-            AugmentApplier augment = AugmentDataManager.getRandomAugment(slotCategory, augmentQuality, preferredFaction, random);
+            String roleTag = BaseSkillEffectDescription.isCivilian(ship) ? VT_Tags.CIVILIAN_ONLY : VT_Tags.MILITARY_ONLY;
+            shipTags.add(roleTag);
+
+            AugmentApplier augment = AugmentDataManager.getRandomAugment(slotCategory, augmentQuality, preferredFaction, shipTags, random,
+                                                                         false);
             boolean success = hullModManager.installAugment(shipAugmentSlot, augment);
 
             if (VT_Settings.sheepDebug) {

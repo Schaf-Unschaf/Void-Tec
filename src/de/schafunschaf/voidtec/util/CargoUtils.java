@@ -13,10 +13,7 @@ import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Items;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
@@ -145,5 +142,17 @@ public class CargoUtils {
                 return;
             }
         }
+    }
+
+    public static CargoAPI addCargo(Collection<CargoStackAPI> stackList, CargoAPI toCargo) {
+        if (isNull(toCargo)) {
+            toCargo = Global.getFactory().createCargo(true);
+        }
+
+        for (CargoStackAPI cargoStackAPI : stackList) {
+            toCargo.addFromStack(cargoStackAPI);
+        }
+
+        return toCargo;
     }
 }

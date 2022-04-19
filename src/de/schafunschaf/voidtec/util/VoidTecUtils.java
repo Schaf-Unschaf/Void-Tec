@@ -6,6 +6,7 @@ import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Skills;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
@@ -55,7 +56,8 @@ public class VoidTecUtils {
     public static void addRandomAugmentsToFleetCargo(Random random, int numPerItem, int quantity) {
         CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
         for (int i = 0; i < quantity; i++) {
-            cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, AugmentDataManager.getRandomAugment(random)), numPerItem);
+            cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, AugmentDataManager.getRandomAugment(random, true)),
+                             numPerItem);
         }
     }
 
@@ -84,9 +86,15 @@ public class VoidTecUtils {
     }
 
     public static long getBonusXPForInstalling(FleetMemberAPI fleetMember) {
-        int numSMods = fleetMember.getVariant().getPermaMods().size();
+        int sModsToRemove = getSModsToRemove(fleetMember);
         long xpForLevelUp = Global.getSettings().getLevelupPlugin().getXPForLevel(Global.getSector().getPlayerStats().getLevel() + 1);
-        return xpForLevelUp / 3 * numSMods;
+        return xpForLevelUp / 3 * Math.max(sModsToRemove, 0);
+    }
+
+    public static int getSModsToRemove(FleetMemberAPI fleetMember) {
+        int numSMods = fleetMember.getVariant().getSMods().size();
+        boolean hasBestOfTheBest = Global.getSector().getPlayerStats().getSkillLevel(Skills.BEST_OF_THE_BEST) > 0;
+        return hasBestOfTheBest ? numSMods - 1 : numSMods;
     }
 
     public static int getBonusXPPercentage(long bonusXP) {

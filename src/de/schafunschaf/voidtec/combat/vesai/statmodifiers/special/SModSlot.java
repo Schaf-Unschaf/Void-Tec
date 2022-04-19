@@ -41,15 +41,12 @@ public class SModSlot extends BaseStatMod {
     @Override
     public void generateTooltipEntry(MutableShipStatsAPI stats, String id, TooltipMakerAPI tooltip, Color bulletColor,
                                      AugmentApplier parentAugment) {
-        setBulletMode(tooltip, bulletColor);
         MutableStat.StatMod statMod = stats.getDynamic().getMod(Stats.MAX_PERMANENT_HULLMODS_MOD).getFlatBonus(id);
         if (isNull(statMod)) {
             return;
         }
 
-        String description = "%s %s by %s";
-
-        generateTooltip(tooltip, statMod, description, bulletColor, parentAugment);
+        generateTooltip(tooltip, statMod, bulletColor, parentAugment);
     }
 
     @Override

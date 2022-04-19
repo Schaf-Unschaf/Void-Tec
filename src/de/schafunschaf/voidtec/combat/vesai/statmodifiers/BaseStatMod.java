@@ -30,7 +30,7 @@ public abstract class BaseStatMod implements StatApplier {
     public static void generateStatTooltip(TooltipMakerAPI tooltip, String statID, int value, boolean isFighterStat) {
         BaseStatMod statMod = StatModProvider.getStatMod(statID);
         String text = "%s %s by %s";
-        statMod.generateTooltip(tooltip, value, text, null, isFighterStat);
+        statMod.generateTooltip(tooltip, value, null, isFighterStat);
     }
 
     protected int generateModValue(StatModValue<Float, Float, Boolean, Boolean> statModValue, long randomSeed, AugmentQuality quality) {
@@ -77,8 +77,7 @@ public abstract class BaseStatMod implements StatApplier {
         return true;
     }
 
-    protected void generateTooltip(TooltipMakerAPI tooltip, MutableStat.StatMod statMod, String description, Color bulletColor,
-                                   AugmentApplier parentAugment) {
+    protected void generateTooltip(TooltipMakerAPI tooltip, MutableStat.StatMod statMod, Color bulletColor, AugmentApplier parentAugment) {
         int value = isMult() ? (int) (100 * statMod.value) - 100 : (int) statMod.value;
 
         if (isNull(tooltip)) {
@@ -88,10 +87,10 @@ public abstract class BaseStatMod implements StatApplier {
 
         boolean isFighterStat = VoidTecUtils.checkIfFighterStat(parentAugment);
 
-        generateTooltip(tooltip, value, description, bulletColor, isFighterStat);
+        generateTooltip(tooltip, value, bulletColor, isFighterStat);
     }
 
-    private void generateTooltip(TooltipMakerAPI tooltip, int value, String text, Color bulletColor, boolean isFighterStat) {
+    private void generateTooltip(TooltipMakerAPI tooltip, int value, Color bulletColor, boolean isFighterStat) {
         BaseStatMod statMod = StatModProvider.getStatMod(statID);
         String percentageSign = isMult() ? "%" : "";
         boolean isPositive = value >= 0;
@@ -105,7 +104,7 @@ public abstract class BaseStatMod implements StatApplier {
         Color hlColor = isPositive ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor();
 
         setBulletMode(tooltip, isNull(bulletColor) ? hlColor : bulletColor);
-        tooltip.addPara(fighterString + text, 0f, new Color[]{hlColor, Misc.getTextColor(), hlColor}, statMod.displayName, incDec,
+        tooltip.addPara(fighterString + "%s %s by %s", 0f, new Color[]{hlColor, Misc.getTextColor(), hlColor}, statMod.displayName, incDec,
                         Math.abs(value) + percentageSign);
         unindent(tooltip);
     }

@@ -23,6 +23,8 @@ public class VT_StatModKeys {
     public static final String VENT_RATE = "vent_rate";
     public static final String ZERO_FLUX_LIMIT = "zero_flux_limit";
 
+    public static final String CARGO_CAPACITY = "cargo_capacity";
+    public static final String FUEL_CAPACITY = "fuel_capacity";
     public static final String CR_DEPLOYMENT = "cr_deployment";
     public static final String CRITICAL_MALFUNCTIONS = "critical_malfunctions";
     public static final String CR_LOSS = "cr_loss";

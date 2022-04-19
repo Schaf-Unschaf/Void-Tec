@@ -246,7 +246,13 @@ public class RepairTab {
 
         int curValMin = Math.round(statModValue.minValue * mult);
         int curValMax = Math.round(statModValue.maxValue * mult);
-        String curValString = String.format("%s - %s", Math.abs(curValMin) + percentageSign, Math.abs(curValMax) + percentageSign);
+        String curValString;
+
+        if (curValMin != curValMax) {
+            curValString = String.format("%s - %s", Math.abs(curValMin) + percentageSign, Math.abs(curValMax) + percentageSign);
+        } else {
+            curValString = String.format("%s", Math.abs(curValMin) + percentageSign);
+        }
 
         mult = 1f;
         if (statModValue.getsModified) {
@@ -257,7 +263,13 @@ public class RepairTab {
 
         int nextValMin = Math.round(statModValue.minValue * mult);
         int nextValMax = Math.round(statModValue.maxValue * mult);
-        String nextValString = String.format("%s - %s", Math.abs(nextValMin) + percentageSign, Math.abs(nextValMax) + percentageSign);
+        String nextValString;
+
+        if (nextValMin != nextValMax) {
+            nextValString = String.format("%s - %s", Math.abs(nextValMin) + percentageSign, Math.abs(nextValMax) + percentageSign);
+        } else {
+            nextValString = String.format("%s", Math.abs(nextValMin) + percentageSign);
+        }
 
         mult = 1f;
         if (statModValue.getsModified) {
@@ -267,7 +279,13 @@ public class RepairTab {
         }
         int repValMin = Math.round(statModValue.minValue * mult);
         int repValMax = Math.round(statModValue.maxValue * mult);
-        String repValString = String.format("%s - %s", Math.abs(repValMin) + percentageSign, Math.abs(repValMax) + percentageSign);
+        String repValString;
+
+        if (repValMin != repValMax) {
+            repValString = String.format("%s - %s", Math.abs(repValMin) + percentageSign, Math.abs(repValMax) + percentageSign);
+        } else {
+            repValString = String.format("%s", Math.abs(repValMin) + percentageSign);
+        }
 
         boolean hasNegativeEffect = statApplier.hasNegativeValueAsBenefit() && curValMin >= 0
                 || !statApplier.hasNegativeValueAsBenefit() && curValMin < 0;

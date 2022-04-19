@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
@@ -73,13 +74,17 @@ public class AugmentDataLoader {
                     secondaryStatValues = getStatValuesFromString(secondaryStatModValueString);
                 }
 
-                String[] augmentQualityValueString = row.optString("allowedAugmentQualities").split("\\s*(,\\s*)+");
+                String[] augmentQualityValueString = getSeparatedStrings(row.optString("allowedAugmentQualities"));
                 String[] augmentQuality;
                 if (augmentQualityValueString.length == 1 && augmentQualityValueString[0].isEmpty()) {
                     augmentQuality = AugmentQuality.allowedValues;
                 } else {
                     augmentQuality = augmentQualityValueString;
                 }
+
+                String[] allowedFactions = getSeparatedStrings(row.optString("allowedFactions"));
+                String[] forbiddenFactions = getSeparatedStrings(row.optString("forbiddenFactions"));
+                String[] tags = getSeparatedStrings(row.optString("tags"));
 
                 try {
                     AugmentData augmentData = new AugmentData(augmentID, row.optString("manufacturer"), row.optString("name"),
@@ -90,7 +95,9 @@ public class AugmentDataLoader {
                                                               new TextWithHighlights(row.optString("additionalDescription"), null),
                                                               row.optBoolean("equalQualityRoll"), row.optString("beforeCreationScript"),
                                                               row.optString("afterCreationScript"), row.optString("combatScript"),
-                                                              row.optString("rightClickScript"), row.optBoolean("uniqueMod"));
+                                                              row.optString("rightClickScript"), row.optBoolean("uniqueMod"),
+                                                              Arrays.asList(allowedFactions), Arrays.asList(forbiddenFactions),
+                                                              Arrays.asList(tags));
 
                     AugmentDataManager.storeAugmentData(augmentID, augmentData);
                 } catch (JSONException error) {
@@ -100,6 +107,10 @@ public class AugmentDataLoader {
         } catch (IOException | JSONException error) {
             log.warn(String.format("VT: An error occurred while loading Augment data:\n %s", error));
         }
+    }
+
+    private static String[] getSeparatedStrings(String string) {
+        return string.split("\\s*(,\\s*)+");
     }
 
     public static List<StatApplier> convertStatMods(String... statModKeys) {
@@ -118,7 +129,7 @@ public class AugmentDataLoader {
     }
 
     private static List<StatApplier> getStatModsFromString(String statModString) {
-        String[] strings = statModString.split("\\s*(,\\s*)+");
+        String[] strings = getSeparatedStrings(statModString);
 
         return convertStatMods(strings);
     }
@@ -148,7 +159,7 @@ public class AugmentDataLoader {
     }
 
     private static StatModValue<Float, Float, Boolean, Boolean> getStatModValueDataFromString(String statModValueString) {
-        String[] data = statModValueString.split("\\s*(,\\s*)+");
+        String[] data = getSeparatedStrings(statModValueString);
         return new StatModValue<>(Float.valueOf(data[0]), Float.valueOf(data[1]), Boolean.valueOf(data[2].trim()),
                                   Boolean.valueOf(data[3].trim()));
     }

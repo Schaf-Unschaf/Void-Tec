@@ -64,6 +64,13 @@ public class HullModDataStorage {
         Global.getSector().getMemoryWithoutUpdate().set(KEY, this);
     }
 
+    public void removeHullmod(FleetMemberAPI fleetMember) {
+        HullModManager hullModManager = getHullModManager(fleetMember.getId());
+        if (!isNull(hullModManager)) {
+            hullModManager.removeHullMod(fleetMember);
+        }
+    }
+
     private List<FleetMemberAPI> getPlayerStoredShips() {
         List<FleetMemberAPI> storedShips = new ArrayList<>();
         List<SubmarketAPI> playerStorage = getCompletePlayerStorage();

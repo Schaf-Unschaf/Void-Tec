@@ -36,7 +36,7 @@ public class EmptySlotButton extends DefaultButton {
             return;
         }
 
-        if (canInstallAugment) {
+        if (canInstallAugment && VoidTecUtils.isPlayerDockedAtSpaceport()) {
             AugmentApplier augmentFromCargo = AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
             AugmentApplier augmentToInstall = augmentFromCargo.isStackable() ? AugmentDataManager.cloneAugment(augmentFromCargo) :
                                               augmentFromCargo;
@@ -76,7 +76,7 @@ public class EmptySlotButton extends DefaultButton {
 
     @Override
     public boolean doesButtonHaveConfirmDialog() {
-        return canInstallAugment;
+        return canInstallAugment && VoidTecUtils.isPlayerDockedAtSpaceport();
     }
 
     @Override

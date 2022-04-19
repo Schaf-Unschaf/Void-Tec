@@ -24,7 +24,7 @@ public class FormattingTools {
     }
 
     public static String capitalizeFirst(String string) {
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
+        return string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
     }
 
     public static String formatCredits(float creditValue) {

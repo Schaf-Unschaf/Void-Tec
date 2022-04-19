@@ -33,50 +33,44 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
 
     @Getter
     private static final Map<String, Set<DamagedAugmentData>> damagedShipsInLastBattle = new HashMap<>();
+    private static final List<String> preBattlePlayerFleetIDs = new ArrayList<>();
 
     public VT_CampaignListener(boolean permaRegister) {
         super(permaRegister);
     }
 
-    @Override
-    public void reportShownInteractionDialog(InteractionDialogAPI dialog) {
-        SectorEntityToken interactionTarget = dialog.getInteractionTarget();
-        if (isNull(interactionTarget)) {
-            return;
+    private void savePlayerMemberIDs() {
+        for (FleetMemberAPI fleetMember : Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy()) {
+            preBattlePlayerFleetIDs.add(fleetMember.getId());
         }
+    }
 
-        // Clean the storage when docking at a friendly spaceport
+    // Give NPC-Fleets augments depending on fleet type, ship type and faction
+    private void populateNPCShipsWithAugments(SectorEntityToken interactionTarget) {
+        if (interactionTarget instanceof CampaignFleetAPI && !interactionTarget.isPlayerFleet()) {
+            int battleJoinRange = Global.getSettings().getInt("battleJoinRange");
+            List<CampaignFleetAPI> nearbyFleets = Misc.findNearbyFleets(interactionTarget, battleJoinRange, new Misc.FleetFilter() {
+                @Override
+                public boolean accept(CampaignFleetAPI curr) {
+                    return !curr.isPlayerFleet();
+                }
+            });
+
+            nearbyFleets.add((CampaignFleetAPI) interactionTarget);
+
+            for (CampaignFleetAPI fleet : nearbyFleets) {
+                AugmentGenerator.generateFleetAugments(fleet, VT_Settings.aiHullmodChance);
+            }
+        }
+    }
+
+    // Clean the storage when docking at a friendly spaceport
+    private void cleanHullmodData(SectorEntityToken interactionTarget) {
         if (!isNull(interactionTarget.getMarket())) {
             HullModDataStorage.getInstance().cleanDataStorage();
             if (canInstallVESAI(interactionTarget)) {
                 Global.getSector().addTransientScript(new VT_DockedAtSpaceportHelper(interactionTarget.getMarket()));
             }
-        }
-
-        // Give NPC-Fleets augments depending on fleet type, ship type and faction
-        if (interactionTarget instanceof CampaignFleetAPI && !interactionTarget.isPlayerFleet()) {
-            AugmentGenerator.generateFleetAugments((CampaignFleetAPI) interactionTarget, VT_Settings.aiHullmodChance);
-        }
-    }
-
-    @Override
-    public void reportEncounterLootGenerated(FleetEncounterContextPlugin plugin, CargoAPI loot) {
-        Random random = new Random(Misc.getSalvageSeed(plugin.getBattle().getNonPlayerCombined()));
-
-        List<FleetMemberData> casualties = plugin.getLoserData().getOwnCasualties();
-        casualties.addAll(plugin.getWinnerData().getOwnCasualties());
-
-        loot.addAll(prepareAugmentsForSalvage(getUnrecoverableShips(casualties), random));
-    }
-
-    @Override
-    public void reportPlayerEngagement(EngagementResultAPI result) {
-        EngagementResultForFleetAPI playerResult = result.getWinnerResult().isPlayer()
-                                                   ? result.getWinnerResult()
-                                                   : result.getLoserResult();
-
-        for (FleetMemberAPI fleetMember : playerResult.getDeployed()) {
-            applyAfterBattleDamageToAugments(result, fleetMember);
         }
     }
 
@@ -86,12 +80,79 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
             return;
         }
 
-        AugmentManagerIntel augmentManagerIntel = AugmentManagerIntel.getInstance();
-        Global.getSector()
-              .getCampaignUI()
-              .addMessage(augmentManagerIntel, CommMessageAPI.MessageClickAction.INTEL_TAB, augmentManagerIntel);
+        reportDamagedAugments();
+    }
 
-        damagedShipsInLastBattle.clear();
+    @Override
+    public void reportShownInteractionDialog(InteractionDialogAPI dialog) {
+        SectorEntityToken interactionTarget = dialog.getInteractionTarget();
+        if (isNull(interactionTarget)) {
+            return;
+        }
+
+        savePlayerMemberIDs();
+        cleanHullmodData(interactionTarget);
+        populateNPCShipsWithAugments(interactionTarget);
+    }
+
+    @Override
+    public void reportPlayerEngagement(EngagementResultAPI result) {
+        applyAfterBattleDamage(result);
+    }
+
+    @Override
+    public void reportEncounterLootGenerated(FleetEncounterContextPlugin plugin, CargoAPI loot) {
+        generateAugmentLoot(plugin, loot);
+        recoverAugmentsFromCapturedShips(plugin, loot);
+    }
+
+    private void recoverAugmentsFromCapturedShips(FleetEncounterContextPlugin plugin, CargoAPI loot) {
+        HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
+        List<FleetMemberAPI> recoveredShipsWithVESAI = new ArrayList<>();
+        for (FleetMemberAPI fleetMember : Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy()) {
+            if (!preBattlePlayerFleetIDs.contains(fleetMember.getId())
+                    && fleetMember.getVariant().hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID)) {
+                recoveredShipsWithVESAI.add(fleetMember);
+            }
+        }
+
+        Random random = new Random(Misc.getSalvageSeed(plugin.getBattle().getNonPlayerCombined()));
+        CargoAPI recoveredAugments = prepareAugmentsForSalvage(null, recoveredShipsWithVESAI, random);
+        for (FleetMemberAPI memberAPI : recoveredShipsWithVESAI) {
+            hullModDataStorage.removeHullmod(memberAPI);
+        }
+
+        loot.addAll(recoveredAugments);
+    }
+
+    private void applyAfterBattleDamage(EngagementResultAPI result) {
+        EngagementResultForFleetAPI playerResult = result.getWinnerResult().isPlayer()
+                                                   ? result.getWinnerResult()
+                                                   : result.getLoserResult();
+
+        for (FleetMemberAPI fleetMember : playerResult.getDeployed()) {
+            applyAfterBattleDamageToAugments(result, fleetMember);
+        }
+    }
+
+    private void generateAugmentLoot(FleetEncounterContextPlugin plugin, CargoAPI loot) {
+        Random random = new Random(Misc.getSalvageSeed(plugin.getBattle().getNonPlayerCombined()));
+
+        List<FleetMemberData> casualties = plugin.getLoserData().getOwnCasualties();
+        casualties.addAll(plugin.getWinnerData().getOwnCasualties());
+
+        loot.addAll(prepareAugmentsForSalvage(getUnrecoverableShips(casualties), null, random));
+    }
+
+    private void reportDamagedAugments() {
+        if (!damagedShipsInLastBattle.isEmpty()) {
+            AugmentManagerIntel augmentManagerIntel = AugmentManagerIntel.getInstance();
+            Global.getSector()
+                  .getCampaignUI()
+                  .addMessage(augmentManagerIntel, CommMessageAPI.MessageClickAction.INTEL_TAB, augmentManagerIntel);
+
+            damagedShipsInLastBattle.clear();
+        }
     }
 
     private void applyAfterBattleDamageToAugments(EngagementResultAPI result, FleetMemberAPI fleetMember) {
@@ -107,11 +168,15 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
         }
 
         Random random = new Random(result.getBattle().getSeed());
-        int damageAttempts = Math.round(fleetMember.getStatus().getHullDamageTaken() * 100 / 15);
+        float sizeMod = Misc.getSizeNum(fleetMember.getHullSpec().getHullSize());
+        float armorRating = fleetMember.getHullSpec().getArmorRating();
+        int damageAttempts = Math.round(fleetMember.getStatus().getHullDamageTaken() * 100 / VT_Settings.damageTakenThreshold);
+        int damageChance = Math.max(
+                Math.round(VT_Settings.damageChanceOnDamageTaken - VT_Settings.chanceReductionPerArmor * armorRating / sizeMod), 1);
 
         for (int i = 0; i < damageAttempts; i++) {
-            if (MathUtils.rollSuccessful(VT_Settings.damageChanceOnDamage, random)) {
-                damagedAugments.add(new DamagedAugmentData(hullModManager.damageRandomAugment(5, random)));
+            if (MathUtils.rollSuccessful(damageChance, random)) {
+                damagedAugments.add(new DamagedAugmentData(hullModManager.damageRandomAugment(1, random)));
             }
         }
 
@@ -138,12 +203,23 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
         return unrecoverableShips;
     }
 
-    private CargoAPI prepareAugmentsForSalvage(List<FleetMemberData> casualties, Random salvageRandom) {
+    private CargoAPI prepareAugmentsForSalvage(List<FleetMemberData> casualties, List<FleetMemberAPI> fleetMemberList,
+                                               Random salvageRandom) {
         CargoAPI augmentLoot = Global.getFactory().createCargo(true);
 
-        for (FleetMemberData casualty : casualties) {
-            if (casualty.getMember().getVariant().hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID)) {
-                HullModManager hullModManager = HullModDataStorage.getInstance().getHullModManager(casualty.getMember().getId());
+        if (isNull(fleetMemberList)) {
+            fleetMemberList = new ArrayList<>();
+        }
+
+        if (!isNull(casualties)) {
+            for (FleetMemberData casualty : casualties) {
+                fleetMemberList.add(casualty.getMember());
+            }
+        }
+
+        for (FleetMemberAPI fleetMember : fleetMemberList) {
+            if (fleetMember.getVariant().hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID)) {
+                HullModManager hullModManager = HullModDataStorage.getInstance().getHullModManager(fleetMember.getId());
                 for (AugmentSlot filledSlot : hullModManager.getFilledSlots()) {
                     if (salvageRandom.nextInt(100) + 1 <= VT_Settings.recoverChance) {
                         AugmentApplier slottedAugment = filledSlot.getSlottedAugment();

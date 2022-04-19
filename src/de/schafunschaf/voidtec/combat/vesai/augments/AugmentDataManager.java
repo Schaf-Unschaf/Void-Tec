@@ -7,6 +7,7 @@ import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import java.util.*;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
+import static de.schafunschaf.voidtec.util.ComparisonTools.isNullOrEmpty;
 
 public class AugmentDataManager {
 
@@ -29,44 +30,93 @@ public class AugmentDataManager {
         AUGMENT_DATA_MAP.put(augmentID, augment);
     }
 
-    public static AugmentApplier getRandomAugment(Random random) {
-        return getRandomAugment(null, null, null, random);
+    public static AugmentApplier getRandomAugment(Random random, boolean ignoreWeighting) {
+        return getRandomAugment(null, null, null, null, random, ignoreWeighting);
     }
 
     public static AugmentApplier getRandomAugment(SlotCategory slotCategory, AugmentQuality augmentQuality, FactionAPI faction,
-                                                  Random random) {
+                                                  List<String> tags, Random random, boolean ignoreWeighting) {
         if (isNull(random)) {
             random = new Random();
         }
 
         WeightedRandomPicker<AugmentData> picker = new WeightedRandomPicker<>(random);
+        if (!ignoreWeighting) {
+            picker.add(null, 100);
+        }
 
         Collection<AugmentData> augmentDataCollection = AUGMENT_DATA_MAP.values();
 
         if (isNull(augmentQuality)) {
-            augmentQuality = AugmentQuality.getRandomQuality(random, false);
+            augmentQuality = AugmentQuality.getRandomQuality(random, ignoreWeighting);
         }
 
         float factionMult;
 
         if (!isNull(slotCategory)) {
             for (AugmentData augmentData : augmentDataCollection) {
+                String[] augmentQualityRange = augmentData.getAugmentQualityRange();
+                List<String> allowedFactions = augmentData.getAllowedFactions();
+                List<String> forbiddenFactions = augmentData.getForbiddenFactions();
+                List<String> augmentDataTags = augmentData.getTags();
+
                 factionMult = !isNull(faction) && augmentData.getManufacturer().equals(faction.getId()) ? 10f : 1f;
-                if (augmentData.getPrimarySlot().equals(slotCategory)) {
-                    if (Arrays.asList(augmentData.augmentQualityRange).contains(augmentQuality.name())) {
-                        picker.add(augmentData, augmentData.getRarity() * factionMult);
-                    }
-                } else if (!isNull(augmentData.getSecondarySlots()) && augmentData.getSecondarySlots().contains(slotCategory)) {
-                    if (Arrays.asList(augmentData.augmentQualityRange).contains(augmentQuality.name())) {
-                        picker.add(augmentData, augmentData.getRarity() * factionMult);
-                    }
+                float weight = ignoreWeighting ? 1 : augmentData.getRarity() * factionMult;
+
+                boolean matchesTag = true;
+                boolean matchesAllowedFaction = true;
+                boolean isNotForbiddenFaction = true;
+                boolean isPrimarySlot = augmentData.getPrimarySlot().equals(slotCategory);
+                boolean isSecondarySlot = !isNull(augmentData.getSecondarySlots())
+                        && augmentData.getSecondarySlots().contains(slotCategory);
+                boolean matchesSlot = isPrimarySlot || !isNull(augmentData.getSecondarySlots()) && isSecondarySlot;
+                boolean matchesQuality = Arrays.asList(augmentQualityRange).contains(augmentQuality.name());
+
+                if (!isNullOrEmpty(augmentDataTags) && !isNullOrEmpty(tags)) {
+                    matchesTag = !Collections.disjoint(augmentData.getTags(), tags);
+                }
+
+                if (!isNull(faction) && !isNullOrEmpty(allowedFactions)) {
+                    matchesAllowedFaction = allowedFactions.contains(faction.getId());
+                }
+
+                if (!isNull(faction) && !isNullOrEmpty(forbiddenFactions)) {
+                    isNotForbiddenFaction = !forbiddenFactions.contains(faction.getId());
+                }
+
+                if (matchesTag && matchesAllowedFaction && isNotForbiddenFaction && matchesSlot && matchesQuality) {
+                    picker.add(augmentData, weight);
                 }
             }
         } else {
             for (AugmentData augmentData : augmentDataCollection) {
+                String[] augmentQualityRange = augmentData.getAugmentQualityRange();
+                List<String> allowedFactions = augmentData.getAllowedFactions();
+                List<String> forbiddenFactions = augmentData.getForbiddenFactions();
+                List<String> augmentDataTags = augmentData.getTags();
+
                 factionMult = !isNull(faction) && augmentData.getManufacturer().equals(faction.getId()) ? 10f : 1f;
-                if (Arrays.asList(augmentData.augmentQualityRange).contains(augmentQuality.name())) {
-                    picker.add(augmentData, augmentData.getRarity() * factionMult);
+                float weight = ignoreWeighting ? 1 : augmentData.getRarity() * factionMult;
+
+                boolean matchesTag = true;
+                boolean matchesAllowedFaction = true;
+                boolean isNotForbiddenFaction = true;
+                boolean matchesQuality = Arrays.asList(augmentQualityRange).contains(augmentQuality.name());
+
+                if (!isNullOrEmpty(augmentDataTags) && !isNullOrEmpty(tags)) {
+                    matchesTag = !Collections.disjoint(augmentData.getTags(), tags);
+                }
+
+                if (!isNull(faction) && !isNullOrEmpty(allowedFactions)) {
+                    matchesAllowedFaction = allowedFactions.contains(faction.getId());
+                }
+
+                if (!isNull(faction) && !isNullOrEmpty(forbiddenFactions)) {
+                    isNotForbiddenFaction = !forbiddenFactions.contains(faction.getId());
+                }
+
+                if (matchesTag && matchesAllowedFaction && isNotForbiddenFaction && matchesQuality) {
+                    picker.add(augmentData, weight);
                 }
             }
         }

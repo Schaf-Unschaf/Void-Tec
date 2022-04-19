@@ -50,7 +50,7 @@ public class MissileHealth extends BaseStatMod {
                 return;
             }
         }
-        generateTooltip(tooltip, statMod, description, bulletColor, parentAugment);
+        generateTooltip(tooltip, statMod, bulletColor, parentAugment);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class MissileHealth extends BaseStatMod {
         String incDec = isPositive ? "Increases" : "Decreases";
         String hlString1 = "durability";
         String hlString2 = "missiles";
-        String description = String.format("the %s capability of all %s", hlString1, hlString2);
+        String description = String.format("the %s of all %s", hlString1, hlString2);
 
         return generateStatDescription(tooltip, description, incDec, bulletColor, minValue, maxValue, isPositive, isFighterStat,
                                        hlString1,

@@ -99,16 +99,12 @@ public class AugmentPartsUtility {
         }
     }
 
-    public static boolean canDismantleAugment(AugmentApplier augment) {
-        return !isNull(augment);
-    }
-
-    public static void disassembleAugment(AugmentCargoWrapper augmentCargoWrapper) {
-        disassembleAugment(augmentCargoWrapper.getAugment());
+    public static void dismantleAugment(AugmentCargoWrapper augmentCargoWrapper) {
+        dismantleAugment(augmentCargoWrapper.getAugment());
         CargoUtils.removeAugmentFromCargo(augmentCargoWrapper);
     }
 
-    public static void disassembleAugment(AugmentApplier augment) {
+    public static void dismantleAugment(AugmentApplier augment) {
         List<CraftingComponent> disassembledComponents = getComponentsForDismantling(augment);
 
         for (CraftingComponent component : disassembledComponents) {
@@ -124,17 +120,20 @@ public class AugmentPartsUtility {
         List<CraftingComponent> possibleComponents = new ArrayList<>();
 
         Random random = new Random(augment.hashCode());
-        AugmentQuality quality = augment.getAugmentQuality();
+        AugmentQuality quality = augment.getInitialQuality();
+        int damagedMalus = quality.ordinal() - augment.getAugmentQuality().ordinal();
 
         int baseCost = (int) Math.ceil(BASE_PART_AMOUNT * BASIC_DISASSEMBLE_MOD);
         AugmentComponent baseComponent = new AugmentComponent(AugmentPartsManager.BASIC_COMPONENT, quality);
-        int addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f)) + random.nextInt(Math.max(baseCost / 2, 1));
+        int addAmount = Math.max(Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f))
+                                         + random.nextInt(Math.max(baseCost / 2, 1)) - damagedMalus, 1);
         baseComponent.addAmount(addAmount);
         possibleComponents.add(baseComponent);
 
         int primaryCost = (int) Math.ceil(BASE_PART_AMOUNT * PRIMARY_DISASSEMBLE_MOD);
         AugmentComponent primaryComponent = new AugmentComponent(augment.getPrimarySlot(), quality);
-        addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f)) + random.nextInt(Math.max(primaryCost / 2, 1));
+        addAmount = Math.max(Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f))
+                                     + random.nextInt(Math.max(primaryCost / 2, 1)) - damagedMalus, 1);
         primaryComponent.addAmount(addAmount);
         possibleComponents.add(primaryComponent);
 
@@ -142,8 +141,8 @@ public class AugmentPartsUtility {
             int secondaryCost = (int) Math.ceil(
                     BASE_PART_AMOUNT * SECONDARY_DISASSEMBLE_MOD / augment.getSecondarySlots().size());
             AugmentComponent secondaryComponent = new AugmentComponent(secondarySlot, quality);
-            addAmount = Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f))
-                    + random.nextInt(Math.max(secondaryCost / 2, 1));
+            addAmount = Math.max(Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f))
+                                         + random.nextInt(Math.max(secondaryCost / 2, 1) - damagedMalus), 1);
             secondaryComponent.addAmount(addAmount);
             possibleComponents.add(secondaryComponent);
         }

@@ -24,6 +24,8 @@ import de.schafunschaf.voidtec.ids.VT_Settings;
 import de.schafunschaf.voidtec.ids.VT_Strings;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import lombok.Getter;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -115,6 +117,17 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
         AugmentApplier augment = getAugmentItemData().getAugment();
         AugmentQuality augmentQuality = augment.getAugmentQuality();
 
+        if (augment.isDestroyed()) {
+            tooltip.addTitle("Destroyed Augment");
+            tooltip.addSectionHeading("NON-FUNCTIONAL AUGMENT DETECTED", augmentQuality.getColor(),
+                                      Misc.scaleColor(augmentQuality.getColor(), 0.4f), Alignment.MID, largePad);
+            tooltip.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), smallPad);
+
+            addCostLabel(tooltip, largePad, transferHandler, stackSource);
+
+            return;
+        }
+
         if (augment.getName().toLowerCase().contains("rainbow")) {
             RainbowString rainbowString = new RainbowString(augment.getName(), Color.RED, 20);
             tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -137,11 +150,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
         tooltip.addPara(augment.getDescription().getDisplayString(), largePad, highlightColor,
                         augment.getDescription().getHighlights());
 
-        if (augmentQuality == AugmentQuality.DESTROYED) {
-            tooltip.addSectionHeading("NON-FUNCTIONAL AUGMENT DETECTED", augmentQuality.getColor(),
-                                      Misc.scaleColor(augmentQuality.getColor(), 0.4f), Alignment.MID, largePad);
-            tooltip.addPara(VT_Strings.VT_DESTROYED_AUGMENT_DESC, augmentQuality.getColor(), smallPad);
-        } else if (augmentQuality != augment.getInitialQuality()) {
+        if (augmentQuality != augment.getInitialQuality()) {
             tooltip.addSectionHeading("DAMAGED AUGMENT DETECTED", Misc.getHighlightColor(), Misc.scaleColor(Misc.getGrayColor(), 0.4f),
                                       Alignment.MID,
                                       largePad);
@@ -153,16 +162,16 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
             }
 
-            if (!(augmentQuality == AugmentQuality.DESTROYED) && !isNull(augment.getPrimaryStatMods()) && !augment.getPrimaryStatMods()
-                                                                                                                  .isEmpty()) {
+            if (!isNull(augment.getPrimaryStatMods()) && !augment.getPrimaryStatMods()
+                                                                 .isEmpty()) {
                 tooltip.addSectionHeading("Primary Stat Modification Info", augment.getPrimarySlot().getColor().brighter(),
                                           Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
                 tooltip.addSpacer(smallPad);
                 augment.generateStatDescription(tooltip, smallPad, true, null);
             }
 
-            if (!(augmentQuality == AugmentQuality.DESTROYED) && !isNull(augment.getSecondaryStatMods()) && !augment.getSecondaryStatMods()
-                                                                                                                    .isEmpty()) {
+            if (!isNull(augment.getSecondaryStatMods()) && !augment.getSecondaryStatMods()
+                                                                   .isEmpty()) {
                 tooltip.addSectionHeading("Secondary Stat Modification Info", augment.getPrimarySlot().getColor().brighter(),
                                           Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
                 tooltip.addSpacer(smallPad);
@@ -178,8 +187,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
             }
 
-            if (augmentQuality != AugmentQuality.DESTROYED
-                    && (!augment.getPrimaryStatMods().isEmpty() || !augment.getSecondaryStatMods().isEmpty())) {
+            if (!augment.getPrimaryStatMods().isEmpty() || !augment.getSecondaryStatMods().isEmpty()) {
                 tooltip.addPara("Expand to see detailed modification info.", Misc.getGrayColor(), largePad);
             }
         }
@@ -192,8 +200,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
     @Override
     public boolean isTooltipExpandable() {
         AugmentApplier augment = getAugmentItemData().getAugment();
-        return (augment.getAugmentQuality() != AugmentQuality.DESTROYED
-                && (!augment.getPrimaryStatMods().isEmpty() || !augment.getSecondaryStatMods().isEmpty()));
+        return (!augment.isDestroyed() && (!augment.getPrimaryStatMods().isEmpty() || !augment.getSecondaryStatMods().isEmpty()));
     }
 
     @Override
@@ -226,7 +233,8 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
             }
         }
 
-        Color coverColor = augment.getAugmentQuality() == AugmentQuality.DESTROYED ? Color.LIGHT_GRAY : Color.WHITE;
+        Color coverColor = augment.isDestroyed() ? Color.DARK_GRAY : Color.WHITE;
+        glowColor = augment.isDestroyed() ? Misc.scaleColorOnly(AugmentQuality.DESTROYED.getColor(), 0.5f) : glowColor;
 
         cover.setColor(coverColor);
         cover.renderAtCenter(0f, 0f);
@@ -234,10 +242,13 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
         glow.setColor(glowColor);
         glow.renderAtCenter(0f, 0f);
 
-        if (augment.getAugmentQuality() == AugmentQuality.DESTROYED) {
+        if (augment.isDestroyed()) {
             SpriteAPI destroyed = Global.getSettings().getSprite(VT_Icons.LOCKED_SLOT_ICON);
             destroyed.setSize(50, 50);
             destroyed.renderAtCenter(0, 0);
+        } else if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+            addSlotIndicator(x, y);
+            addQualityIndicator(x, y, w, h);
         }
     }
 
@@ -248,5 +259,73 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
 
     public AugmentItemData getAugmentItemData() {
         return (AugmentItemData) stack.getSpecialDataIfSpecial();
+    }
+
+    private void addSlotIndicator(float x, float y) {
+        AugmentApplier augment = getAugmentItemData().getAugment();
+        List<SlotCategory> allSlots = new ArrayList<>();
+        float xMargin = 5f;
+        float yMargin = 5f;
+        float lengthPrimary = 30f;
+        float lengthSecondary = 50f / (augment.getSecondarySlots().size() + 1);
+        float height = 3f;
+        float padding = 0f;
+
+        allSlots.add(augment.getPrimarySlot());
+        allSlots.addAll(augment.getSecondarySlots());
+
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        for (SlotCategory slot : allSlots) {
+            Color color = slot.getColor();
+            float indicatorLength = augment.getPrimarySlot() == slot ? lengthPrimary : lengthSecondary;
+
+            GL11.glColor4ub((byte) color.getRed(),
+                            (byte) color.getGreen(),
+                            (byte) color.getBlue(),
+                            (byte) color.getAlpha());
+
+            GL11.glBegin(GL11.GL_QUADS);
+            {
+                GL11.glVertex2f(x + xMargin + padding, y + yMargin); // BL
+                GL11.glVertex2f(x + xMargin + padding, y + yMargin + height); // TL
+                GL11.glVertex2f(x + indicatorLength + padding, y + yMargin + height); // TR
+                GL11.glVertex2f(x + indicatorLength + padding, y + yMargin); // BR
+            }
+            GL11.glEnd();
+
+            xMargin = 1f;
+            padding += indicatorLength;
+        }
+    }
+
+    private void addQualityIndicator(float x, float y, float w, float h) {
+        AugmentApplier augment = getAugmentItemData().getAugment();
+        float xMargin = 5f;
+        float yMargin = 5f;
+        float length = 15f;
+        float height = 15f;
+
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        Color color = augment.getAugmentQuality().getColor();
+
+        GL11.glColor4ub((byte) color.getRed(),
+                        (byte) color.getGreen(),
+                        (byte) color.getBlue(),
+                        (byte) color.getAlpha());
+
+        GL11.glBegin(GL11.GL_QUADS);
+        {
+            GL11.glVertex2f(x + xMargin, y + h - height); // BL
+            GL11.glVertex2f(x + xMargin, y + h - yMargin); // TL
+            GL11.glVertex2f(x + length, y + h - yMargin); // TR
+            GL11.glVertex2f(x + length, y + h - height); // BR
+        }
+        GL11.glEnd();
     }
 }

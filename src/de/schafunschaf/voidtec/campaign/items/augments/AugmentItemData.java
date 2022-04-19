@@ -1,11 +1,14 @@
 package de.schafunschaf.voidtec.campaign.items.augments;
 
 import com.fs.starfarer.api.campaign.SpecialItemData;
+import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.helper.ColorShifter;
 import de.schafunschaf.voidtec.helper.MalfunctionEffect;
 import lombok.Getter;
+
+import java.util.Objects;
 
 @Getter
 public class AugmentItemData extends SpecialItemData {
@@ -17,6 +20,9 @@ public class AugmentItemData extends SpecialItemData {
     public AugmentItemData(String id, String data, AugmentApplier augment) {
         super(id, data);
         this.augment = augment;
+        if (!augment.isStackable()) {
+            setData(Misc.genUID());
+        }
         float modifier = augment.getAugmentQuality().getModifier();
         float breathingLength = 300f;
         if (augment.getAugmentQuality() == AugmentQuality.CUSTOMISED) {
@@ -42,7 +48,10 @@ public class AugmentItemData extends SpecialItemData {
     public boolean equals(Object obj) {
         if (obj instanceof AugmentItemData) {
             AugmentApplier otherAugment = ((AugmentItemData) obj).augment;
-            boolean isStackable = augment.isStackable() && otherAugment.isStackable();
+            if (this.getAugment().isDestroyed() && otherAugment.isDestroyed()) {
+                return true;
+            }
+            boolean isStackable = Objects.equals(this.getData(), ((AugmentItemData) obj).getData());
             boolean isSameAugment = otherAugment.getAugmentID().equals(this.augment.getAugmentID());
             boolean hasSameInitQuality = otherAugment.getInitialQuality() == this.augment.getInitialQuality();
             boolean hasSameCurQuality = otherAugment.getAugmentQuality() == this.augment.getAugmentQuality();

@@ -14,6 +14,7 @@ import de.schafunschaf.voidtec.util.FormattingTools;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import lombok.SneakyThrows;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 
@@ -122,6 +123,9 @@ public class BaseChestPlugin extends BaseSpecialItemPlugin implements StorageChe
     @Override
     public void render(float x, float y, float w, float h, float alphaMult, float glowMult, SpecialItemRendererAPI renderer) {
         getChestData().render(x, y, w, h, alphaMult, glowMult, renderer);
+        if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+//            renderInventoryCapacity(x, y, w);
+        }
     }
 
     @Override
@@ -140,5 +144,87 @@ public class BaseChestPlugin extends BaseSpecialItemPlugin implements StorageChe
 
     public void setName(String name) {
         getChestData().setName(name);
+    }
+
+    protected void renderInventoryCapacity(float x, float y, float w) {
+        float width = w - 10f;
+        float height = 10f;
+        float borderPadding = 5f;
+        float borderSize = 1f;
+        float margin = 3f;
+        float fillPercent = ((float) getChestData().getCurrentSize()) / getChestData().getMaxSize();
+        float barWidth = (width - margin * 2) * fillPercent;
+
+        Color barColor = fillPercent > 0.9f
+                         ? Misc.getNegativeHighlightColor() : fillPercent > 0.5f
+                                                              ? Misc.getHighlightColor() : Misc.getPositiveHighlightColor();
+
+        renderBorder(x, y, width, height, borderPadding);
+        renderBG(x, y, width, height, borderPadding, borderSize);
+        renderBar(x, y, barWidth, height, margin, borderPadding, barColor);
+    }
+
+    private void renderBorder(float x, float y, float width, float height, float borderPadding) {
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        Color color = getChestData().getColor();
+
+        GL11.glColor4ub((byte) color.getRed(),
+                        (byte) color.getGreen(),
+                        (byte) color.getBlue(),
+                        (byte) color.getAlpha());
+
+        GL11.glBegin(GL11.GL_QUADS);
+        {
+            GL11.glVertex2f(x + borderPadding, y + borderPadding); // BL
+            GL11.glVertex2f(x + borderPadding, y + borderPadding + height); // TL
+            GL11.glVertex2f(x + borderPadding + width, y + borderPadding + height); // TR
+            GL11.glVertex2f(x + borderPadding + width, y + borderPadding); // BR
+        }
+        GL11.glEnd();
+    }
+
+    private void renderBG(float x, float y, float width, float height, float margin, float borderSize) {
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        Color color = Color.GRAY;
+
+        GL11.glColor4ub((byte) color.getRed(),
+                        (byte) color.getGreen(),
+                        (byte) color.getBlue(),
+                        (byte) color.getAlpha());
+
+        GL11.glBegin(GL11.GL_QUADS);
+        {
+            GL11.glVertex2f(x + borderSize + margin, y + borderSize + margin); // BL
+            GL11.glVertex2f(x + borderSize + margin, y + borderSize + height); // TL
+            GL11.glVertex2f(x + borderSize + width + margin, y + borderSize + height + margin); // TR
+            GL11.glVertex2f(x + borderSize + width + margin, y + borderSize + margin); // BR
+        }
+        GL11.glEnd();
+    }
+
+    private void renderBar(float x, float y, float width, float height, float margin, float borderPadding, Color color) {
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        GL11.glColor4ub((byte) color.getRed(),
+                        (byte) color.getGreen(),
+                        (byte) color.getBlue(),
+                        (byte) color.getAlpha());
+
+        GL11.glBegin(GL11.GL_QUADS);
+        {
+            GL11.glVertex2f(x + borderPadding + margin, y + borderPadding + margin); // BL
+            GL11.glVertex2f(x + borderPadding + margin, y + borderPadding + height - margin); // TL
+            GL11.glVertex2f(x + borderPadding + width + margin, y + borderPadding + height - margin); // TR
+            GL11.glVertex2f(x + borderPadding + width + margin, y + borderPadding + margin); // BR
+        }
+        GL11.glEnd();
     }
 }

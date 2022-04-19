@@ -50,6 +50,8 @@ public class StatLoader {
         map.put(VENT_RATE, new VentRate(VENT_RATE, "Vent rate"));
         map.put(ZERO_FLUX_LIMIT, new ZeroFluxLimit(ZERO_FLUX_LIMIT, "Zero-Flux limit"));
 
+        map.put(CARGO_CAPACITY, new CargoCapacity(CARGO_CAPACITY, "Cargo capacity"));
+        map.put(FUEL_CAPACITY, new CargoCapacity(FUEL_CAPACITY, "Fuel capacity"));
         map.put(CR_DEPLOYMENT, new CRDeployment(CR_DEPLOYMENT, "CR per deployment"));
         map.put(CRITICAL_MALFUNCTIONS, new CriticalMalfunction(CRITICAL_MALFUNCTIONS, "Critical malfunction chance"));
         map.put(CR_LOSS, new CRLoss(CR_LOSS, "CR Loss per second"));

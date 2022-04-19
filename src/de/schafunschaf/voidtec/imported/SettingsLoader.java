@@ -14,6 +14,7 @@ public class SettingsLoader {
         try {
             JSONObject settings = Global.getSettings().loadJSON(FILE_PATH);
             VT_Settings.sheepDebug = settings.getBoolean("sheepDebug");
+            VT_Settings.enableRemoveHullmodButton = settings.getBoolean("enableRemoveHullmodButton");
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }

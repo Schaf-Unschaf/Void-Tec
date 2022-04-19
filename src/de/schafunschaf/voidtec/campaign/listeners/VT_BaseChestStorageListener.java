@@ -11,43 +11,52 @@ import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.items.chests.StorageChestData;
 import de.schafunschaf.voidtec.campaign.items.chests.StorageChestPlugin;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DialogHelperLeaveToCargo;
+import de.schafunschaf.voidtec.util.CargoUtils;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import de.schafunschaf.voidtec.util.ui.ProgressBar;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VT_BaseChestStorageListener implements CargoPickerListener {
 
     protected final StorageChestPlugin chestPlugin;
     protected final StorageChestData chestData;
     protected final CargoAPI chestInventory;
-    protected final CargoAPI allowedCargo;
+    protected final CargoAPI sourceCargo;
     protected final InteractionDialogAPI dialog;
     protected boolean loadedChestCargo = false;
 
-    public VT_BaseChestStorageListener(StorageChestPlugin chestPlugin, CargoAPI allowedCargo, InteractionDialogAPI dialog) {
+    public VT_BaseChestStorageListener(StorageChestPlugin chestPlugin, CargoAPI sourceCargo, InteractionDialogAPI dialog) {
         this.chestPlugin = chestPlugin;
         this.chestData = chestPlugin.getChestData();
         this.chestInventory = chestData.getChestStorage();
-        this.allowedCargo = allowedCargo;
+        this.sourceCargo = sourceCargo;
         this.dialog = dialog;
     }
 
     @Override
     public void pickedCargo(CargoAPI cargo) {
-        int sumCargoAffected = 0;
+        List<CargoStackAPI> cargoToAdd = new ArrayList<>();
+        List<CargoStackAPI> cargoOverflow = new ArrayList<>();
+        int sumChestCargo = 0;
 
-        for (CargoStackAPI stack : cargo.getStacksCopy()) {
-            sumCargoAffected += (int) stack.getSize();
+        // Distribute stacks
+        for (CargoStackAPI stackToTransfer : cargo.getStacksCopy()) {
+            boolean chestOverflowing = sumChestCargo + stackToTransfer.getSize() > chestData.getMaxSize();
+
+            if (chestOverflowing) {
+                cargoOverflow.add(stackToTransfer);
+            } else {
+                cargoToAdd.add(stackToTransfer);
+                sumChestCargo += stackToTransfer.getSize();
+            }
         }
 
-        // Enough space to store items?
-        if (chestData.getCurrentSize() + sumCargoAffected < chestData.getMaxSize()) {
-            chestPlugin.setSize(sumCargoAffected);
-            chestInventory.clear();
-            chestInventory.addAll(cargo);
-        }
-
+        chestInventory.clear();
+        chestInventory.addAll(CargoUtils.addCargo(cargoToAdd, null));
+        sourceCargo.addAll(CargoUtils.addCargo(cargoOverflow, null));
         closeChest();
     }
 
@@ -101,9 +110,15 @@ public class VT_BaseChestStorageListener implements CargoPickerListener {
 
     protected void closeChest() {
         CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
-        playerCargo.addAll(allowedCargo);
+        playerCargo.addAll(sourceCargo);
         playerCargo.sort();
 
+        int sumChestCargo = 0;
+        for (CargoStackAPI stack : chestInventory.getStacksCopy()) {
+            sumChestCargo += stack.getSize();
+        }
+
+        chestPlugin.setSize(sumChestCargo);
         Global.getSector().addTransientScript(new VT_DialogHelperLeaveToCargo());
         dialog.dismiss();
     }

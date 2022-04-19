@@ -90,7 +90,7 @@ public class VoidTecPlugin extends BaseModPlugin {
 
             for (int i = 0; i < 80; i++) {
                 AugmentApplier augment = AugmentDataManager.getRandomAugment(SlotCategory.getRandomCategory(null, true),
-                                                                             AugmentQuality.DOMAIN, null, null);
+                                                                             AugmentQuality.DOMAIN, null, null, null, true);
                 augment.damageAugment(new Random().nextInt(6));
                 VoidTecUtils.addAugmentToFleetCargo(augment);
             }
