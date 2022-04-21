@@ -47,20 +47,20 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
 
     // Give NPC-Fleets augments depending on fleet type, ship type and faction
     private void populateNPCShipsWithAugments(SectorEntityToken interactionTarget) {
-        if (interactionTarget instanceof CampaignFleetAPI && !interactionTarget.isPlayerFleet()) {
-            int battleJoinRange = Global.getSettings().getInt("battleJoinRange");
-            List<CampaignFleetAPI> nearbyFleets = Misc.findNearbyFleets(interactionTarget, battleJoinRange, new Misc.FleetFilter() {
-                @Override
-                public boolean accept(CampaignFleetAPI curr) {
-                    return !curr.isPlayerFleet();
-                }
-            });
-
-            nearbyFleets.add((CampaignFleetAPI) interactionTarget);
-
-            for (CampaignFleetAPI fleet : nearbyFleets) {
-                AugmentGenerator.generateFleetAugments(fleet, VT_Settings.aiHullmodChance);
+        int battleJoinRange = Global.getSettings().getInt("battleJoinRange");
+        List<CampaignFleetAPI> nearbyFleets = Misc.findNearbyFleets(interactionTarget, battleJoinRange, new Misc.FleetFilter() {
+            @Override
+            public boolean accept(CampaignFleetAPI curr) {
+                return !curr.isPlayerFleet();
             }
+        });
+
+        if (interactionTarget instanceof CampaignFleetAPI && !interactionTarget.isPlayerFleet()) {
+            nearbyFleets.add((CampaignFleetAPI) interactionTarget);
+        }
+
+        for (CampaignFleetAPI fleet : nearbyFleets) {
+            AugmentGenerator.generateFleetAugments(fleet, VT_Settings.aiHullmodChance);
         }
     }
 

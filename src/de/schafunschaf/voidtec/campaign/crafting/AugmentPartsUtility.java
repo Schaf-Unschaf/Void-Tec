@@ -142,7 +142,7 @@ public class AugmentPartsUtility {
                     BASE_PART_AMOUNT * SECONDARY_DISASSEMBLE_MOD / augment.getSecondarySlots().size());
             AugmentComponent secondaryComponent = new AugmentComponent(secondarySlot, quality);
             addAmount = Math.max(Math.round(baseCost * (VT_Settings.partDisassemblePercentage / 100f))
-                                         + random.nextInt(Math.max(secondaryCost / 2, 1) - damagedMalus), 1);
+                                         + random.nextInt(Math.max(secondaryCost / 2, 1)) - damagedMalus, 1);
             secondaryComponent.addAmount(addAmount);
             possibleComponents.add(secondaryComponent);
         }

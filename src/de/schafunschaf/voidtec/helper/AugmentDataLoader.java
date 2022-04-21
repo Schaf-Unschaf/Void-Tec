@@ -82,9 +82,18 @@ public class AugmentDataLoader {
                     augmentQuality = augmentQualityValueString;
                 }
 
-                String[] allowedFactions = getSeparatedStrings(row.optString("allowedFactions"));
-                String[] forbiddenFactions = getSeparatedStrings(row.optString("forbiddenFactions"));
-                String[] tags = getSeparatedStrings(row.optString("tags"));
+                String allowedFactions = row.optString("allowedFactions");
+                List<String> allowedFactionList = allowedFactions.isEmpty()
+                                                  ? new ArrayList<String>()
+                                                  : Arrays.asList(getSeparatedStrings(allowedFactions));
+                String forbiddenFactions = row.optString("forbiddenFactions");
+                List<String> forbiddenFactionsList = forbiddenFactions.isEmpty()
+                                                     ? new ArrayList<String>()
+                                                     : Arrays.asList(getSeparatedStrings(forbiddenFactions));
+                String tags = row.optString("tags");
+                List<String> tagsList = tags.isEmpty()
+                                        ? new ArrayList<String>()
+                                        : Arrays.asList(getSeparatedStrings(tags));
 
                 try {
                     AugmentData augmentData = new AugmentData(augmentID, row.optString("manufacturer"), row.optString("name"),
@@ -96,8 +105,7 @@ public class AugmentDataLoader {
                                                               row.optBoolean("equalQualityRoll"), row.optString("beforeCreationScript"),
                                                               row.optString("afterCreationScript"), row.optString("combatScript"),
                                                               row.optString("rightClickScript"), row.optBoolean("uniqueMod"),
-                                                              Arrays.asList(allowedFactions), Arrays.asList(forbiddenFactions),
-                                                              Arrays.asList(tags));
+                                                              allowedFactionList, forbiddenFactionsList, tagsList);
 
                     AugmentDataManager.storeAugmentData(augmentID, augmentData);
                 } catch (JSONException error) {
