@@ -11,7 +11,7 @@ public class VT_Settings {
     public static boolean randomSlotAmount = false;
     public static boolean hullmodInstallationWithSP = false;
     public static int installCostSP = 1;
-    public static int installCostCredits = 30_000;
+    public static float installBaseValueFraction = 0.5f;
     public static int maxNumSlotsForCreditUnlock = 6;
     public static int removalCostSP = 1;
     public static int aiHullmodChance = 50;

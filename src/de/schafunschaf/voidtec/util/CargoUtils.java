@@ -28,6 +28,8 @@ public class CargoUtils {
         List<StorageChestData> chestsInStorage = new ArrayList<>();
         List<AugmentCargoWrapper> augmentCargoWrappers = new ArrayList<>();
 
+        playerCargo.sort();
+
         for (EveryFrameScript transientScript : Global.getSector().getTransientScripts()) {
             if (transientScript instanceof VT_DockedAtSpaceportHelper) {
                 localCargo = ((VT_DockedAtSpaceportHelper) transientScript).getMarket()

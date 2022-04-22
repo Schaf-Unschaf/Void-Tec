@@ -279,7 +279,7 @@ public class ShipPanel {
         IntelButton intelButton;
 
         if (!augmentSlot.isUnlocked()) {
-            intelButton = new LockedSlotButton(augmentSlot);
+            intelButton = new LockedSlotButton(augmentSlot, ship);
         } else if (augmentSlot.isEmpty()) {
             intelButton = new EmptySlotButton(augmentSlot, isCompatible);
         } else {

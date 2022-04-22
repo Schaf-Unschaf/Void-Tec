@@ -12,6 +12,8 @@ import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
 import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.ids.VT_Settings;
 import de.schafunschaf.voidtec.util.FormattingTools;
+import de.schafunschaf.voidtec.util.MathUtils;
+import de.schafunschaf.voidtec.util.ShipUtils;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import de.schafunschaf.voidtec.util.ui.UIUtils;
@@ -27,14 +29,14 @@ import static de.schafunschaf.voidtec.ids.VT_Settings.*;
 public class InstallHullmodButton extends DefaultButton {
 
     private final FleetMemberAPI fleetMember;
-    private final float hullSizeMult;
     private final List<String> sModsToRemove;
+    private final float installCost;
     private String selectedSMod = "";
 
     public InstallHullmodButton(FleetMemberAPI fleetMember) {
         this.fleetMember = fleetMember;
-        this.hullSizeMult = Misc.getSizeNum(fleetMember.getHullSpec().getHullSize());
         this.sModsToRemove = getRemovableSMods(fleetMember.getVariant());
+        this.installCost = MathUtils.roundWholeNumber(fleetMember.getHullSpec().getBaseValue() * installBaseValueFraction, 2);
     }
 
     @Override
@@ -59,25 +61,25 @@ public class InstallHullmodButton extends DefaultButton {
         if (hullmodInstallationWithSP) {
             playerStats.addStoryPoints(-installCostSP);
         } else {
-            Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(installCostCredits * hullSizeMult);
+            Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(installCost);
         }
     }
 
     @Override
     public void createConfirmationPrompt(TooltipMakerAPI tooltip) {
         tooltip.setForceProcessInput(true);
-        String installCost = Misc.getDGSCredits(installCostCredits * hullSizeMult);
+        String creditString = Misc.getDGSCredits(installCost);
         Color hlColor = Misc.getHighlightColor();
         int bonusPercent = VoidTecUtils.getBonusXPPercentage(VoidTecUtils.getBonusXPForInstalling(fleetMember));
         if (hullmodInstallationWithSP) {
-            installCost = installCostSP + " Story " + FormattingTools.singularOrPlural(installCostSP, "Point");
+            creditString = installCostSP + " Story " + FormattingTools.singularOrPlural(installCostSP, "Point");
             hlColor = Misc.getStoryOptionColor();
         }
 
-        String shipClass = FormattingTools.capitalizeFirst(fleetMember.getHullSpec().getHullSize().toString());
+        String shipClass = ShipUtils.convertSizeToString(fleetMember.getHullSpec().getHullSize());
         tooltip.addPara("Do you want to install the VoidTec Engineering Suite on your ship?", 0f);
-        tooltip.addPara(String.format("This will cost %s for a %s-sized vessel.", installCost, shipClass), 6f, hlColor,
-                        installCost);
+        tooltip.addPara(String.format("This will cost %s for a %s-sized vessel.", creditString, shipClass), 6f, hlColor,
+                        creditString);
 
         if (!sModsToRemove.isEmpty()) {
             tooltip.addPara("You can choose to keep one of the following SMods:", 10f);
@@ -209,10 +211,10 @@ public class InstallHullmodButton extends DefaultButton {
         String buttonText;
 
         if (VoidTecUtils.isPlayerDockedAtSpaceport()) {
-            if (VoidTecUtils.canPayForInstallation(hullSizeMult)) {
+            if (VoidTecUtils.canPayForInstallation(fleetMember.getBaseValue())) {
                 buttonText = "Install VESAI";
             } else {
-                buttonText = "Not enough " + (hullmodInstallationWithSP ? "SP" : "credits");
+                buttonText = "Not enough credits";
             }
         } else {
             buttonText = "Need Spaceport";
@@ -227,8 +229,8 @@ public class InstallHullmodButton extends DefaultButton {
         Color hlColor = spEnabled ? Misc.getStoryOptionColor() : Misc.getHighlightColor();
         String highlight = spEnabled
                            ? String.format("%s SP", VT_Settings.installCostSP)
-                           : Misc.getDGSCredits(VT_Settings.installCostCredits * hullSizeMult);
-        tooltip.addPara("Installation cost: %s", 6f, Misc.getGrayColor(), hlColor, highlight);
+                           : Misc.getDGSCredits(installCost);
+        tooltip.addPara("Installation: %s", 6f, Misc.getGrayColor(), hlColor, highlight);
 
         Color base = spEnabled ? Misc.getStoryBrightColor() : Misc.getBrightPlayerColor();
         Color bg = spEnabled ? Misc.getStoryDarkColor() : Misc.getDarkPlayerColor();
@@ -245,6 +247,6 @@ public class InstallHullmodButton extends DefaultButton {
     }
 
     private boolean canInstall() {
-        return VoidTecUtils.isPlayerDockedAtSpaceport() && VoidTecUtils.canPayForInstallation(hullSizeMult);
+        return VoidTecUtils.isPlayerDockedAtSpaceport() && VoidTecUtils.canPayForInstallation(installCost);
     }
 }

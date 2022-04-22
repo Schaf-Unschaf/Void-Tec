@@ -3,6 +3,7 @@ package de.schafunschaf.voidtec.campaign.intel;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.FilterByCategoryButton;
+import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.FilterByQualityButton;
 import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.SelectAugmentButton;
 import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.SortOrderButton;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemPlugin;
@@ -33,7 +34,7 @@ public class CargoPanel {
     private final float padding;
 
     private final float headerHeight = 20f;
-    private final float sorterHeight = 68f;
+    private final float sorterHeight = 100f;
     private final float elementHeight = 28f;
     private final float filterButtonSize = 24f;
     private final float itemSpacing = 3f;
@@ -54,9 +55,11 @@ public class CargoPanel {
         String selectedSlot = isNull(AugmentManagerIntel.getActiveCategoryFilter())
                               ? "ALL"
                               : AugmentManagerIntel.getActiveCategoryFilter().toString();
-        Color selectedColor = isNull(AugmentManagerIntel.getActiveCategoryFilter())
+        Color selectedColor = isNull(AugmentManagerIntel.getActiveQualityFilter())
                               ? Color.WHITE
-                              : AugmentManagerIntel.getActiveCategoryFilter().getColor();
+                              : AugmentManagerIntel.getActiveQualityFilter().getColor();
+
+        filterElement.addSpacer(3f).getPosition().setXAlignOffset(4f);
 
         ButtonAPI lastButton = null;
         for (final SlotCategory slotCategory : SlotCategory.values) {
@@ -64,15 +67,51 @@ public class CargoPanel {
 
             if (!isNull(lastButton)) {
                 augmentButton.getPosition().rightOfMid(lastButton, 4f);
-            } else {
-                augmentButton.getPosition().setXAlignOffset(4f).setYAlignOffset(-6f);
             }
 
             lastButton = augmentButton;
         }
 
-        UIComponentAPI spacerComponent = filterElement.addSpacer(28f);
-        spacerComponent.getPosition().inTL(5f, 0f);
+        filterElement.addSpacer(30f).getPosition().inTL(5f, 0f);
+        filterElement.setParaFont(Fonts.VICTOR_10);
+        float slotBorderWidth = 227f;
+        float slotBorderHeight = 15f;
+        float qualityBorderWidth = 212f;
+        float qualityBorderHeight = 10f;
+        UIUtils.addHorizontalSeparator(filterElement, slotBorderWidth, 1f, Misc.getBasePlayerColor(), 1f)
+               .getPosition()
+               .setXAlignOffset(23f);
+        UIUtils.addVerticalSeparator(filterElement, 1f, slotBorderHeight, Misc.getBasePlayerColor())
+               .getPosition()
+               .setXAlignOffset(slotBorderWidth)
+               .setYAlignOffset(
+                       slotBorderHeight);
+        filterElement.addPara("Slot", -4f);
+        filterElement.getPrev().getPosition().setXAlignOffset(-25f - slotBorderWidth);
+        filterElement.addPara("Quality", 0f).setAlignment(Alignment.RMID);
+        filterElement.getPrev().getPosition().setXAlignOffset(0f);
+        UIUtils.addHorizontalSeparator(filterElement, qualityBorderWidth, 1f, Misc.getBasePlayerColor(), -1f)
+               .getPosition()
+               .setXAlignOffset(-2f);
+        UIUtils.addVerticalSeparator(filterElement, 1f, qualityBorderHeight, Misc.getBasePlayerColor());
+        filterElement.addSpacer(3f).getPosition().setXAlignOffset(4f).setYAlignOffset(qualityBorderHeight);
+
+        UIComponentAPI lastBox = null;
+        for (AugmentQuality quality : AugmentQuality.values) {
+            if (quality == AugmentQuality.DESTROYED) {
+                continue;
+            }
+
+            UIComponentAPI qualityFilter = new FilterByQualityButton(quality).addButton(filterElement, 30f, 15f);
+
+            if (!isNull(lastBox)) {
+                qualityFilter.getPosition().rightOfTop(lastBox, 6f);
+            }
+
+            lastBox = qualityFilter;
+        }
+
+        filterElement.addSpacer(62f).getPosition().inTL(5f, 0f);
 
         filterElement.setParaFont(Fonts.ORBITRON_20AA);
         filterElement.addPara("Filter:", Misc.getBasePlayerColor(), 7f);
@@ -98,7 +137,11 @@ public class CargoPanel {
         boolean hasSelectedAugmentInList = false;
         for (AugmentCargoWrapper augmentCargoWrapper : AugmentManagerIntel.getAugmentsInCargo()) {
             final AugmentApplier augmentInStack = augmentCargoWrapper.getAugment();
-            if (!(isNull(AugmentManagerIntel.getActiveCategoryFilter()) || matchesFilter(augmentInStack))) {
+            if (!(isNull(AugmentManagerIntel.getActiveCategoryFilter()) || matchesCategoryFilter(augmentInStack))) {
+                continue;
+            }
+
+            if (!(isNull(AugmentManagerIntel.getActiveQualityFilter()) || matchesQualityFilter(augmentInStack))) {
                 continue;
             }
 
@@ -125,7 +168,7 @@ public class CargoPanel {
         mainPanel.addUIElement(uiElement).inBR(0f, 0f);
     }
 
-    private boolean matchesFilter(AugmentApplier augment) {
+    private boolean matchesCategoryFilter(AugmentApplier augment) {
         if (isNull(augment)) {
             return false;
         }
@@ -138,6 +181,15 @@ public class CargoPanel {
         boolean isAlreadyInstalled = !isNull(selectedSlot) && selectedSlot.getHullModManager().hasSameAugmentSlotted(augment);
 
         return (matchesPrimarySlot || matchesSecondarySlot) && !isAlreadyInstalled;
+    }
+
+    private boolean matchesQualityFilter(AugmentApplier augment) {
+        if (isNull(augment)) {
+            return false;
+        }
+
+        AugmentQuality activeQualityFilter = AugmentManagerIntel.getActiveQualityFilter();
+        return (!isNull(activeQualityFilter) && activeQualityFilter == augment.getAugmentQuality());
     }
 
     private void generateAugmentForPanel(CustomPanelAPI mainPanel, final TooltipMakerAPI cargoElement,

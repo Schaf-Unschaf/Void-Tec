@@ -441,22 +441,8 @@ public class HullModManager {
 
         if (VT_Settings.randomSlotAmount) {
             numUnlockedSlots = random.nextInt(maxSlots) + 1;
-        } else {
-            switch (hullSize) {
-                case FRIGATE:
-                    numUnlockedSlots += 1;
-                    break;
-                case DESTROYER:
-                    numUnlockedSlots += 2;
-                    break;
-                case CRUISER:
-                    numUnlockedSlots += 3;
-                    break;
-                case CAPITAL_SHIP:
-                    numUnlockedSlots += 4;
-                    break;
-            }
         }
+
         numUnlockedSlots = Math.min(numUnlockedSlots, maxSlots);
 
         shipAugmentSlots.add(new AugmentSlot(this, SlotCategory.COSMETIC, true));

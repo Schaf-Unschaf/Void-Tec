@@ -34,8 +34,10 @@ public abstract class BaseStatMod implements StatApplier {
     }
 
     protected int generateModValue(StatModValue<Float, Float, Boolean, Boolean> statModValue, long randomSeed, AugmentQuality quality) {
-        float qualityModifier = isNull(quality) ? 1f : quality.getModifier();
         float value;
+        float qualityModifier = statModValue.invertModifier
+                                ? AugmentQuality.getHighestQuality().getModifier() + 1 - quality.getModifier()
+                                : quality.getModifier();
         Random random = new Random(randomSeed);
 
         if (Math.abs(statModValue.minValue) >= Math.abs(statModValue.maxValue)) {

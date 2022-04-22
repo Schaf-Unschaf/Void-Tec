@@ -17,14 +17,14 @@ public class MathUtils {
         return (int) (Math.round(number / pow) * pow);
     }
 
-    public static float roundWholeNumber(float number, int numPlaces) {
+    public static int roundWholeNumber(float number, int numPlaces) {
         double pow = Math.pow(10, numPlaces);
-        return (float) (Math.round(number / pow) * pow);
+        return (int) (Math.round(number / pow) * pow);
     }
 
-    public static double roundWholeNumber(double number, int numPlaces) {
+    public static int roundWholeNumber(double number, int numPlaces) {
         double pow = Math.pow(10, numPlaces);
-        return (Math.round(number / pow) * pow);
+        return (int) (Math.round(number / pow) * pow);
     }
 
     public static float roundDecimals(float number, int numDecimals) {

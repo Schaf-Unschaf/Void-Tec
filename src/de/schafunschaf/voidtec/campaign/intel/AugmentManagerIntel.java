@@ -9,6 +9,7 @@ import de.schafunschaf.voidtec.campaign.listeners.VT_CampaignListener;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.helper.DamagedAugmentData;
 import de.schafunschaf.voidtec.ids.VT_Colors;
@@ -44,6 +45,9 @@ public class AugmentManagerIntel extends BaseIntel {
     @Getter
     @Setter
     private static SlotCategory activeCategoryFilter;
+    @Getter
+    @Setter
+    private static AugmentQuality activeQualityFilter;
     @Getter
     @Setter
     private static boolean isShowingManufacturingPanel = false;

@@ -289,32 +289,36 @@ public class RepairTab {
 
         boolean hasNegativeEffect = statApplier.hasNegativeValueAsBenefit() && curValMin >= 0
                 || !statApplier.hasNegativeValueAsBenefit() && curValMin < 0;
+        boolean noRepairsNeeded = curQuality.isGreaterOrEqualThen(maxQuality);
 
         Color curValColor;
+        Color negativeColor = Misc.getNegativeHighlightColor();
+        Color positiveColor = Misc.getPositiveHighlightColor();
+
         if (hasNegativeEffect) {
-            curValColor = Misc.getNegativeHighlightColor().darker();
+            curValColor = noRepairsNeeded ? negativeColor : negativeColor.darker();
         } else {
-            curValColor = Misc.getPositiveHighlightColor().darker();
+            curValColor = noRepairsNeeded ? positiveColor : positiveColor.darker();
         }
 
         Color nextValColor;
-        if (curQuality.isGreaterOrEqualThen(AugmentQuality.DOMAIN) || curValMin == nextValMin && curValMax == nextValMax) {
+        if (noRepairsNeeded || curValMin == nextValMin && curValMax == nextValMax) {
             nextValColor = Misc.getGrayColor();
             nextValString = "---";
         } else if (hasNegativeEffect) {
-            nextValColor = Misc.getNegativeHighlightColor();
+            nextValColor = negativeColor;
         } else {
-            nextValColor = Misc.getPositiveHighlightColor();
+            nextValColor = positiveColor;
         }
 
         Color repValColor;
-        if (curQuality.isGreaterOrEqualThen(AugmentQuality.DOMAIN)) {
+        if (noRepairsNeeded) {
             repValColor = Misc.getGrayColor();
             repValString = "---";
         } else if (hasNegativeEffect) {
-            repValColor = Misc.getNegativeHighlightColor();
+            repValColor = negativeColor;
         } else {
-            repValColor = Misc.getPositiveHighlightColor();
+            repValColor = positiveColor;
         }
 
         tooltip.addRow(Alignment.LMID, Misc.getTextColor(), displayName,

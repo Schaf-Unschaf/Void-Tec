@@ -1,5 +1,6 @@
 package de.schafunschaf.voidtec.util;
 
+import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
@@ -17,5 +18,13 @@ public class ShipUtils {
         String shipType = String.format("%s %s", shipClass, shipDesignation);
 
         return String.format("%s, %s", shipName, shipType);
+    }
+
+    public static String convertSizeToString(ShipAPI.HullSize hullSize) {
+        if (hullSize == ShipAPI.HullSize.CAPITAL_SHIP) {
+            return "Capital";
+        } else {
+            return FormattingTools.capitalizeFirst(hullSize.toString());
+        }
     }
 }

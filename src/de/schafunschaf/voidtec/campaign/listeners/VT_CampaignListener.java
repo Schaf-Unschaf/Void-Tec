@@ -3,12 +3,16 @@ package de.schafunschaf.voidtec.campaign.listeners;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.comm.CommMessageAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.AugmentManagerIntel;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
+import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemPlugin;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
 import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
@@ -37,6 +41,22 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
 
     public VT_CampaignListener(boolean permaRegister) {
         super(permaRegister);
+    }
+
+    private void removeAugmentsFromMarket(MarketAPI market) {
+        List<SubmarketAPI> vanillaMarkets = new ArrayList<>();
+        vanillaMarkets.add(market.getSubmarket(Submarkets.SUBMARKET_OPEN));
+        vanillaMarkets.add(market.getSubmarket(Submarkets.SUBMARKET_BLACK));
+        vanillaMarkets.add(market.getSubmarket(Submarkets.GENERIC_MILITARY));
+
+        for (SubmarketAPI submarket : vanillaMarkets) {
+            CargoAPI submarketCargo = submarket.getCargo();
+            for (CargoStackAPI cargoStack : submarketCargo.getStacksCopy()) {
+                if (cargoStack.getPlugin() instanceof AugmentItemPlugin) {
+                    submarketCargo.removeStack(cargoStack);
+                }
+            }
+        }
     }
 
     private void savePlayerMemberIDs() {
@@ -104,6 +124,11 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
     public void reportEncounterLootGenerated(FleetEncounterContextPlugin plugin, CargoAPI loot) {
         generateAugmentLoot(plugin, loot);
         recoverAugmentsFromCapturedShips(plugin, loot);
+    }
+
+    @Override
+    public void reportPlayerClosedMarket(MarketAPI market) {
+        removeAugmentsFromMarket(market);
     }
 
     private void recoverAugmentsFromCapturedShips(FleetEncounterContextPlugin plugin, CargoAPI loot) {

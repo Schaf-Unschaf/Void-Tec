@@ -24,7 +24,6 @@ import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.util.Random;
 
-import static de.schafunschaf.voidtec.ids.VT_Settings.*;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class VoidTecUtils {
@@ -40,12 +39,8 @@ public class VoidTecUtils {
         return Global.getSector().hasTransientScript(VT_DockedAtSpaceportHelper.class);
     }
 
-    public static boolean canPayForInstallation(float hullSizeMult) {
-        if (hullmodInstallationWithSP) {
-            return Global.getSector().getPlayerStats().getStoryPoints() >= installCostSP;
-        }
-
-        return Global.getSector().getPlayerFleet().getCargo().getCredits().get() >= installCostCredits * hullSizeMult;
+    public static boolean canPayForInstallation(float installCost) {
+        return Global.getSector().getPlayerFleet().getCargo().getCredits().get() >= installCost;
     }
 
     public static void addAugmentToFleetCargo(AugmentApplier augment) {

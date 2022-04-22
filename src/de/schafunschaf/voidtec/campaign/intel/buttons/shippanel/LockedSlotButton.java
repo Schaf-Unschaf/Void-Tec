@@ -1,6 +1,7 @@
 package de.schafunschaf.voidtec.campaign.intel.buttons.shippanel;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.ui.BaseTooltipCreator;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
@@ -13,23 +14,30 @@ import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Settings;
 import de.schafunschaf.voidtec.util.FormattingTools;
+import de.schafunschaf.voidtec.util.MathUtils;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
-import static de.schafunschaf.voidtec.ids.VT_Settings.*;
+import static de.schafunschaf.voidtec.ids.VT_Settings.installCostSP;
+import static de.schafunschaf.voidtec.ids.VT_Settings.maxNumSlotsForCreditUnlock;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class LockedSlotButton extends DefaultButton {
 
     private final AugmentSlot augmentSlot;
     private final int unlockedSlots;
+    private final float installCost;
     private final boolean canUnlockWithCredits;
+    private ButtonAPI button;
 
-    public LockedSlotButton(AugmentSlot augmentSlot) {
+    public LockedSlotButton(AugmentSlot augmentSlot, FleetMemberAPI fleetMember) {
         this.augmentSlot = augmentSlot;
         this.unlockedSlots = augmentSlot.getHullModManager().getUnlockedSlots().size();
+        this.installCost = MathUtils.roundWholeNumber(fleetMember.getHullSpec().getBaseValue() * 0.1f * unlockedSlots, 2);
         this.canUnlockWithCredits = unlockedSlots < VT_Settings.maxNumSlotsForCreditUnlock;
     }
 
@@ -37,10 +45,9 @@ public class LockedSlotButton extends DefaultButton {
     public void buttonPressConfirmed(IntelUIAPI ui) {
         if (unlockedSlots >= maxNumSlotsForCreditUnlock) {
             Global.getSector().getPlayerStats().addStoryPoints(-installCostSP);
-        } else {
-            int installCost = installCostCredits * unlockedSlots;
-            Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(installCost);
         }
+
+        Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(installCost);
 
         augmentSlot.unlockSlot();
     }
@@ -48,17 +55,23 @@ public class LockedSlotButton extends DefaultButton {
     @Override
     public void createConfirmationPrompt(TooltipMakerAPI tooltip) {
         assert augmentSlot != null;
-        int installCost = installCostCredits * unlockedSlots;
+        assert button != null;
+        button.setChecked(true);
 
         String installCostString = Misc.getDGSCredits(installCost);
-        Color hlColor = Misc.getHighlightColor();
+        String spCostString = "";
+        String spString = "";
+        List<Color> hlColors = new ArrayList<>();
+        hlColors.add(Misc.getHighlightColor());
         if (unlockedSlots >= maxNumSlotsForCreditUnlock) {
-            installCostString = installCostSP + " Story " + FormattingTools.singularOrPlural(installCostSP, "Point");
-            hlColor = Misc.getStoryOptionColor();
+            spCostString = installCostSP + " Story " + FormattingTools.singularOrPlural(installCostSP, "Point");
+            spString = " and " + spCostString;
+            hlColors.add(Misc.getStoryOptionColor());
         }
 
         tooltip.addPara("Do you want to unlock this slot?", 0f);
-        tooltip.addPara(String.format("This will cost you %s", installCostString), 3f, hlColor, installCostString);
+        tooltip.addPara(String.format("This will cost you %s%s", installCostString, spString), 3f, hlColors.toArray(new Color[0]),
+                        installCostString, spCostString);
     }
 
     @Override
@@ -100,7 +113,7 @@ public class LockedSlotButton extends DefaultButton {
         }
 
         tooltip.setButtonFontVictor14();
-        ButtonAPI button = ButtonUtils.addCheckboxButton(tooltip, width, height, 0f, buttonTextColor, buttonColor, buttonColor, this);
+        button = ButtonUtils.addCheckboxButton(tooltip, width, height, 0f, buttonTextColor, buttonColor, buttonColor, this);
         button.setChecked(true);
 
         button.setEnabled(canUnlockSlot());
@@ -113,16 +126,16 @@ public class LockedSlotButton extends DefaultButton {
     @Override
     public void addTooltip(TooltipMakerAPI tooltip) {
         final boolean playerDockedAtSpaceport = VoidTecUtils.isPlayerDockedAtSpaceport();
-        boolean canUnlockWithCredits = unlockedSlots < VT_Settings.maxNumSlotsForCreditUnlock;
-        int installCost = VT_Settings.installCostCredits * unlockedSlots;
 
-        final String unlockCost = canUnlockWithCredits
-                                  ? Misc.getDGSCredits(installCost)
-                                  : String.format("%s SP", VT_Settings.installCostSP);
-        final String unlockSlotText = String.format("Locked slot\n" + "Cost to unlock: %s", unlockCost);
+        final String unlockCostCredits = Misc.getDGSCredits(installCost);
+        final String unlockCostSP = String.format("%s SP", VT_Settings.installCostSP);
+        final String unlockCostSPString = canUnlockWithCredits ? "" : String.format(" and %s", unlockCostSP);
+        final String unlockSlotText = String.format("Locked slot\n" + "Cost to unlock: %s%s", unlockCostCredits, unlockCostSPString);
         final String needSpaceportText = "Need Spaceport for modification";
 
-        final Color hlColor = canUnlockWithCredits ? Misc.getHighlightColor() : Misc.getStoryOptionColor();
+        final List<Color> hlColor = new ArrayList<>();
+        hlColor.add(Misc.getHighlightColor());
+        hlColor.add(Misc.getStoryOptionColor());
 
         final float stringWidth = playerDockedAtSpaceport
                                   ? tooltip.computeStringWidth(unlockSlotText)
@@ -135,7 +148,7 @@ public class LockedSlotButton extends DefaultButton {
 
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                tooltip.addPara(unlockSlotText, 0f, hlColor, unlockCost);
+                tooltip.addPara(unlockSlotText, 0f, hlColor.toArray(new Color[0]), unlockCostCredits, unlockCostSP);
                 if (!playerDockedAtSpaceport) {
                     tooltip.addPara(needSpaceportText, Misc.getGrayColor(), 3f);
                 }
@@ -144,15 +157,11 @@ public class LockedSlotButton extends DefaultButton {
     }
 
     private boolean canUnlockSlot() {
-        boolean canUnlockWithCredits = unlockedSlots < VT_Settings.maxNumSlotsForCreditUnlock;
-
         if (VoidTecUtils.isPlayerDockedAtSpaceport()) {
-            if (canUnlockWithCredits) {
-                int installCost = VT_Settings.installCostCredits * unlockedSlots;
-                return Global.getSector().getPlayerFleet().getCargo().getCredits().get() >= installCost;
-            }
+            boolean hasCredits = Global.getSector().getPlayerFleet().getCargo().getCredits().get() >= installCost;
+            boolean hasSP = Global.getSector().getPlayerStats().getStoryPoints() >= installCostSP;
 
-            return Global.getSector().getPlayerStats().getStoryPoints() >= VT_Settings.installCostSP;
+            return canUnlockWithCredits ? hasCredits : hasSP && hasCredits;
         }
 
         return false;
