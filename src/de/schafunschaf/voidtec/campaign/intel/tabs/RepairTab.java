@@ -170,6 +170,7 @@ public class RepairTab {
                        Misc.getBasePlayerColor(), new Color(0, 0, 0, 0), new GlowingBox(selectedAugment.getPrimarySlot().getColor()))
                .getPosition()
                .inTMid(0f);
+
         IntelButton repairAugmentButton = new RepairAugmentButton(selectedAugment);
         ButtonAPI repairButton = repairAugmentButton.addButton(buttonUIElement, 0f, 20f);
         repairAugmentButton.addTooltip(buttonUIElement);

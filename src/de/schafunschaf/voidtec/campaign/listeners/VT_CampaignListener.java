@@ -50,7 +50,15 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
         vanillaMarkets.add(market.getSubmarket(Submarkets.GENERIC_MILITARY));
 
         for (SubmarketAPI submarket : vanillaMarkets) {
+            if (isNull(submarket)) {
+                continue;
+            }
+
             CargoAPI submarketCargo = submarket.getCargo();
+            if (isNull(submarketCargo)) {
+                continue;
+            }
+
             for (CargoStackAPI cargoStack : submarketCargo.getStacksCopy()) {
                 if (cargoStack.getPlugin() instanceof AugmentItemPlugin) {
                     submarketCargo.removeStack(cargoStack);
@@ -79,8 +87,21 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
             nearbyFleets.add((CampaignFleetAPI) interactionTarget);
         }
 
+        CampaignFleetAPI defenderFleet = interactionTarget.getMemoryWithoutUpdate().getFleet("$defenderFleet");
+        if (!isNull(defenderFleet)) {
+            nearbyFleets.add(defenderFleet);
+        }
+
+        MarketAPI interactionTargetMarket = interactionTarget.getMarket();
+        if (!isNull(interactionTargetMarket)) {
+            CampaignFleetAPI nexResponseFleet = interactionTargetMarket.getMemoryWithoutUpdate().getFleet("$nex_responseFleet");
+            if (!isNull(nexResponseFleet)) {
+                nearbyFleets.add(nexResponseFleet);
+            }
+        }
+
         for (CampaignFleetAPI fleet : nearbyFleets) {
-            AugmentGenerator.generateFleetAugments(fleet, VT_Settings.aiHullmodChance);
+            AugmentGenerator.generateFleetAugments(fleet);
         }
     }
 
@@ -101,6 +122,13 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
         }
 
         reportDamagedAugments();
+    }
+
+    @Override
+    public void reportFleetSpawned(CampaignFleetAPI fleet) {
+        if (Global.getSector().getCampaignUI().isShowingDialog()) {
+            AugmentGenerator.generateFleetAugments(fleet);
+        }
     }
 
     @Override
@@ -246,13 +274,17 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
             if (fleetMember.getVariant().hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID)) {
                 HullModManager hullModManager = HullModDataStorage.getInstance().getHullModManager(fleetMember.getId());
                 for (AugmentSlot filledSlot : hullModManager.getFilledSlots()) {
-                    if (salvageRandom.nextInt(100) + 1 <= VT_Settings.recoverChance) {
+                    if (MathUtils.rollSuccessful(VT_Settings.recoverChance, salvageRandom)) {
                         AugmentApplier slottedAugment = filledSlot.getSlottedAugment();
                         filledSlot.removeAugment();
-                        if (salvageRandom.nextInt(100) + 1 <= VT_Settings.damageChanceOnDestroy) {
-                            int numLevelsDamaged = salvageRandom.nextInt(3) + 1;
+                        if (MathUtils.rollSuccessful(VT_Settings.destroyChanceOnRecover, salvageRandom)) {
                             augmentLoot.addSpecial(
-                                    new AugmentItemData(VT_Items.AUGMENT_ITEM, null, slottedAugment.damageAugment(numLevelsDamaged)), 1f);
+                                    new AugmentItemData(VT_Items.AUGMENT_ITEM, null, slottedAugment.destroy()), 1f);
+                        } else if (MathUtils.rollSuccessful(VT_Settings.damageChanceOnRecover, salvageRandom)) {
+                            int numLevelsDamaged = salvageRandom.nextInt(5) + 1;
+                            augmentLoot.addSpecial(
+                                    new AugmentItemData(VT_Items.AUGMENT_ITEM, null, slottedAugment.damageAugment(numLevelsDamaged, false)),
+                                    1f);
                         } else {
                             augmentLoot.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, slottedAugment), 1f);
                         }

@@ -30,18 +30,18 @@ public enum SlotCategory {
     Color color;
     int weighting;
 
-    public static List<SlotCategory> getAllowedCategories() {
-        List<SlotCategory> allowedCategories = new ArrayList<>();
+    public static List<SlotCategory> getGeneralCategories() {
+        List<SlotCategory> slotCategories = new ArrayList<>();
 
-        allowedCategories.add(WEAPON);
-        allowedCategories.add(FLIGHT_DECK);
-        allowedCategories.add(STRUCTURE);
-        allowedCategories.add(SHIELD);
-        allowedCategories.add(REACTOR);
-        allowedCategories.add(ENGINE);
-        allowedCategories.add(SYSTEM);
+        slotCategories.add(WEAPON);
+        slotCategories.add(FLIGHT_DECK);
+        slotCategories.add(STRUCTURE);
+        slotCategories.add(SHIELD);
+        slotCategories.add(REACTOR);
+        slotCategories.add(ENGINE);
+        slotCategories.add(SYSTEM);
 
-        return allowedCategories;
+        return slotCategories;
     }
 
     public static SlotCategory getRandomCategory(Random random, boolean ignoreWeighting) {
@@ -50,7 +50,7 @@ public enum SlotCategory {
         }
 
         WeightedRandomPicker<SlotCategory> picker = new WeightedRandomPicker<>(random);
-        for (SlotCategory slotCategory : getAllowedCategories()) {
+        for (SlotCategory slotCategory : getGeneralCategories()) {
             int weight = ignoreWeighting ? 1 : slotCategory.weighting;
             picker.add(slotCategory, weight);
         }

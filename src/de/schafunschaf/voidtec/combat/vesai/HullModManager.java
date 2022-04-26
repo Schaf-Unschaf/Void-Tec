@@ -28,7 +28,6 @@ import lombok.extern.log4j.Log4j;
 import java.awt.Color;
 import java.util.*;
 
-import static com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 @Log4j
@@ -39,9 +38,14 @@ public class HullModManager {
     private final ShipStatEffectManager shipStatEffectManager = new ShipStatEffectManager();
     @Getter
     private final String fleetMemberID;
+    private final String sModPenalty = "_sModOverLimitPenalty";
     private final List<AppliedStatModifier> appliedModifiers = new ArrayList<>();
     @Getter
     private final long randomSeed;
+
+    private final float supplyPenalty = 100f;
+    private final float recoveryPenalty = 100f;
+    private final float performancePenalty = 100f / 3;
 
     public HullModManager(FleetMemberAPI fleetMember) {
         this.fleetMemberID = fleetMember.getId();
@@ -53,6 +57,10 @@ public class HullModManager {
     public void removeHullMod(FleetMemberAPI fleetMember) {
         if (!fleetMemberID.equals(fleetMember.getId())) {
             return;
+        }
+
+        for (AugmentSlot slot : getAllSlots()) {
+            slot.removeAugment();
         }
 
         fleetMember.getVariant().removePermaMod(VoidTecEngineeringSuite.HULL_MOD_ID);
@@ -263,16 +271,28 @@ public class HullModManager {
         float maxPermanentHullmods = Global.getSettings().getFloat("maxPermanentHullmods");
         int builtInBonusSlots = (int) stats.getDynamic().getMod(Stats.MAX_PERMANENT_HULLMODS_MOD).getFlatBonus();
         int maxBuiltInMods = (int) (maxPermanentHullmods + builtInBonusSlots);
-        int currentBuiltInMods = stats.getVariant().getSMods().size();
+        int currentBuiltInMods = stats.getVariant().getSMods().size()+3;
+        int numOverLimitMods = Math.abs(currentBuiltInMods - maxBuiltInMods);
+        boolean overLimit = currentBuiltInMods > maxBuiltInMods;
 
-        if (maxBuiltInMods > 0) {
-            tooltip.addPara("Available Build-In Slots: %s/%s", 10f, Misc.getTextColor(), Misc.getHighlightColor(),
+        if (overLimit) {
+            String sumSupplyPenalty = (int) (supplyPenalty * numOverLimitMods) + "%";
+            String sumRecoveryPenalty = (int) (recoveryPenalty * numOverLimitMods) + "%";
+            String sumPerformancePenalty = Math.min(Math.round(performancePenalty * numOverLimitMods), 100) + "%";
+
+            tooltip.addPara("Currently used Build-In Slots: %s / %s",
+                            10f, new Color[]{Misc.getNegativeHighlightColor(), Misc.getHighlightColor()},
                             String.valueOf(currentBuiltInMods), String.valueOf(maxBuiltInMods));
+            tooltip.addPara("Your ship is over its Build-In capacity!", Misc.getNegativeHighlightColor(), 6f);
+            tooltip.addPara("It will suffer a penalty of %s to its maintenance and recovery cost as well as a %s shortened PPT.",
+                            6f, Misc.getNegativeHighlightColor(), sumSupplyPenalty, sumPerformancePenalty, sumRecoveryPenalty);
+        } else if (maxBuiltInMods > 0) {
+            Color color = currentBuiltInMods < maxBuiltInMods ? Misc.getPositiveHighlightColor() : Misc.getHighlightColor();
+            tooltip.addPara("Currently used Build-In Slots: %s / %s", 10f, color, String.valueOf(currentBuiltInMods),
+                            String.valueOf(maxBuiltInMods));
         } else {
-            tooltip.addPara("Available Build-In Slots: %s", 10f, Misc.getTextColor(), Misc.getNegativeHighlightColor(), "NONE");
+            tooltip.addPara("No Build-In Slots available", Misc.getGrayColor(), 10f);
         }
-        tooltip.addPara("Some %s Augments can grant additional slots for building in hullmods.", 3f, Misc.getGrayColor(),
-                        SlotCategory.SPECIAL.getColor(), SlotCategory.SPECIAL.name()).italicize();
     }
 
     public boolean installAugment(AugmentSlot augmentSlot, AugmentApplier augment) {
@@ -420,7 +440,7 @@ public class HullModManager {
 
         AugmentSlot augmentSlot = slotsWithDamageableAugments.get(random.nextInt(slotsWithDamageableAugments.size()));
 
-        return augmentSlot.getSlottedAugment().damageAugment(numLevelsDamaged);
+        return augmentSlot.getSlottedAugment().damageAugment(numLevelsDamaged, false);
     }
 
     public void generateSlotsForShip(FleetMemberAPI fleetMember) {
@@ -429,7 +449,6 @@ public class HullModManager {
         }
 
         Random random = new Random(randomSeed);
-        HullSize hullSize = fleetMember.getVariant().getHullSize();
         boolean isPhase = fleetMember.isPhaseShip();
         int numFlightDecks = fleetMember.getNumFlightDecks();
         boolean isCarrier = numFlightDecks > 0;
@@ -437,7 +456,7 @@ public class HullModManager {
                 && !isNull(fleetMember.getFleetData().getFleet())
                 && !fleetMember.getFleetData().getFleet().isPlayerFleet();
         int maxSlots = 6;
-        int numUnlockedSlots = isNPC ? random.nextInt(maxSlots) : 0;
+        int numUnlockedSlots = isNPC ? random.nextInt(maxSlots) : VT_Settings.unlockedSlots;
 
         if (VT_Settings.randomSlotAmount) {
             numUnlockedSlots = random.nextInt(maxSlots) + 1;
@@ -452,7 +471,7 @@ public class HullModManager {
         }
 
         Map<SlotCategory, Integer> categoryPoolWithWeighting = new HashMap<>();
-        for (SlotCategory allowedCategory : SlotCategory.getAllowedCategories()) {
+        for (SlotCategory allowedCategory : SlotCategory.getGeneralCategories()) {
             if (isPhase && allowedCategory == SlotCategory.SHIELD) {
                 continue;
             }
@@ -490,5 +509,28 @@ public class HullModManager {
         }
 
         appliedModifiers.add(nextASM);
+    }
+
+    public void addOverLimitPenalty(MutableShipStatsAPI stats, String id) {
+        float maxPermanentHullmods = Global.getSettings().getFloat("maxPermanentHullmods");
+        int builtInBonusSlots = (int) stats.getDynamic().getMod(Stats.MAX_PERMANENT_HULLMODS_MOD).getFlatBonus();
+        int maxBuiltInMods = (int) (maxPermanentHullmods + builtInBonusSlots);
+        int currentBuiltInMods = stats.getVariant().getSMods().size();
+        int numOverLimitMods = Math.abs(currentBuiltInMods - maxBuiltInMods);
+        boolean overLimit = currentBuiltInMods > maxBuiltInMods;
+
+        if (overLimit) {
+            stats.getSuppliesPerMonth().modifyPercent(id + sModPenalty, supplyPenalty * numOverLimitMods);
+            stats.getSuppliesToRecover().modifyPercent(id + sModPenalty, recoveryPenalty * numOverLimitMods);
+            stats.getPeakCRDuration().modifyPercent(id + sModPenalty, -Math.min(Math.round(performancePenalty * numOverLimitMods), 100));
+        }
+    }
+
+    public void unlockAllSlots() {
+        for (AugmentSlot slot : getAllSlots()) {
+            if (!slot.isUnlocked()) {
+                slot.unlockSlot();
+            }
+        }
     }
 }

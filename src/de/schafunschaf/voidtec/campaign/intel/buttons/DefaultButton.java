@@ -4,7 +4,7 @@ import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-public class DefaultButton implements IntelButton {
+public abstract class DefaultButton implements IntelButton {
 
     @Override
     public void buttonPressCancelled(IntelUIAPI ui) {

@@ -50,6 +50,7 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
 
         hullModManager.applySlotEffects(stats, id);
         hullModManager.applyBeforeCreation(stats, id);
+        hullModManager.addOverLimitPenalty(stats, id);
     }
 
     @Override

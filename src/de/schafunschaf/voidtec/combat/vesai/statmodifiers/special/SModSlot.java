@@ -5,7 +5,7 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
+import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.BaseStatMod;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModValue;
@@ -21,20 +21,18 @@ public class SModSlot extends BaseStatMod {
     }
 
     @Override
-    public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean, Boolean> statModValue, long randomSeed,
+    public void applyToShip(MutableShipStatsAPI stats, String id, StatModValue<Float, Float, Boolean, Boolean> statModValue,
+                            long randomSeed,
                             AugmentApplier parentAugment) {
-        if (parentAugment.getInstalledSlot().getSlotCategory() == SlotCategory.FLIGHT_DECK) {
-            parentAugment.updateFighterStatValue(id + "_" + statID,
-                                                 1f + generateModValue(statModValue, randomSeed, parentAugment.getAugmentQuality()) / 100f);
-        } else {
-            stats.getDynamic()
-                 .getMod(Stats.MAX_PERMANENT_HULLMODS_MOD)
-                 .modifyFlat(id, generateModValue(statModValue, randomSeed, parentAugment.getAugmentQuality()));
-        }
+        stats.getDynamic()
+             .getMod(Stats.MAX_PERMANENT_HULLMODS_MOD)
+             .modifyFlat(id, generateModValue(statModValue, randomSeed, parentAugment.getAugmentQuality()));
+
     }
 
     @Override
     public void remove(MutableShipStatsAPI stats, String id) {
+        id = VoidTecEngineeringSuite.HULL_MOD_ID + "_" + id;
         stats.getDynamic().getMod(Stats.MAX_PERMANENT_HULLMODS_MOD).unmodify(id);
     }
 

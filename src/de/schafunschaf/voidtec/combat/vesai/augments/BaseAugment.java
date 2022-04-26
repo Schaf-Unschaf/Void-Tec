@@ -66,7 +66,7 @@ public class BaseAugment implements AugmentApplier {
                               ? AugmentQuality.getRandomQualityInRange(augmentData.getAugmentQualityRange(), null,
                                                                        augmentData.isEqualQualityRoll())
                               : augmentQuality;
-        this.initialQuality = augmentQuality;
+        this.initialQuality = augmentQuality.isGreaterOrEqualThen(AugmentQuality.COMMON) ? augmentQuality : AugmentQuality.COMMON;
         this.additionalDescription = augmentData.getAdditionalDescription();
         this.beforeCreationEffect = ((BeforeCreationEffect) createInstanceFromPath(augmentData.getBeforeCreationEffectPath()));
         this.afterCreationEffect = ((AfterCreationEffect) createInstanceFromPath(augmentData.getAfterCreationEffectPath()));
@@ -260,14 +260,25 @@ public class BaseAugment implements AugmentApplier {
     }
 
     @Override
-    public AugmentApplier damageAugment(int numLevelsDamaged) {
+    public AugmentApplier damageAugment(int numLevelsDamaged, boolean canDestroy) {
         if (augmentQuality == AugmentQuality.CUSTOMISED) {
             return this;
         }
 
         for (int i = 0; i < numLevelsDamaged; i++) {
+            if (!canDestroy && augmentQuality == AugmentQuality.DEGRADED) {
+                break;
+            }
+
             augmentQuality = augmentQuality.getLowerQuality();
         }
+
+        return this;
+    }
+
+    @Override
+    public AugmentApplier destroy() {
+        augmentQuality = AugmentQuality.DESTROYED;
 
         return this;
     }

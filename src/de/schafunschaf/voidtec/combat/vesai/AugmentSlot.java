@@ -16,7 +16,7 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 public class AugmentSlot {
 
     private final HullModManager hullModManager;
-    private final SlotCategory slotCategory;
+    private SlotCategory slotCategory;
     private AugmentApplier slottedAugment;
     private boolean isUnlocked;
 
@@ -98,8 +98,10 @@ public class AugmentSlot {
     }
 
     public void removeAugment() {
-        slottedAugment.uninstall();
-        slottedAugment = null;
+        if (!isNull(slottedAugment)) {
+            slottedAugment.uninstall();
+            slottedAugment = null;
+        }
     }
 
     public boolean isEmpty() {
@@ -108,5 +110,10 @@ public class AugmentSlot {
 
     public void collectAppliedStats(MutableShipStatsAPI stats, String id) {
         slottedAugment.collectAppliedStats(stats, id);
+    }
+
+    public void setSlotCategory(SlotCategory newCategory) {
+        removeAugment();
+        slotCategory = newCategory;
     }
 }

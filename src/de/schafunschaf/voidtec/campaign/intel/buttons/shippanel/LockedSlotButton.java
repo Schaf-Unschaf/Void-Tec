@@ -37,7 +37,7 @@ public class LockedSlotButton extends DefaultButton {
     public LockedSlotButton(AugmentSlot augmentSlot, FleetMemberAPI fleetMember) {
         this.augmentSlot = augmentSlot;
         this.unlockedSlots = augmentSlot.getHullModManager().getUnlockedSlots().size();
-        this.installCost = MathUtils.roundWholeNumber(fleetMember.getHullSpec().getBaseValue() * 0.1f * unlockedSlots, 2);
+        this.installCost = MathUtils.roundWholeNumber(fleetMember.getHullSpec().getBaseValue() * 0.1f * Math.max(unlockedSlots - 2, 1), 2);
         this.canUnlockWithCredits = unlockedSlots < VT_Settings.maxNumSlotsForCreditUnlock;
     }
 

@@ -26,17 +26,17 @@ public class SpecialShips {
     public static void loadSpecialShipFiles() {
         try {
             JSONObject mergedSpecialShips = Global.getSettings().getMergedJSONForMod(FILE_PATH, VoidTecPlugin.MOD_ID);
-            JSONObject specialHulls = mergedSpecialShips.getJSONObject("specialHulls");
-            JSONObject specialVariants = mergedSpecialShips.getJSONObject("specialVariants");
+            JSONObject specialHullsJSON = mergedSpecialShips.getJSONObject("specialHulls");
+            JSONObject specialVariantsJSON = mergedSpecialShips.getJSONObject("specialVariants");
 
-            Map<String, Object[]> specialHullMap = JSONParser.parseJSONObject(specialHulls);
-            for (Map.Entry<String, Object[]> entry : specialHullMap.entrySet()) {
-                specialHulls.put(entry.getKey(), entry.getValue());
+            Map<String, Object[]> specialHullMap = JSONParser.parseJSONObject(specialHullsJSON);
+            for (String key : specialHullMap.keySet()) {
+                specialHulls.put(key, (String[]) specialHullMap.get(key));
             }
 
-            Map<String, Object[]> specialVariantMap = JSONParser.parseJSONObject(specialVariants);
-            for (Map.Entry<String, Object[]> entry : specialVariantMap.entrySet()) {
-                specialVariants.put(entry.getKey(), entry.getValue());
+            Map<String, Object[]> specialVariantMap = JSONParser.parseJSONObject(specialVariantsJSON);
+            for (String key : specialVariantMap.keySet()) {
+                specialVariants.put(key, (String[]) specialVariantMap.get(key));
             }
         } catch (IOException | JSONException e) {
             log.error(String.format("Failed to load SpecialShips: %s", e));

@@ -71,9 +71,11 @@ public interface AugmentApplier {
 
     boolean isDestroyed();
 
-    AugmentApplier damageAugment(int numLevelsDamaged);
+    AugmentApplier damageAugment(int numLevelsDamaged, boolean canDestroy);
 
     AugmentApplier repairAugment(int numLevelsRepaired);
+
+    AugmentApplier destroy();
 
     void installAugment(AugmentSlot augmentSlot);
 

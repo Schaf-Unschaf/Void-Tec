@@ -27,7 +27,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -37,8 +36,9 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 @Log4j
 public class AugmentGenerator {
 
-    public static void generateFleetAugments(CampaignFleetAPI fleet, float probability) {
+    public static void generateFleetAugments(CampaignFleetAPI fleet) {
         Random random = new Random(fleet.getId().hashCode());
+        fleet.setInflated(true);
 
         for (FleetMemberAPI fleetMember : fleet.getFleetData().getMembersListCopy()) {
             if (fleetMember.isStation()) {
@@ -46,11 +46,13 @@ public class AugmentGenerator {
             }
 
             if (SpecialShips.isSpecialShip(fleetMember)) {
-                generateShipAugments(fleetMember, 1f, SpecialShips.getQualityRange(fleetMember), random);
+                generateShipAugments(fleetMember, 100, SpecialShips.getQualityRange(fleetMember), true, random);
                 continue;
             }
 
-            generateShipAugments(fleetMember, probability, getCategoryForFleet(fleet), random);
+            if (MathUtils.rollSuccessful(VT_Settings.aiHullmodChance, random)) {
+                generateShipAugments(fleetMember, VT_Settings.aiSlotFillChance, getCategoryForFleet(fleet), random);
+            }
         }
     }
 
@@ -94,7 +96,7 @@ public class AugmentGenerator {
         return GenerationCategory.MILITARY;
     }
 
-    public static void generateShipAugments(FleetMemberAPI ship, float probability, GenerationCategory category, Random random) {
+    public static void generateShipAugments(FleetMemberAPI ship, int probability, GenerationCategory category, Random random) {
         if (isNull(category) || ship.getVariant().hasHullMod(VoidTecEngineeringSuite.HULL_MOD_ID)) {
             return;
         }
@@ -103,31 +105,31 @@ public class AugmentGenerator {
             category = GenerationCategory.CIVILIAN;
         }
 
-        generateShipAugments(ship, probability, category.getQualityRange(), random);
+        generateShipAugments(ship, probability, category.getQualityRange(), false, random);
     }
 
-    public static void generateShipAugments(FleetMemberAPI ship, float probability, String[] qualityRange, Random random) {
-        int bound = (int) Math.pow(10, BigDecimal.valueOf(probability).scale());
-        int scaledProb = (int) (probability * bound);
-        if (random.nextInt(bound) <= scaledProb) {
-            HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
-            HullModManager hullModManager = hullModDataStorage.getHullModManager(ship.getId());
-            if (isNull(hullModManager)) {
-                hullModManager = new HullModManager(ship);
-            }
-
-            ShipVariantAPI variant = ship.getVariant();
-            variant.addPermaMod(VoidTecEngineeringSuite.HULL_MOD_ID);
-            Object prefFactionObject = ship.getFleetData().getFleet().getMemoryWithoutUpdate().get(VT_MemoryKeys.VT_PREF_FACTION_KEY);
-            FactionAPI preferredFaction = isNull(prefFactionObject)
-                                          ? ship.getFleetData().getFleet().getFaction()
-                                          : Global.getSector().getFaction(((String) prefFactionObject));
-            fillUnlockedSlots(hullModManager, ship, preferredFaction, qualityRange, scaledProb, random);
+    public static void generateShipAugments(FleetMemberAPI ship, int probability, String[] qualityRange, boolean unlockAll, Random random) {
+        HullModDataStorage hullModDataStorage = HullModDataStorage.getInstance();
+        HullModManager hullModManager = hullModDataStorage.getHullModManager(ship.getId());
+        if (isNull(hullModManager)) {
+            hullModManager = new HullModManager(ship);
         }
+
+        if (unlockAll) {
+            hullModManager.unlockAllSlots();
+        }
+
+        ShipVariantAPI variant = ship.getVariant();
+        variant.addPermaMod(VoidTecEngineeringSuite.HULL_MOD_ID);
+        Object prefFactionObject = ship.getFleetData().getFleet().getMemoryWithoutUpdate().get(VT_MemoryKeys.VT_PREF_FACTION_KEY);
+        FactionAPI preferredFaction = isNull(prefFactionObject)
+                                      ? ship.getFleetData().getFleet().getFaction()
+                                      : Global.getSector().getFaction(((String) prefFactionObject));
+        fillUnlockedSlots(hullModManager, ship, preferredFaction, qualityRange, probability, random);
     }
 
     public static void fillUnlockedSlots(HullModManager hullModManager, FleetMemberAPI ship, FactionAPI preferredFaction,
-                                         String[] qualityRange, int scaledProbability, Random random) {
+                                         String[] qualityRange, int probability, Random random) {
         if (VT_Settings.sheepDebug) {
             log.info(String.format("Generating random augments for [%s]", ShipUtils.generateShipNameWithClass(ship)));
         }
@@ -137,7 +139,7 @@ public class AugmentGenerator {
         }
 
         for (AugmentSlot shipAugmentSlot : hullModManager.getUnlockedSlots()) {
-            if (!shipAugmentSlot.isEmpty() || !MathUtils.rollSuccessful(scaledProbability, random)) {
+            if (!shipAugmentSlot.isEmpty() || !MathUtils.rollSuccessful(probability, random)) {
                 continue;
             }
 

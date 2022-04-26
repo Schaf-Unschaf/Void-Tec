@@ -76,7 +76,7 @@ public class EmptySlotButton extends DefaultButton {
 
     @Override
     public boolean doesButtonHaveConfirmDialog() {
-        return canInstallAugment && VoidTecUtils.isPlayerDockedAtSpaceport();
+        return InfoPanel.getSelectedTab() == InfoPanel.InfoTabs.DETAILS && canInstallAugment && VoidTecUtils.isPlayerDockedAtSpaceport();
     }
 
     @Override

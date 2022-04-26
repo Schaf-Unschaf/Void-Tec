@@ -11,6 +11,7 @@ import de.schafunschaf.voidtec.combat.hullmods.VoidTecEngineeringSuite;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.HullModDataStorage;
 import de.schafunschaf.voidtec.combat.vesai.HullModManager;
+import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Settings;
@@ -170,20 +171,22 @@ public class ShipPanel {
 
         boolean hasVESAI = true;
         boolean isSelected = false;
+        AugmentSlot selectedSlot = null;
         HullModManager hullModManager = HullModDataStorage.getInstance().getHullModManager(ship.getId());
         if (isNull(hullModManager)) {
             hasVESAI = false;
         } else {
             for (AugmentSlot augmentSlot : hullModManager.getUnlockedSlots()) {
                 AugmentApplier selectedAugment = AugmentManagerIntel.getSelectedInstalledAugment();
-                AugmentSlot selectedSlot = AugmentManagerIntel.getSelectedSlot();
+                AugmentSlot selectedSlotInIntel = AugmentManagerIntel.getSelectedSlot();
                 AugmentApplier slottedAugment = augmentSlot.getSlottedAugment();
 
                 boolean matchesInstalledAugment = !isNull(slottedAugment) && slottedAugment == selectedAugment;
-                boolean matchesSlot = !isNull(selectedSlot) && augmentSlot == selectedSlot;
+                boolean matchesSlot = !isNull(selectedSlotInIntel) && augmentSlot == selectedSlotInIntel;
 
                 if ((matchesSlot || matchesInstalledAugment)) {
                     isSelected = true;
+                    selectedSlot = augmentSlot;
                     break;
                 }
             }
@@ -206,12 +209,21 @@ public class ShipPanel {
         }
 
         if (hasVESAI) {
-            if (VT_Settings.enableRemoveHullmodButton) {
-                shipElement.setButtonFontVictor10();
-                ButtonUtils.addLabeledButton(shipElement, shipIconSize - augmentButtonPadding * 2, 10f, 0f, Misc.getTextColor(),
-                                             Misc.getDarkPlayerColor(), CutStyle.ALL, new RemoveHullmodButton(ship))
-                           .getPosition().setYAlignOffset(1f).setXAlignOffset(4f);
-                shipElement.setButtonFontDefault();
+            float smallButtonHeight = 12f;
+            float smallButtonWidth = shipIconSize - augmentButtonPadding * 2;
+
+            if (isNull(selectedSlot)) {
+                if (VT_Settings.enableRemoveHullmodButton) {
+                    shipElement.setButtonFontVictor10();
+                    ButtonUtils.addLabeledButton(shipElement, smallButtonWidth, smallButtonHeight, 0f, Misc.getTextColor(),
+                                                 Misc.getDarkPlayerColor(), CutStyle.ALL, new RemoveHullmodButton(ship))
+                               .getPosition().setYAlignOffset(3f).setXAlignOffset(4f);
+                    shipElement.setButtonFontDefault();
+                }
+            } else if (VT_Settings.enableChangeSlotButton
+                    && SlotCategory.getGeneralCategories().contains(selectedSlot.getSlotCategory())
+                    && selectedSlot.isEmpty()) {
+                new ChangeSlotButton(selectedSlot).addButton(shipElement, smallButtonWidth, smallButtonHeight);
             }
 
             ButtonAPI lastScriptRunnerButton = null;

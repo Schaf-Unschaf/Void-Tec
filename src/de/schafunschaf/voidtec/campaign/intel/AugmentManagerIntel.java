@@ -171,7 +171,7 @@ public class AugmentManagerIntel extends BaseIntel {
             for (DamagedAugmentData augmentData : damagedAugmentData) {
                 hlStrings.add(augmentData.getAugmentName());
                 hlColors.add(augmentData.getSlotColor());
-                String semicolon = augmentListBuilder.length() > 0 ? " ," : "";
+                String semicolon = augmentListBuilder.length() > 0 ? ", " : "";
                 augmentListBuilder.append(semicolon).append(augmentData.getAugmentName());
             }
 

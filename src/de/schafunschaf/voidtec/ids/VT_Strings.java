@@ -5,7 +5,7 @@ public class VT_Strings {
     public static final String VT_DAMAGED_AUGMENT_DESC = "This Augments functionality degraded over time or by getting damaged.\n" +
             "It can still be installed and will work at a reduced efficiency.";
     public static final String VT_DESTROYED_AUGMENT_DESC = "This Augment is damaged beyond repair.\n" +
-            "It can't be installed and is nothing more than a heap of scrap in its current state.";
+            "It can't be installed and is nothing more than a heap of scrap.";
 
     public static final String BULLET_CHAR = "•";
 

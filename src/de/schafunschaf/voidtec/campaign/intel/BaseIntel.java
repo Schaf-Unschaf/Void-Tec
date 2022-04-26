@@ -55,5 +55,12 @@ public class BaseIntel extends BaseIntelPlugin {
 
     @Override
     public void buttonPressCancelled(Object buttonId, IntelUIAPI ui) {
+        if (buttonId instanceof IntelButton) {
+            ((IntelButton) buttonId).buttonPressCancelled(ui);
+        }
+
+        Global.getSector().getPlayerFleet().getFleetData().setSyncNeeded();
+        Global.getSector().getPlayerFleet().getFleetData().syncMemberLists();
+        ui.updateUIForItem(this);
     }
 }

@@ -220,7 +220,7 @@ public class VT_LootListener implements ShowLootListener {
                 continue;
             }
 
-            augment.damageAugment(damageAmount);
+            augment.damageAugment(damageAmount, false);
             AugmentItemData augmentItemData = new AugmentItemData(VT_Items.AUGMENT_ITEM, null, augment);
 
             cargo.addSpecial(augmentItemData, 1f);

@@ -24,15 +24,22 @@ public class DismantleAugmentButton extends DefaultButton {
 
     private final AugmentApplier augment;
     private final AugmentCargoWrapper augmentCargoWrapper;
+    private final boolean canNotBeDismantled;
 
     public DismantleAugmentButton(AugmentApplier augment) {
         this.augment = augment;
         this.augmentCargoWrapper = null;
+        this.canNotBeDismantled = augment.isDestroyed()
+                || augment.getAugmentQuality() == AugmentQuality.CUSTOMISED
+                || augment.getInitialQuality() == AugmentQuality.DEGRADED;
     }
 
     public DismantleAugmentButton(AugmentCargoWrapper augmentCargoWrapper) {
         this.augmentCargoWrapper = augmentCargoWrapper;
         this.augment = augmentCargoWrapper.getAugment();
+        this.canNotBeDismantled = augment.isDestroyed()
+                || augment.getAugmentQuality() == AugmentQuality.CUSTOMISED
+                || augment.getInitialQuality() == AugmentQuality.DEGRADED;
     }
 
     @Override
@@ -52,23 +59,29 @@ public class DismantleAugmentButton extends DefaultButton {
     public void createConfirmationPrompt(TooltipMakerAPI tooltip) {
         tooltip.addPara(String.format("%s %s?", getName(), augment.getName()), 0f, augment.getAugmentQuality().getColor(),
                         augment.getName());
-        tooltip.addPara("This will give you the following components:", 10f, Misc.getHighlightColor(),
-                        Misc.getDGSCredits(VoidTecUtils.calcNeededCreditsForRepair(augment)));
-        tooltip.addSpacer(3f);
-        tooltip.setBulletedListMode(String.format(" %s ", VT_Strings.BULLET_CHAR));
-        for (CraftingComponent component : AugmentPartsUtility.getComponentsForDismantling(augment)) {
-            Color compCatColor = isNull(component.getPartCategory()) ? Misc.getTextColor() : component.getPartCategory().getColor();
-            tooltip.setBulletColor(component.getPartQuality().getColor());
-            tooltip.addPara("%s %s %s-Parts", 0f,
-                            new Color[]{Misc.getHighlightColor(), component.getPartQuality().getColor(), compCatColor,
-                                        Misc.getHighlightColor()}, String.valueOf(component.getAmount()),
-                            component.getPartQuality().getName(), component.getName());
+
+        if (AugmentPartsUtility.getComponentsForDismantling(augment).isEmpty()) {
+            tooltip.addPara("This augment appears to have no usable components left to salvage.", Misc.getGrayColor(), 10f);
+            tooltip.addPara("Consider selling instead of trashing it to get some pocket change.", Misc.getGrayColor(), 3f);
+        } else {
+            tooltip.addPara("This will give you the following components:", 10f, Misc.getHighlightColor(),
+                            Misc.getDGSCredits(VoidTecUtils.calcNeededCreditsForRepair(augment)));
+            tooltip.addSpacer(3f);
+            tooltip.setBulletedListMode(String.format(" %s ", VT_Strings.BULLET_CHAR));
+            for (CraftingComponent component : AugmentPartsUtility.getComponentsForDismantling(augment)) {
+                Color compCatColor = isNull(component.getPartCategory()) ? Misc.getTextColor() : component.getPartCategory().getColor();
+                tooltip.setBulletColor(component.getPartQuality().getColor());
+                tooltip.addPara("%s %s %s-Parts", 0f,
+                                new Color[]{Misc.getHighlightColor(), component.getPartQuality().getColor(), compCatColor,
+                                            Misc.getHighlightColor()}, String.valueOf(component.getAmount()),
+                                component.getPartQuality().getName(), component.getName());
+            }
         }
     }
 
     @Override
     public boolean doesButtonHaveConfirmDialog() {
-        return !(!isNull(augmentCargoWrapper) && augment.getAugmentQuality() == AugmentQuality.CUSTOMISED);
+        return !(!isNull(augmentCargoWrapper) && augment.getAugmentQuality() == AugmentQuality.CUSTOMISED && !canNotBeDismantled);
     }
 
     @Override
@@ -85,10 +98,12 @@ public class DismantleAugmentButton extends DefaultButton {
     public String getName() {
         if (!isNull(augmentCargoWrapper) && augment.getAugmentQuality() == AugmentQuality.CUSTOMISED) {
             return "------";
-        } else if (augment.isDestroyed() || augment.getAugmentQuality() == AugmentQuality.CUSTOMISED) {
-            return "Remove";
         } else {
-            return "Dismantle";
+            if (canNotBeDismantled) {
+                return "Remove";
+            } else {
+                return "Dismantle";
+            }
         }
     }
 

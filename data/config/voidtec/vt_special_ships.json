@@ -1,7 +1,7 @@
 {
   "specialHulls": {
     "ziggurat": ["DOMAIN"],
-    "tesseract": ["REMNANT"]
+    "tesseract": ["DOMAIN"]
   },
 
   "specialVariants": {

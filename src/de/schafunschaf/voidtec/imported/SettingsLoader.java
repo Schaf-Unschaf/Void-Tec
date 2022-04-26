@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 public class SettingsLoader {
+
     private static final String FILE_PATH = "VoidTec_Settings.ini";
 
     public static void loadSettings() {
@@ -15,6 +16,12 @@ public class SettingsLoader {
             JSONObject settings = Global.getSettings().loadJSON(FILE_PATH);
             VT_Settings.sheepDebug = settings.getBoolean("sheepDebug");
             VT_Settings.enableRemoveHullmodButton = settings.getBoolean("enableRemoveHullmodButton");
+            VT_Settings.enableChangeSlotButton = settings.getBoolean("enableChangeSlotButton");
+            VT_Settings.aiHullmodChance = settings.getInt("aiHullmodChance");
+            VT_Settings.aiSlotFillChance = settings.getInt("aiSlotFillChance");
+            VT_Settings.recoverChance = settings.getInt("recoverChance");
+            VT_Settings.destroyChanceOnRecover = settings.getInt("destroyChanceOnRecover");
+            VT_Settings.damageChanceOnRecover = settings.getInt("damageChanceOnRecover");
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }

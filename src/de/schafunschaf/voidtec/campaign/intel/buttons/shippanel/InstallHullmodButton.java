@@ -5,7 +5,9 @@ import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.characters.MutableCharacterStatsAPI;
 import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
+import com.fs.starfarer.api.loading.HullModSpecAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
@@ -85,7 +87,9 @@ public class InstallHullmodButton extends DefaultButton {
             tooltip.addPara("You can choose to keep one of the following SMods:", 10f);
 
             for (final String sMod : sModsToRemove) {
-                final String displayName = Global.getSettings().getHullModSpec(sMod).getDisplayName();
+                HullModSpecAPI modSpec = Global.getSettings().getHullModSpec(sMod);
+                final String displayName = modSpec.getDisplayName();
+                final SpriteAPI sprite = Global.getSettings().getSprite(modSpec.getSpriteName());
 
                 if (selectedSMod.isEmpty()) {
                     selectedSMod = sMod;
@@ -93,12 +97,12 @@ public class InstallHullmodButton extends DefaultButton {
 
                 final float size = 20f;
                 final float borderSize = 1f;
-                final float borderMargin = 1f;
+                sprite.setSize(size - borderSize * 2, size - borderSize * 2);
                 CustomPanelAPI buttonPanelAPI = Global.getSettings().createCustom(500, size, null);
 
                 TooltipMakerAPI uiElement = buttonPanelAPI.createUIElement(500, size, false);
-                UIComponentAPI box = UIUtils.addBox(uiElement, "", null, null, size, size, borderSize, borderMargin, null,
-                                                    Misc.getTextColor(), Misc.getStoryDarkColor(),
+                UIComponentAPI box = UIUtils.addBox(uiElement, "", null, null, size, size, borderSize, 0, null,
+                                                    Misc.getStoryDarkColor(), Color.BLACK,
                                                     new CustomUIPanelPlugin() {
                                                         private PositionAPI p;
                                                         private boolean isChecked = sMod.equals(selectedSMod);
@@ -115,33 +119,42 @@ public class InstallHullmodButton extends DefaultButton {
 
                                                         @Override
                                                         public void render(float alphaMult) {
-                                                            if (p == null || !isChecked) {
+                                                            if (p == null) {
                                                                 return;
+                                                            }
+
+                                                            if (!isChecked) {
+                                                                sprite.setAlphaMult(0.3f);
+                                                            } else {
+                                                                sprite.setAlphaMult(1f);
                                                             }
 
                                                             float x = p.getX();
                                                             float y = p.getY();
-                                                            float padding = borderSize + borderMargin;
-                                                            float hlSize = size - padding * 2;
-                                                            Color color = Misc.getStoryOptionColor();
 
-                                                            GL11.glDisable(GL11.GL_TEXTURE_2D);
-                                                            GL11.glEnable(GL11.GL_BLEND);
-                                                            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+                                                            if (isChecked) {
+                                                                Color color = Misc.getStoryOptionColor();
 
-                                                            GL11.glColor4ub((byte) color.getRed(),
-                                                                            (byte) color.getGreen(),
-                                                                            (byte) color.getBlue(),
-                                                                            (byte) (color.getAlpha()));
+                                                                GL11.glDisable(GL11.GL_TEXTURE_2D);
+                                                                GL11.glEnable(GL11.GL_BLEND);
+                                                                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-                                                            GL11.glBegin(GL11.GL_QUADS);
-                                                            {
-                                                                GL11.glVertex2f(x + padding, y + padding);
-                                                                GL11.glVertex2f(x + padding, y + padding + hlSize);
-                                                                GL11.glVertex2f(x + padding + hlSize, y + padding + hlSize);
-                                                                GL11.glVertex2f(x + padding + hlSize, y + padding);
+                                                                GL11.glColor4ub((byte) color.getRed(),
+                                                                                (byte) color.getGreen(),
+                                                                                (byte) color.getBlue(),
+                                                                                (byte) (color.getAlpha()));
+
+                                                                GL11.glBegin(GL11.GL_QUADS);
+                                                                {
+                                                                    GL11.glVertex2f(x, y);
+                                                                    GL11.glVertex2f(x, y + size);
+                                                                    GL11.glVertex2f(x + size, y + size);
+                                                                    GL11.glVertex2f(x + size, y);
+                                                                }
+                                                                GL11.glEnd();
                                                             }
-                                                            GL11.glEnd();
+
+                                                            sprite.render(x + borderSize, y + borderSize);
                                                         }
 
                                                         @Override
@@ -211,7 +224,7 @@ public class InstallHullmodButton extends DefaultButton {
         String buttonText;
 
         if (VoidTecUtils.isPlayerDockedAtSpaceport()) {
-            if (VoidTecUtils.canPayForInstallation(fleetMember.getBaseValue())) {
+            if (VoidTecUtils.canPayForInstallation(installCost)) {
                 buttonText = "Install VESAI";
             } else {
                 buttonText = "Not enough credits";
