@@ -5,6 +5,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
 import de.schafunschaf.voidtec.campaign.items.chests.StorageChestData;
@@ -32,9 +33,11 @@ public class CargoUtils {
 
         for (EveryFrameScript transientScript : Global.getSector().getTransientScripts()) {
             if (transientScript instanceof VT_DockedAtSpaceportHelper) {
-                localCargo = ((VT_DockedAtSpaceportHelper) transientScript).getMarket()
-                                                                           .getSubmarket(Submarkets.SUBMARKET_STORAGE)
-                                                                           .getCargo();
+                MarketAPI market = ((VT_DockedAtSpaceportHelper) transientScript).getMarket();
+                if (isNull(market) || isNull(market.getSubmarket(Submarkets.SUBMARKET_STORAGE))) {
+                    break;
+                }
+                localCargo = market.getSubmarket(Submarkets.SUBMARKET_STORAGE).getCargo();
                 break;
             }
         }

@@ -75,13 +75,17 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
 
     // Give NPC-Fleets augments depending on fleet type, ship type and faction
     private void populateNPCShipsWithAugments(SectorEntityToken interactionTarget) {
-        int battleJoinRange = Global.getSettings().getInt("battleJoinRange");
-        List<CampaignFleetAPI> nearbyFleets = Misc.findNearbyFleets(interactionTarget, battleJoinRange, new Misc.FleetFilter() {
-            @Override
-            public boolean accept(CampaignFleetAPI curr) {
-                return !curr.isPlayerFleet();
-            }
-        });
+        List<CampaignFleetAPI> nearbyFleets = new ArrayList<>();
+
+        if (!isNull(interactionTarget.getContainingLocation())) {
+            int battleJoinRange = Global.getSettings().getInt("battleJoinRange");
+            nearbyFleets = Misc.findNearbyFleets(interactionTarget, battleJoinRange, new Misc.FleetFilter() {
+                @Override
+                public boolean accept(CampaignFleetAPI curr) {
+                    return !curr.isPlayerFleet();
+                }
+            });
+        }
 
         if (interactionTarget instanceof CampaignFleetAPI && !interactionTarget.isPlayerFleet()) {
             nearbyFleets.add((CampaignFleetAPI) interactionTarget);
@@ -184,7 +188,9 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
                                                    : result.getLoserResult();
 
         for (FleetMemberAPI fleetMember : playerResult.getDeployed()) {
-            applyAfterBattleDamageToAugments(result, fleetMember);
+            if (fleetMember.getFleetData().getFleet().isPlayerFleet()) {
+                applyAfterBattleDamageToAugments(result, fleetMember);
+            }
         }
     }
 
@@ -229,7 +235,12 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
 
         for (int i = 0; i < damageAttempts; i++) {
             if (MathUtils.rollSuccessful(damageChance, random)) {
-                damagedAugments.add(new DamagedAugmentData(hullModManager.damageRandomAugment(1, random)));
+                AugmentApplier damagedAugment = hullModManager.damageRandomAugment(1, random);
+                if (isNull(damagedAugment)) {
+                    continue;
+                }
+
+                damagedAugments.add(new DamagedAugmentData(damagedAugment));
             }
         }
 

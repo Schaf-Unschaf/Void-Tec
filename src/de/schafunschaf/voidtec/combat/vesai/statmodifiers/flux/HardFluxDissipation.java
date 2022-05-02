@@ -40,7 +40,6 @@ public class HardFluxDissipation extends BaseStatMod {
                                      AugmentApplier parentAugment) {
         MutableStat.StatMod statMod = stats.getHardFluxDissipationFraction().getFlatStatMod(id);
 
-        String description = "%s %s by %s";
         if (ComparisonTools.isNull(statMod)) {
             Float fighterStatValue = parentAugment.getFighterStatValue(id + "_" + statID);
             if (!ComparisonTools.isNull(fighterStatValue)) {
@@ -51,6 +50,11 @@ public class HardFluxDissipation extends BaseStatMod {
             }
         }
         generateTooltip(tooltip, statMod, bulletColor, parentAugment);
+    }
+
+    @Override
+    public boolean isMult() {
+        return false;
     }
 
     @Override

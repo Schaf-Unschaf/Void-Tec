@@ -12,6 +12,7 @@ import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
+import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Strings;
 import de.schafunschaf.voidtec.util.CargoUtils;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
@@ -64,7 +65,14 @@ public class EmptySlotButton extends DefaultButton {
 
     @Override
     public void createConfirmationPrompt(TooltipMakerAPI tooltip) {
-        AugmentApplier augment = AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
+        AugmentCargoWrapper selectedAugmentInCargo = AugmentManagerIntel.getSelectedAugmentInCargo();
+
+        if (isNull(selectedAugmentInCargo)) {
+            tooltip.addPara("No Augment selected", 0f);
+            return;
+        }
+
+        AugmentApplier augment = selectedAugmentInCargo.getAugment();
         String bullet = VT_Strings.BULLET_CHAR + " ";
 
         tooltip.addPara("Install the augment in this slot (%s)?", 0f, augmentSlot.getSlotCategory().getColor(),

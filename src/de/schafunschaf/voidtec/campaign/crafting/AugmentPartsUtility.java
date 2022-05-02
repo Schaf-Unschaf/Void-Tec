@@ -23,7 +23,7 @@ public class AugmentPartsUtility {
     private static final float BASIC_REPAIR_MOD = 3;
     private static final float PRIMARY_REPAIR_MOD = 2;
     private static final float SECONDARY_REPAIR_MOD = 1;
-    private static final float BASIC_DISASSEMBLE_MOD = 2;
+    private static final float BASIC_DISASSEMBLE_MOD = 3;
     private static final float PRIMARY_DISASSEMBLE_MOD = 2;
     private static final float SECONDARY_DISASSEMBLE_MOD = 1;
     private static final float BASIC_CRAFT_MOD = 1;
@@ -38,7 +38,7 @@ public class AugmentPartsUtility {
 
         Random random = new Random(augment.hashCode());
         AugmentQuality higherQuality = augment.getAugmentQuality().getHigherQuality();
-        float qualityModifier = (float) Math.pow(higherQuality.getModifier(), 2);
+        float qualityModifier = higherQuality.getModifier();
 
         int baseCost = (int) Math.ceil(BASE_PART_AMOUNT * BASIC_REPAIR_MOD * qualityModifier);
         AugmentComponent baseComponent = new AugmentComponent(AugmentPartsManager.BASIC_COMPONENT, higherQuality);

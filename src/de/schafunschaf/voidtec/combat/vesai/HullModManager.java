@@ -271,7 +271,7 @@ public class HullModManager {
         float maxPermanentHullmods = Global.getSettings().getFloat("maxPermanentHullmods");
         int builtInBonusSlots = (int) stats.getDynamic().getMod(Stats.MAX_PERMANENT_HULLMODS_MOD).getFlatBonus();
         int maxBuiltInMods = (int) (maxPermanentHullmods + builtInBonusSlots);
-        int currentBuiltInMods = stats.getVariant().getSMods().size()+3;
+        int currentBuiltInMods = stats.getVariant().getSMods().size();
         int numOverLimitMods = Math.abs(currentBuiltInMods - maxBuiltInMods);
         boolean overLimit = currentBuiltInMods > maxBuiltInMods;
 

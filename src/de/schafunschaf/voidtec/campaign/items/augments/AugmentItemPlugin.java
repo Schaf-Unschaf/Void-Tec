@@ -162,18 +162,38 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
             }
 
-            if (!isNull(augment.getPrimaryStatMods()) && !augment.getPrimaryStatMods()
-                                                                 .isEmpty()) {
-                tooltip.addSectionHeading("Primary Stat Modification Info", augment.getPrimarySlot().getColor().brighter(),
+            if (!isNull(augment.getPrimaryStatMods()) && !augment.getPrimaryStatMods().isEmpty()) {
+                tooltip.addSectionHeading("", augment.getPrimarySlot().getColor().brighter(),
                                           Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
+                tooltip.addPara("%s Slot", -17f, augment.getPrimarySlot().getColor(), augment.getPrimarySlot().getName())
+                       .setAlignment(Alignment.MID);
                 tooltip.addSpacer(smallPad);
                 augment.generateStatDescription(tooltip, smallPad, true, null);
             }
 
             if (!isNull(augment.getSecondaryStatMods()) && !augment.getSecondaryStatMods()
                                                                    .isEmpty()) {
-                tooltip.addSectionHeading("Secondary Stat Modification Info", augment.getPrimarySlot().getColor().brighter(),
-                                          Misc.scaleColor(augment.getPrimarySlot().getColor(), 0.5f), Alignment.MID, largePad);
+                StringBuilder secondaryText = new StringBuilder();
+                List<String> hlStrings = new ArrayList<>();
+                List<Color> hlColors = new ArrayList<>();
+
+                for (Iterator<SlotCategory> iterator = augment.getSecondarySlots().iterator(); iterator.hasNext(); ) {
+                    SlotCategory secondarySlot = iterator.next();
+                    secondaryText.append(secondarySlot.getName());
+                    if (iterator.hasNext()) {
+                        secondaryText.append(" | ");
+                    }
+
+                    hlStrings.add(secondarySlot.getName());
+                    hlColors.add(secondarySlot.getColor());
+                }
+
+                secondaryText.append(" Slot");
+
+                tooltip.addSectionHeading("", augment.getPrimarySlot().getColor().brighter(),
+                                          Misc.scaleColor(Misc.getGrayColor(), 0.5f), Alignment.MID, largePad);
+                tooltip.addPara(secondaryText.toString(), -17f, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]))
+                       .setAlignment(Alignment.MID);
                 tooltip.addSpacer(smallPad);
 
                 augment.generateStatDescription(tooltip, smallPad, false, null);
@@ -305,27 +325,60 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
         AugmentApplier augment = getAugmentItemData().getAugment();
         float xMargin = 5f;
         float yMargin = 5f;
-        float length = 15f;
-        float height = 15f;
+        float length = 10f;
+        float height = 10f;
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        Color color = augment.getAugmentQuality().getColor();
+        if (augment.getAugmentQuality() != augment.getInitialQuality()) {
+            Color color = augment.getAugmentQuality().getColor();
+            Color color2 = augment.getInitialQuality().getColor();
 
-        GL11.glColor4ub((byte) color.getRed(),
-                        (byte) color.getGreen(),
-                        (byte) color.getBlue(),
-                        (byte) color.getAlpha());
+            GL11.glColor4ub((byte) color.getRed(),
+                            (byte) color.getGreen(),
+                            (byte) color.getBlue(),
+                            (byte) color.getAlpha());
 
-        GL11.glBegin(GL11.GL_QUADS);
-        {
-            GL11.glVertex2f(x + xMargin, y + h - height); // BL
-            GL11.glVertex2f(x + xMargin, y + h - yMargin); // TL
-            GL11.glVertex2f(x + length, y + h - yMargin); // TR
-            GL11.glVertex2f(x + length, y + h - height); // BR
+            GL11.glBegin(GL11.GL_QUADS);
+            {
+                GL11.glVertex2f(x + xMargin - 0.5f, y + h - yMargin - height); // BL
+                GL11.glVertex2f(x + xMargin - 0.5f, y + h - yMargin); // TL
+                GL11.glVertex2f(x + xMargin - 0.5f + length / 2, y + h - yMargin); // TR
+                GL11.glVertex2f(x + xMargin - 0.5f + length / 2, y + h - yMargin - height); // BR
+            }
+            GL11.glEnd();
+
+            GL11.glColor4ub((byte) color2.getRed(),
+                            (byte) color2.getGreen(),
+                            (byte) color2.getBlue(),
+                            (byte) color2.getAlpha());
+
+            GL11.glBegin(GL11.GL_QUADS);
+            {
+                GL11.glVertex2f(x + xMargin + 0.5f + length / 2, y + h - yMargin - height); // BL
+                GL11.glVertex2f(x + xMargin + 0.5f + length / 2, y + h - yMargin); // TL
+                GL11.glVertex2f(x + xMargin + 0.5f + length, y + h - yMargin); // TR
+                GL11.glVertex2f(x + xMargin + 0.5f + length, y + h - yMargin - height); // BR
+            }
+            GL11.glEnd();
+        } else {
+            Color color = augment.getAugmentQuality().getColor();
+
+            GL11.glColor4ub((byte) color.getRed(),
+                            (byte) color.getGreen(),
+                            (byte) color.getBlue(),
+                            (byte) color.getAlpha());
+
+            GL11.glBegin(GL11.GL_QUADS);
+            {
+                GL11.glVertex2f(x + xMargin, y + h - yMargin - height); // BL
+                GL11.glVertex2f(x + xMargin, y + h - yMargin); // TL
+                GL11.glVertex2f(x + xMargin + length, y + h - yMargin); // TR
+                GL11.glVertex2f(x + xMargin + length, y + h - yMargin - height); // BR
+            }
+            GL11.glEnd();
         }
-        GL11.glEnd();
     }
 }

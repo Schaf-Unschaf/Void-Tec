@@ -1,6 +1,7 @@
 package de.schafunschaf.voidtec.campaign.intel.buttons.shippanel;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.characters.MutableCharacterStatsAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.ui.BaseTooltipCreator;
 import com.fs.starfarer.api.ui.ButtonAPI;
@@ -45,6 +46,10 @@ public class LockedSlotButton extends DefaultButton {
     public void buttonPressConfirmed(IntelUIAPI ui) {
         if (unlockedSlots >= maxNumSlotsForCreditUnlock) {
             Global.getSector().getPlayerStats().addStoryPoints(-installCostSP);
+
+            MutableCharacterStatsAPI playerStats = Global.getSector().getPlayerStats();
+            long bonusXP = (long) (Global.getSettings().getLevelupPlugin().getXPForLevel(Global.getSector().getPlayerStats().getLevel() + 1) *0.2);
+            playerStats.addBonusXP(bonusXP, false, null, false);
         }
 
         Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(installCost);
@@ -63,7 +68,7 @@ public class LockedSlotButton extends DefaultButton {
         String spString = "";
         List<Color> hlColors = new ArrayList<>();
         hlColors.add(Misc.getHighlightColor());
-        if (unlockedSlots >= maxNumSlotsForCreditUnlock) {
+        if (!canUnlockWithCredits) {
             spCostString = installCostSP + " Story " + FormattingTools.singularOrPlural(installCostSP, "Point");
             spString = " and " + spCostString;
             hlColors.add(Misc.getStoryOptionColor());
@@ -72,6 +77,11 @@ public class LockedSlotButton extends DefaultButton {
         tooltip.addPara("Do you want to unlock this slot?", 0f);
         tooltip.addPara(String.format("This will cost you %s%s", installCostString, spString), 3f, hlColors.toArray(new Color[0]),
                         installCostString, spCostString);
+
+        if (!canUnlockWithCredits) {
+            String bonusString = "20% Bonus XP";
+            tooltip.addPara("You will gain an additional %s for unlocking this Slot.", 10f, Misc.getStoryOptionColor(), bonusString);
+        }
     }
 
     @Override

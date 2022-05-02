@@ -6,7 +6,7 @@
 "aiSlotFillChance" : 50;
 
 # Recover-Chance -> Destroy-Chance -> Damage-Chance
-"recoverChance" : 30;
-"destroyChanceOnRecover" : 75;
+"recoverChance" : 40;
+"destroyChanceOnRecover" : 50;
 "damageChanceOnRecover" : 75;
 }

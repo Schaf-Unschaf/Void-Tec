@@ -6,6 +6,7 @@ import com.fs.starfarer.api.characters.MutableCharacterStatsAPI;
 import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Skills;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.loading.HullModSpecAPI;
 import com.fs.starfarer.api.ui.*;
@@ -31,13 +32,13 @@ import static de.schafunschaf.voidtec.ids.VT_Settings.*;
 public class InstallHullmodButton extends DefaultButton {
 
     private final FleetMemberAPI fleetMember;
-    private final List<String> sModsToRemove;
+    private final List<String> installedSMods;
     private final float installCost;
     private String selectedSMod = "";
 
     public InstallHullmodButton(FleetMemberAPI fleetMember) {
         this.fleetMember = fleetMember;
-        this.sModsToRemove = getRemovableSMods(fleetMember.getVariant());
+        this.installedSMods = new ArrayList<>(fleetMember.getVariant().getSMods());
         this.installCost = MathUtils.roundWholeNumber(fleetMember.getHullSpec().getBaseValue() * installBaseValueFraction, 2);
     }
 
@@ -80,123 +81,133 @@ public class InstallHullmodButton extends DefaultButton {
 
         String shipClass = ShipUtils.convertSizeToString(fleetMember.getHullSpec().getHullSize());
         tooltip.addPara("Do you want to install the VoidTec Engineering Suite on your ship?", 0f);
-        tooltip.addPara(String.format("This will cost %s for a %s-sized vessel.", creditString, shipClass), 6f, hlColor,
-                        creditString);
+        tooltip.addPara(String.format("This will cost %s for a %s-sized vessel.", creditString, shipClass), 6f, hlColor, creditString);
 
-        if (!sModsToRemove.isEmpty()) {
-            tooltip.addPara("You can choose to keep one of the following SMods:", 10f);
+        if (!installedSMods.isEmpty()) {
+            boolean hasBestOfTheBest = Global.getSector().getPlayerStats().getSkillLevel(Skills.BEST_OF_THE_BEST) > 0;
 
-            for (final String sMod : sModsToRemove) {
-                HullModSpecAPI modSpec = Global.getSettings().getHullModSpec(sMod);
-                final String displayName = modSpec.getDisplayName();
-                final SpriteAPI sprite = Global.getSettings().getSprite(modSpec.getSpriteName());
+            String keepSModText;
+            if (hasBestOfTheBest && installedSMods.size() == 1) {
+                keepSModText = "%s allows you keep the following SMod:";
+                tooltip.addPara(keepSModText, 10f, Misc.getHighlightColor(), "Best Of The Best");
+            } else if (hasBestOfTheBest) {
+                keepSModText = "%s allows you to select one of the following SMods to keep:";
+                tooltip.addPara(keepSModText, 10f, Misc.getHighlightColor(), "Best Of The Best");
+            }
 
-                if (selectedSMod.isEmpty()) {
-                    selectedSMod = sMod;
-                }
+            if (hasBestOfTheBest) {
+                for (final String sMod : installedSMods) {
+                    HullModSpecAPI modSpec = Global.getSettings().getHullModSpec(sMod);
+                    final String displayName = modSpec.getDisplayName();
+                    final SpriteAPI sprite = Global.getSettings().getSprite(modSpec.getSpriteName());
 
-                final float size = 20f;
-                final float borderSize = 1f;
-                sprite.setSize(size - borderSize * 2, size - borderSize * 2);
-                CustomPanelAPI buttonPanelAPI = Global.getSettings().createCustom(500, size, null);
+                    if (selectedSMod.isEmpty()) {
+                        selectedSMod = sMod;
+                    }
 
-                TooltipMakerAPI uiElement = buttonPanelAPI.createUIElement(500, size, false);
-                UIComponentAPI box = UIUtils.addBox(uiElement, "", null, null, size, size, borderSize, 0, null,
-                                                    Misc.getStoryDarkColor(), Color.BLACK,
-                                                    new CustomUIPanelPlugin() {
-                                                        private PositionAPI p;
-                                                        private boolean isChecked = sMod.equals(selectedSMod);
+                    final float size = 20f;
+                    final float borderSize = 1f;
+                    sprite.setSize(size - borderSize * 2, size - borderSize * 2);
+                    CustomPanelAPI buttonPanelAPI = Global.getSettings().createCustom(500, size, null);
 
-                                                        @Override
-                                                        public void positionChanged(PositionAPI position) {
-                                                            p = position;
-                                                        }
+                    TooltipMakerAPI uiElement = buttonPanelAPI.createUIElement(500, size, false);
+                    UIComponentAPI box = UIUtils.addBox(uiElement, "", null, null, size, size, borderSize, 0, null,
+                                                        Misc.getStoryDarkColor(), Color.BLACK,
+                                                        new CustomUIPanelPlugin() {
+                                                            private PositionAPI p;
+                                                            private boolean isChecked = sMod.equals(selectedSMod);
 
-                                                        @Override
-                                                        public void renderBelow(float alphaMult) {
-
-                                                        }
-
-                                                        @Override
-                                                        public void render(float alphaMult) {
-                                                            if (p == null) {
-                                                                return;
+                                                            @Override
+                                                            public void positionChanged(PositionAPI position) {
+                                                                p = position;
                                                             }
 
-                                                            if (!isChecked) {
-                                                                sprite.setAlphaMult(0.3f);
-                                                            } else {
-                                                                sprite.setAlphaMult(1f);
+                                                            @Override
+                                                            public void renderBelow(float alphaMult) {
+
                                                             }
 
-                                                            float x = p.getX();
-                                                            float y = p.getY();
-
-                                                            if (isChecked) {
-                                                                Color color = Misc.getStoryOptionColor();
-
-                                                                GL11.glDisable(GL11.GL_TEXTURE_2D);
-                                                                GL11.glEnable(GL11.GL_BLEND);
-                                                                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-                                                                GL11.glColor4ub((byte) color.getRed(),
-                                                                                (byte) color.getGreen(),
-                                                                                (byte) color.getBlue(),
-                                                                                (byte) (color.getAlpha()));
-
-                                                                GL11.glBegin(GL11.GL_QUADS);
-                                                                {
-                                                                    GL11.glVertex2f(x, y);
-                                                                    GL11.glVertex2f(x, y + size);
-                                                                    GL11.glVertex2f(x + size, y + size);
-                                                                    GL11.glVertex2f(x + size, y);
-                                                                }
-                                                                GL11.glEnd();
-                                                            }
-
-                                                            sprite.render(x + borderSize, y + borderSize);
-                                                        }
-
-                                                        @Override
-                                                        public void advance(float amount) {
-
-                                                        }
-
-                                                        @Override
-                                                        public void processInput(List<InputEventAPI> events) {
-                                                            if (!sMod.equals(selectedSMod)) {
-                                                                isChecked = false;
-                                                            }
-
-                                                            if (p == null) {
-                                                                return;
-                                                            }
-
-                                                            for (InputEventAPI event : events) {
-                                                                if (event.isConsumed()) {
-                                                                    continue;
+                                                            @Override
+                                                            public void render(float alphaMult) {
+                                                                if (p == null) {
+                                                                    return;
                                                                 }
 
-                                                                if (event.isLMBUpEvent()) {
-                                                                    if (p.containsEvent(event)) {
-                                                                        selectedSMod = sMod;
-                                                                        isChecked = true;
-                                                                        event.consume();
+                                                                if (!isChecked) {
+                                                                    sprite.setAlphaMult(0.3f);
+                                                                } else {
+                                                                    sprite.setAlphaMult(1f);
+                                                                }
+
+                                                                float x = p.getX();
+                                                                float y = p.getY();
+
+                                                                if (isChecked) {
+                                                                    Color color = Misc.getStoryOptionColor();
+
+                                                                    GL11.glDisable(GL11.GL_TEXTURE_2D);
+                                                                    GL11.glEnable(GL11.GL_BLEND);
+                                                                    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+                                                                    GL11.glColor4ub((byte) color.getRed(),
+                                                                                    (byte) color.getGreen(),
+                                                                                    (byte) color.getBlue(),
+                                                                                    (byte) (color.getAlpha()));
+
+                                                                    GL11.glBegin(GL11.GL_QUADS);
+                                                                    {
+                                                                        GL11.glVertex2f(x, y);
+                                                                        GL11.glVertex2f(x, y + size);
+                                                                        GL11.glVertex2f(x + size, y + size);
+                                                                        GL11.glVertex2f(x + size, y);
+                                                                    }
+                                                                    GL11.glEnd();
+                                                                }
+
+                                                                sprite.render(x + borderSize, y + borderSize);
+                                                            }
+
+                                                            @Override
+                                                            public void advance(float amount) {
+
+                                                            }
+
+                                                            @Override
+                                                            public void processInput(List<InputEventAPI> events) {
+                                                                if (!sMod.equals(selectedSMod)) {
+                                                                    isChecked = false;
+                                                                }
+
+                                                                if (p == null) {
+                                                                    return;
+                                                                }
+
+                                                                for (InputEventAPI event : events) {
+                                                                    if (event.isConsumed()) {
+                                                                        continue;
+                                                                    }
+
+                                                                    if (event.isLMBUpEvent()) {
+                                                                        if (p.containsEvent(event)) {
+                                                                            selectedSMod = sMod;
+                                                                            isChecked = true;
+                                                                            event.consume();
+                                                                        }
                                                                     }
                                                                 }
                                                             }
-                                                        }
-                                                    });
+                                                        });
 
-                uiElement.setParaFont(Fonts.INSIGNIA_LARGE);
-                uiElement.addPara(uiElement.shortenString(displayName, 450), Misc.getStoryOptionColor(), 0f)
-                         .getPosition().rightOfBottom(box, 10f);
+                    uiElement.setParaFont(Fonts.INSIGNIA_LARGE);
+                    uiElement.addPara(uiElement.shortenString(displayName, 450), Misc.getStoryOptionColor(), 0f)
+                             .getPosition().rightOfBottom(box, 10f);
 
-                buttonPanelAPI.addUIElement(uiElement).inTL(10f, 0);
-                tooltip.addCustom(buttonPanelAPI, 6f);
+                    buttonPanelAPI.addUIElement(uiElement).inTL(10f, 0);
+                    tooltip.addCustom(buttonPanelAPI, 6f);
+                }
             }
 
-            if (sModsToRemove.size() > 1) {
+            if (bonusPercent > 0) {
                 String bonusString = String.format("%s%% Bonus XP", bonusPercent);
                 tooltip.addPara("You will gain an additional %s as compensation for the removed mods.", 10f, Misc.getStoryOptionColor(),
                                 bonusString);
@@ -253,10 +264,6 @@ public class InstallHullmodButton extends DefaultButton {
         button.setEnabled(canInstall());
 
         return button;
-    }
-
-    private List<String> getRemovableSMods(ShipVariantAPI memberVariant) {
-        return new ArrayList<>(memberVariant.getSMods());
     }
 
     private boolean canInstall() {

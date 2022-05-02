@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class SettingsLoader {
 
-    private static final String FILE_PATH = "VoidTec_Settings.ini";
+    private static final String FILE_PATH = "modSettings.json";
 
     public static void loadSettings() {
         try {
