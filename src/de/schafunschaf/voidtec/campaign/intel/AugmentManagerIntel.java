@@ -2,10 +2,12 @@ package de.schafunschaf.voidtec.campaign.intel;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI;
+import com.fs.starfarer.api.characters.FullName;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.listeners.VT_CampaignListener;
+import de.schafunschaf.voidtec.campaign.scripts.VT_WelcomeMessageScript;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
@@ -16,6 +18,7 @@ import de.schafunschaf.voidtec.ids.VT_Colors;
 import de.schafunschaf.voidtec.ids.VT_Strings;
 import de.schafunschaf.voidtec.util.CargoUtils;
 import de.schafunschaf.voidtec.util.FormattingTools;
+import de.schafunschaf.voidtec.util.VoidTecUtils;
 import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -52,6 +55,8 @@ public class AugmentManagerIntel extends BaseIntel {
     @Setter
     private static boolean isShowingManufacturingPanel = false;
 
+    private boolean welcomeMessageSent = false;
+
     public static AugmentManagerIntel getInstance() {
         IntelManagerAPI intelManager = Global.getSector().getIntelManager();
         AugmentManagerIntel instance;
@@ -60,6 +65,11 @@ public class AugmentManagerIntel extends BaseIntel {
             instance = ((AugmentManagerIntel) intelManager.getIntel(AugmentManagerIntel.class).get(0));
         } else {
             instance = new AugmentManagerIntel();
+            instance.welcomeMessageSent = Global.getSector().getMemoryWithoutUpdate().getBoolean("$_vt_welcomeMessageSent");
+
+            if (!instance.welcomeMessageSent) {
+                Global.getSector().addTransientScript(new VT_WelcomeMessageScript());
+            }
         }
 
         return instance;
@@ -147,10 +157,36 @@ public class AugmentManagerIntel extends BaseIntel {
     @Override
     public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
         if (mode == ListInfoMode.MESSAGES) {
-            createDamageReport(info);
+            if (!welcomeMessageSent) {
+                createWelcomeMessage(info);
+            } else {
+                createDamageReport(info);
+            }
         } else {
-            super.createIntelInfo(info, mode);
+            createIntelText(info);
         }
+    }
+
+    private void createIntelText(TooltipMakerAPI info) {
+        Color color = getTitleColor(null);
+        info.addPara(getName(), color, 0f);
+        String randomIntelMessage = VoidTecUtils.getRandomIntelMessage();
+        String playerName = Global.getSector().getPlayerPerson().getNameString();
+        FullName fullName = Global.getSector().getPlayerPerson().getName();
+
+        randomIntelMessage = randomIntelMessage.replace("$captain", playerName);
+        randomIntelMessage = randomIntelMessage.replace("$firstName", fullName.getFirst());
+        randomIntelMessage = randomIntelMessage.replace("$lastName", fullName.getLast());
+
+        info.addPara(randomIntelMessage, 3f, Misc.getHighlightColor(), playerName, fullName.getFirst(), fullName.getLast());
+    }
+
+    private void createWelcomeMessage(TooltipMakerAPI info) {
+        String welcomeTitle = "VoidTec Engineering Suit Augmentation Interface";
+        info.addPara(welcomeTitle, VT_Colors.VT_COLOR_MAIN, 0f);
+        UIUtils.addHorizontalSeparator(info, info.computeStringWidth(welcomeTitle), 1f, VT_Colors.VT_COLOR_MAIN, 0f);
+        info.addPara("Welcome Captain %s. To access the new Augmentation Interface, open your %s and go to the %s tab.", 3f,
+                     Misc.getHighlightColor(), Global.getSector().getPlayerPerson().getNameString(), "Intel", "Important");
     }
 
     private void createDamageReport(TooltipMakerAPI info) {
@@ -185,6 +221,7 @@ public class AugmentManagerIntel extends BaseIntel {
         selectedInstalledAugment = null;
         selectedAugmentInCargo = null;
         activeCategoryFilter = null;
+        activeQualityFilter = null;
         augmentsInCargo = null;
     }
 }

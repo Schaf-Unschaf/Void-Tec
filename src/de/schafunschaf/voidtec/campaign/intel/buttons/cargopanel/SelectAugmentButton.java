@@ -25,8 +25,9 @@ public class SelectAugmentButton extends DefaultButton {
 
     @Override
     public String getName() {
-        float numAugments = augment.getAugmentCargoStack().getSize();
-        return String.valueOf(isSelected() ? "+" : ((int) numAugments));
+        int numAugments = (int) augment.getAugmentCargoStack().getSize();
+        String displayNumber = numAugments > 99 ? "99+" : String.valueOf(numAugments);
+        return isSelected() ? "+" : displayNumber;
     }
 
     private boolean isSelected() {

@@ -1,4 +1,4 @@
-package de.schafunschaf.voidtec.campaign.intel.buttons.infopanel.repair;
+package de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ui.*;
@@ -23,22 +23,14 @@ import java.awt.Color;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
-public class DismantleAugmentButton extends DefaultButton {
+public class DismantleStackButton extends DefaultButton {
 
     private final AugmentApplier augment;
     private final AugmentCargoWrapper augmentCargoWrapper;
     private final boolean canNotBeDismantled;
     private TextFieldAPI dismantleAmountField;
 
-    public DismantleAugmentButton(AugmentApplier augment) {
-        this.augment = augment;
-        this.augmentCargoWrapper = null;
-        this.canNotBeDismantled = augment.isDestroyed()
-                || augment.getAugmentQuality() == AugmentQuality.CUSTOMISED
-                || augment.getInitialQuality() == AugmentQuality.DEGRADED;
-    }
-
-    public DismantleAugmentButton(AugmentCargoWrapper augmentCargoWrapper) {
+    public DismantleStackButton(AugmentCargoWrapper augmentCargoWrapper) {
         this.augmentCargoWrapper = augmentCargoWrapper;
         this.augment = augmentCargoWrapper.getAugment();
         this.canNotBeDismantled = augment.isDestroyed()
@@ -48,14 +40,9 @@ public class DismantleAugmentButton extends DefaultButton {
 
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
-        if (!(!isNull(augmentCargoWrapper) && augment.getAugmentQuality() == AugmentQuality.CUSTOMISED)) {
-            if (!isNull(augmentCargoWrapper)) {
-                AugmentPartsUtility.dismantleAugment(augmentCargoWrapper, FormattingTools.parseInteger(dismantleAmountField.getText(), 0));
-                AugmentManagerIntel.setSelectedAugmentInCargo(null);
-            } else {
-                AugmentPartsUtility.dismantleAugment(augment);
-                AugmentManagerIntel.setSelectedInstalledAugment(null);
-            }
+        if (augment.getAugmentQuality() != AugmentQuality.CUSTOMISED) {
+            AugmentPartsUtility.dismantleAugment(augmentCargoWrapper, FormattingTools.parseInteger(dismantleAmountField.getText(), 0));
+            AugmentManagerIntel.setSelectedAugmentInCargo(null);
         }
     }
 
@@ -63,7 +50,7 @@ public class DismantleAugmentButton extends DefaultButton {
     public void createConfirmationPrompt(final TooltipMakerAPI tooltip) {
         tooltip.setForceProcessInput(true);
 
-        tooltip.addPara(String.format("%s %s?", getName(), augment.getName()), 0f, augment.getAugmentQuality().getColor(),
+        tooltip.addPara(String.format("Dismantle %s?", augment.getName()), 0f, augment.getAugmentQuality().getColor(),
                         augment.getName());
 
         if (AugmentPartsUtility.getComponentsForDismantling(augment).isEmpty()) {
@@ -85,7 +72,7 @@ public class DismantleAugmentButton extends DefaultButton {
                 dismantleAmountField.setLimitByStringWidth(false);
                 dismantleAmountField.hideCursor();
                 dismantleAmountField.setMidAlignment();
-                dismantleAmountField.setText("1");
+                dismantleAmountField.setText(String.valueOf(stackSize));
                 float xAlignOffset = tooltip.computeStringWidth(text) - 5;
                 tooltip.getPrev().getPosition().setXAlignOffset(xAlignOffset);
                 tooltip.addPara("/ " + stackSize, -26).getPosition().setXAlignOffset(50);
@@ -129,7 +116,7 @@ public class DismantleAugmentButton extends DefaultButton {
 
     @Override
     public String getConfirmText() {
-        return getName();
+        return "Dismantle";
     }
 
     @Override
@@ -139,21 +126,32 @@ public class DismantleAugmentButton extends DefaultButton {
 
     @Override
     public String getName() {
-        if (augment.getAugmentQuality() == AugmentQuality.CUSTOMISED) {
-            return "------";
-        } else {
-            if (canNotBeDismantled) {
-                return "Remove";
-            } else {
-                return "Dismantle";
-            }
-        }
+        return "X";
     }
 
     @Override
     public ButtonAPI addButton(TooltipMakerAPI tooltip, float width, float height) {
-        Color bgColor = Misc.scaleColorOnly(Misc.getNegativeHighlightColor(), 0.25f);
-        return ButtonUtils.addLabeledButton(tooltip, 90, height, 0f, Misc.getNegativeHighlightColor(), bgColor, CutStyle.BL_TR,
-                                            this);
+        ButtonAPI button = ButtonUtils.addLabeledButton(tooltip, width, height, 0f, Color.RED, new Color(0, 0, 0, 0),
+                                                        CutStyle.ALL, this);
+        addTooltip(tooltip);
+
+        return button;
+    }
+
+    @Override
+    public void addTooltip(final TooltipMakerAPI tooltip) {
+        tooltip.addTooltipToPrevious(new BaseTooltipCreator() {
+            private final String tooltipText = "Dismantle the stack?";
+
+            @Override
+            public float getTooltipWidth(Object tooltipParam) {
+                return tooltip.computeStringWidth(tooltipText);
+            }
+
+            @Override
+            public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
+                tooltip.addPara(tooltipText, 0f);
+            }
+        }, TooltipMakerAPI.TooltipLocation.LEFT);
     }
 }

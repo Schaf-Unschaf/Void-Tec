@@ -7,10 +7,12 @@ import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.util.FormattingTools;
 import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;
+import java.util.Arrays;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
@@ -94,19 +96,13 @@ public class ColorPickerDialog implements CustomDialogDelegate {
         int blueValue = getColorValue(fieldBlue);
         int alphaValue = getColorValue(fieldAlpha);
 
+        sanitizeFields();
+
         return new Color(redValue, greenValue, blueValue, alphaValue);
     }
 
     private int getColorValue(TextFieldAPI textField) {
-        int parsedValue = 0;
-        try {
-            parsedValue = Integer.parseInt(textField.getText());
-
-        } catch (NumberFormatException exception) {
-            Global.getLogger(ColorPickerDialog.class).error(exception);
-        }
-
-        return Math.max(Math.min(parsedValue, 255), 0);
+        return Math.max(Math.min(FormattingTools.parseInteger(textField.getText(), 0), 255), 0);
     }
 
     @Override
@@ -125,5 +121,11 @@ public class ColorPickerDialog implements CustomDialogDelegate {
         }
 
         dialog.dismiss();
+    }
+
+    public void sanitizeFields() {
+        for (TextFieldAPI textField : Arrays.asList(fieldRed, fieldGreen, fieldBlue, fieldAlpha)) {
+            textField.setText(String.valueOf(getColorValue(textField)));
+        }
     }
 }

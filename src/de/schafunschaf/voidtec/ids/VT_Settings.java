@@ -12,6 +12,7 @@ public class VT_Settings {
     public static boolean enableChangeSlotButton = false;
     public static boolean randomSlotAmount = false;
     public static boolean hullmodInstallationWithSP = false;
+    public static boolean sModPenalty = true;
     public static int installCostSP = 1;
     public static float installBaseValueFraction = 0.5f;
     public static int maxNumSlotsForCreditUnlock = 6;
@@ -26,6 +27,14 @@ public class VT_Settings {
     public static int damageTakenThreshold = 15;
     public static int damageChanceOnDamageTaken = 30;
     public static float chanceReductionPerArmor = 0.07f;
+
+    public static int basePartAmount = 5;
+    public static float basicRepairMod = 3f;
+    public static float primaryRepairMod = 2f;
+    public static float secondaryRepairMod = 1f;
+    public static float basicDisassembleMod = 3f;
+    public static float primaryDisassembleMod = 2f;
+    public static float secondaryDisassembleMod = 1f;
 
     public static boolean iconFlicker = true;
     public static boolean alternativeChestFlagDisplay = false;

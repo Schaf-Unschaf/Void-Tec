@@ -141,6 +141,16 @@ public enum AugmentQuality {
         return null;
     }
 
+    public static List<String> getNameList() {
+        List<String> nameList = new ArrayList<>();
+
+        for (AugmentQuality quality : values) {
+            nameList.add(quality.getName());
+        }
+
+        return nameList;
+    }
+
     public static AugmentQuality getHighestQuality() {
         float highestModifier = 0f;
         AugmentQuality highestQuality = null;

@@ -2,11 +2,13 @@ package de.schafunschaf.voidtec.util;
 
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.util.Misc;
+import lombok.extern.log4j.Log4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+@Log4j
 public class FormattingTools {
 
     public static String singularOrPlural(int number, String wordAsSingular) {
@@ -31,5 +33,17 @@ public class FormattingTools {
         boolean toLarge = creditValue > 1_000_000_000;
         String postFix = toLarge ? "k " : "";
         return Misc.getFormat().format((int) creditValue / (toLarge ? 1_000 : 1)) + postFix + Strings.C;
+    }
+
+    public static int parseInteger(String string, int defaultValue) {
+        int parsedValue = defaultValue;
+        try {
+            parsedValue = Integer.parseInt(string);
+
+        } catch (NumberFormatException exception) {
+            log.error(exception);
+        }
+
+        return parsedValue;
     }
 }

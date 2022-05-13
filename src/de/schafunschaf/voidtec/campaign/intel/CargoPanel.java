@@ -1,21 +1,25 @@
 package de.schafunschaf.voidtec.campaign.intel;
 
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.FilterByCategoryButton;
-import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.FilterByQualityButton;
-import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.SelectAugmentButton;
-import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.SortOrderButton;
+import de.schafunschaf.voidtec.campaign.intel.buttons.cargopanel.*;
+import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
 import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemPlugin;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
+import de.schafunschaf.voidtec.helper.ColorShifter;
+import de.schafunschaf.voidtec.helper.MalfunctionEffect;
 import de.schafunschaf.voidtec.helper.RainbowString;
 import de.schafunschaf.voidtec.ids.VT_Icons;
+import de.schafunschaf.voidtec.ids.VT_Settings;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import de.schafunschaf.voidtec.util.ui.UIUtils;
+import de.schafunschaf.voidtec.util.ui.plugins.BasePanelPlugin;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -220,7 +224,33 @@ public class CargoPanel {
                     "this Augment for installation.";
         }
 
-        CustomPanelAPI elementPanel = mainPanel.createCustomPanel(width, selectionBoxHeight, null);
+        CustomPanelAPI elementPanel = mainPanel.createCustomPanel(width, selectionBoxHeight, new BasePanelPlugin() {
+            // Render animated icon
+            @Override
+            public void renderBelow(float alphaMult) {
+                AugmentItemData augmentItemData = ((AugmentItemPlugin) augmentCargoWrapper.getAugmentCargoStack()
+                                                                                          .getPlugin()).getAugmentItemData();
+                ColorShifter colorShifter = augmentItemData.getColorShifter();
+                MalfunctionEffect malfunctionEffect = augmentItemData.getMalfunctionEffect();
+                Color glowColor = augmentCargoWrapper.getAugment().getPrimarySlot().getColor();
+
+                if (VT_Settings.iconFlicker) {
+                    if (!isNull(colorShifter)) {
+                        glowColor = colorShifter.shiftColor(0.5f);
+                    } else if (!isNull(malfunctionEffect)) {
+                        glowColor = malfunctionEffect.renderFlicker(augmentCargoWrapper.getAugment().getPrimarySlot().getColor());
+                    }
+                }
+
+                SpriteAPI spriteCover = Global.getSettings().getSprite(VT_Icons.AUGMENT_ITEM_ICON_COVER);
+                SpriteAPI spriteGlow = Global.getSettings().getSprite(VT_Icons.AUGMENT_ITEM_ICON_GLOW);
+                spriteGlow.setColor(glowColor);
+                spriteGlow.setSize(30, 30);
+                spriteGlow.render(p.getX() + 30, p.getY() + 4);
+                spriteCover.setSize(30, 30);
+                spriteCover.render(p.getX() + 30, p.getY() + 4);
+            }
+        });
         final TooltipMakerAPI uiElement = elementPanel.createUIElement(width, selectionBoxHeight, false);
 
         uiElement.setButtonFontVictor14();
@@ -254,8 +284,8 @@ public class CargoPanel {
             }
         }, TooltipMakerAPI.TooltipLocation.LEFT);
 
-        // Image with Name
-        TooltipMakerAPI imageWithText = uiElement.beginImageWithText(VT_Icons.AUGMENT_ITEM_ICON, iconSize);
+        // Blank Image with Name
+        TooltipMakerAPI imageWithText = uiElement.beginImageWithText(VT_Icons.BLANK_ICON, iconSize);
         if (augment.getName().toLowerCase().contains("rainbow")) {
             RainbowString rainbowString = new RainbowString(augment.getName(), Color.RED, 20);
             imageWithText.addPara(
@@ -277,6 +307,12 @@ public class CargoPanel {
         }, TooltipMakerAPI.TooltipLocation.LEFT);
         UIComponentAPI imageWithTextComponent = uiElement.getPrev();
         imageWithTextComponent.getPosition().rightOfMid(buttonComponent, itemPadding).setYAlignOffset(3f);
+
+        // Dismantle Stack Button
+        if (augment.getAugmentQuality() != AugmentQuality.CUSTOMISED) {
+            ButtonAPI dismantleStackButton = new DismantleStackButton(augmentCargoWrapper).addButton(uiElement, 10, 10);
+            dismantleStackButton.getPosition().inTR(7, 0);
+        }
 
         // Damage indicators
         int damageAmount = augment.getInitialQuality().ordinal() - augment.getAugmentQuality().ordinal();

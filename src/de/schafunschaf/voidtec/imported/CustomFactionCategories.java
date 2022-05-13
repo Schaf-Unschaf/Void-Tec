@@ -22,7 +22,7 @@ public class CustomFactionCategories {
     private static final Set<String> OUTLAW_FACTIONS = new HashSet<>();
     private static final Set<String> CIVILIAN_FACTIONS = new HashSet<>();
     private static final Set<String> SPECIAL_FACTIONS = new HashSet<>();
-    private static final Set<String> REMNANT_FACTIONS = new HashSet<>();
+    private static final Set<String> EXOTIC_FACTIONS = new HashSet<>();
     private static final Set<String> DOMAIN_FACTIONS = new HashSet<>();
 
     public static void loadFactionCategoryFiles() {
@@ -33,14 +33,14 @@ public class CustomFactionCategories {
             JSONArray outlawFactions = mergedFactionObject.getJSONArray("outlaw");
             JSONArray civilianFactions = mergedFactionObject.getJSONArray("civilian");
             JSONArray experimentalFactions = mergedFactionObject.getJSONArray("experimental");
-            JSONArray remnantFactions = mergedFactionObject.getJSONArray("remnant");
+            JSONArray exoticFactions = mergedFactionObject.getJSONArray("exotic");
             JSONArray domainFactions = mergedFactionObject.getJSONArray("domain");
 
             IGNORED_FACTIONS.addAll(Arrays.asList((String[]) JSONParser.parseJSONArray(ignoredFactions)));
             OUTLAW_FACTIONS.addAll(Arrays.asList((String[]) JSONParser.parseJSONArray(outlawFactions)));
             CIVILIAN_FACTIONS.addAll(Arrays.asList((String[]) JSONParser.parseJSONArray(civilianFactions)));
             SPECIAL_FACTIONS.addAll(Arrays.asList((String[]) JSONParser.parseJSONArray(experimentalFactions)));
-            REMNANT_FACTIONS.addAll(Arrays.asList((String[]) JSONParser.parseJSONArray(remnantFactions)));
+            EXOTIC_FACTIONS.addAll(Arrays.asList((String[]) JSONParser.parseJSONArray(exoticFactions)));
             DOMAIN_FACTIONS.addAll(Arrays.asList((String[]) JSONParser.parseJSONArray(domainFactions)));
 
         } catch (IOException | JSONException e) {
@@ -65,7 +65,7 @@ public class CustomFactionCategories {
     }
 
     public static boolean isRemnantFaction(String factionID) {
-        return REMNANT_FACTIONS.contains(factionID);
+        return EXOTIC_FACTIONS.contains(factionID);
     }
 
     public static boolean isDomainFaction(String factionID) {

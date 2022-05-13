@@ -28,7 +28,7 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 public class BaseAugment implements AugmentApplier {
 
     protected String augmentID;
-    protected String manufacturer;
+    protected List<String> manufacturer;
     protected String name;
     protected TextWithHighlights description;
     protected int rarity;
@@ -45,6 +45,7 @@ public class BaseAugment implements AugmentApplier {
     protected CombatScriptRunner combatScriptRunner;
     protected RightClickAction rightClickAction;
     protected Map<String, Float> appliedFighterValues;
+    protected List<String> incompatibleWith;
     protected boolean uniqueMod;
     protected boolean stackable;
     protected AugmentQuality initialQuality;
@@ -73,6 +74,7 @@ public class BaseAugment implements AugmentApplier {
         this.combatScriptRunner = ((CombatScriptRunner) createInstanceFromPath(augmentData.getCombatScriptPath()));
         this.rightClickAction = ((RightClickAction) createInstanceFromPath(augmentData.getRightClickActionPath()));
         this.appliedFighterValues = new HashMap<>();
+        this.incompatibleWith = augmentData.incompatibleWith;
         this.uniqueMod = augmentData.isUniqueMod();
         this.stackable = isNull(rightClickAction);
     }
@@ -247,6 +249,11 @@ public class BaseAugment implements AugmentApplier {
         for (StatApplier statMod : getActiveStatMods()) {
             statMod.generateTooltipEntry(stats, id + "_" + getAugmentID(), null, null, this);
         }
+    }
+
+    @Override
+    public boolean isInstalled() {
+        return !isNull(getInstalledSlot());
     }
 
     @Override

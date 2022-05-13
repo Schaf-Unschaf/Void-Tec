@@ -1,6 +1,7 @@
 package de.schafunschaf.voidtec.combat.vesai;
 
 import com.fs.starfarer.api.util.WeightedRandomPicker;
+import de.schafunschaf.voidtec.util.ui.StringAutocorrect;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -76,13 +77,14 @@ public enum SlotCategory {
     }
 
     public static SlotCategory getEnum(String valueString) {
-        for (SlotCategory value : values) {
-            if (value.name().equalsIgnoreCase(valueString) || value.name.equalsIgnoreCase(valueString)) {
-                return value;
-            }
+        List<String> enumList = new ArrayList<>();
+        for (SlotCategory category : values) {
+            enumList.add(category.name());
         }
 
-        return null;
+        String match = StringAutocorrect.findBestStringMatch(valueString, enumList);
+
+        return isNull(match) ? null : SlotCategory.valueOf(match);
     }
 
     @Override

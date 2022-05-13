@@ -6,6 +6,8 @@ public class VT_Icons {
 
     public static final String LOCKED_SLOT_ICON = Global.getSettings().getSpriteName("voidTecSlots", "voidTec_hullmod_lockedSlot");
 
+    public static final String BLANK_ICON = Global.getSettings().getSpriteName("voidTecSlots", "voidTec_item_blank");
+
     public static final String AUGMENT_ITEM_ICON = Global.getSettings().getSpriteName("voidTecSlots", "voidTec_item_augmentChip");
     public static final String AUGMENT_ITEM_ICON_COVER = Global.getSettings()
                                                                .getSpriteName("voidTecSlots", "voidTec_item_augmentChip_cover");

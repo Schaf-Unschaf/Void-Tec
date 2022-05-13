@@ -12,6 +12,7 @@ import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.HullModDataStorage;
 import de.schafunschaf.voidtec.combat.vesai.HullModManager;
 import de.schafunschaf.voidtec.ids.VT_Colors;
+import de.schafunschaf.voidtec.ids.VT_Settings;
 
 import java.awt.Color;
 
@@ -50,7 +51,7 @@ public class VoidTecEngineeringSuite extends BaseHullMod {
 
         hullModManager.applySlotEffects(stats, id);
         hullModManager.applyBeforeCreation(stats, id);
-        if (isInPlayerFleet(stats)) {
+        if (VT_Settings.sModPenalty && isInPlayerFleet(stats)) {
             hullModManager.addOverLimitPenalty(stats, id);
         }
     }

@@ -6,9 +6,7 @@ import de.schafunschaf.voidtec.campaign.listeners.VT_CampaignListener;
 import de.schafunschaf.voidtec.campaign.listeners.VT_LootListener;
 import de.schafunschaf.voidtec.combat.scripts.stats.StatScriptProvider;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModProvider;
-import de.schafunschaf.voidtec.imported.CustomFactionCategories;
-import de.schafunschaf.voidtec.imported.SettingsLoader;
-import de.schafunschaf.voidtec.imported.SpecialShips;
+import de.schafunschaf.voidtec.imported.*;
 import lombok.extern.log4j.Log4j;
 
 @Log4j
@@ -37,6 +35,7 @@ public class ModLoadingHelper {
         AugmentDataLoader.loadAugmentFiles();
         SpecialShips.loadSpecialShipFiles();
         CustomFactionCategories.loadFactionCategoryFiles();
+        WelcomeMessageLoader.loadMessageFiles();
     }
 
 }

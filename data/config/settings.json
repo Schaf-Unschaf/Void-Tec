@@ -6,6 +6,7 @@
   "graphics": {
     "voidTecSlots": {
       "voidTec_hullmod_lockedSlot": "graphics/hullmods/vt_locked_slot.png",
+      "voidTec_item_blank": "graphics/icons/cargo/vt_blank_icon.png",
       "voidTec_item_augmentChip": "graphics/icons/cargo/vt_augment_chip.png",
       "voidTec_item_augmentChip_cover": "graphics/icons/cargo/vt_augment_chip_cover.png",
       "voidTec_item_augmentChip_glow": "graphics/icons/cargo/vt_augment_chip_glow.png",

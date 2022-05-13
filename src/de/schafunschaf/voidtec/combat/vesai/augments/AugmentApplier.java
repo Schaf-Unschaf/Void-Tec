@@ -39,7 +39,7 @@ public interface AugmentApplier {
 
     TextWithHighlights getDescription();
 
-    String getManufacturer();
+    List<String> getManufacturer();
 
     SlotCategory getPrimarySlot();
 
@@ -66,6 +66,8 @@ public interface AugmentApplier {
     void runRightClickAction();
 
     void collectAppliedStats(MutableShipStatsAPI stats, String id);
+
+    boolean isInstalled();
 
     boolean isRepairable();
 

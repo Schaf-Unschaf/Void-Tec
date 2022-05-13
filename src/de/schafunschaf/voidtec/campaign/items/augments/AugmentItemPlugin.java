@@ -42,11 +42,30 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
             return;
         }
 
-        String manufacturerName = isNull(augment.getManufacturer()) ? "Unknown" : augment.getManufacturer();
-        FactionAPI faction = Global.getSector().getFaction(manufacturerName.toLowerCase());
-        Color manufacturerColor = VoidTecUtils.getManufacturerColor(manufacturerName);
-        if (!isNull(faction)) {
-            manufacturerName = Misc.ucFirst(faction.getDisplayNameWithArticleWithoutArticle());
+        StringBuilder manufacturerString = new StringBuilder();
+        List<String> manufacturerNames = new ArrayList<>();
+        List<Color> manufacturerHLColors = new ArrayList<>();
+
+        if (augment.getManufacturer().isEmpty()) {
+            manufacturerString.append("Unknown");
+            manufacturerNames.add("Unknown");
+            manufacturerHLColors.add(Misc.getTextColor());
+        } else {
+            for (Iterator<String> iterator = augment.getManufacturer().iterator(); iterator.hasNext(); ) {
+                String manufacturer = iterator.next();
+                FactionAPI faction = Global.getSector().getFaction(manufacturer.toLowerCase());
+                Color manufacturerColor = VoidTecUtils.getManufacturerColor(manufacturer);
+                if (!isNull(faction)) {
+                    manufacturer = Misc.ucFirst(faction.getDisplayNameWithArticleWithoutArticle());
+                }
+
+                manufacturerString.append(manufacturer);
+                manufacturerNames.add(manufacturer);
+                manufacturerHLColors.add(manufacturerColor);
+                if (iterator.hasNext()) {
+                    manufacturerString.append(", ");
+                }
+            }
         }
 
         String qualityDescription = String.format("Quality: %s", augment.getAugmentQuality().getName());
@@ -67,7 +86,8 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
         String uniqueString = augment.isUniqueMod() ? String.format(" (%s)", unique) : "";
 
         tooltip.setParaFontColor(Misc.getGrayColor());
-        tooltip.addPara("Manufacturer: %s", padding, manufacturerColor, manufacturerName);
+        tooltip.addPara(String.format("Manufacturer: %s", manufacturerString), padding, manufacturerHLColors.toArray(new Color[0]),
+                        manufacturerNames.toArray(new String[0]));
         tooltip.addPara(qualityDescription, paraPadding, hlColors.toArray(new Color[0]), hlStrings.toArray(new String[0]));
         tooltip.addPara("Slot: %s" + uniqueString, paraPadding, new Color[]{augment.getPrimarySlot().getColor(), Misc.getHighlightColor()},
                         augment.getPrimarySlot().getName(), unique);

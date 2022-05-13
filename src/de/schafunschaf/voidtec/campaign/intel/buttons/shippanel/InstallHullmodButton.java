@@ -25,7 +25,6 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static de.schafunschaf.voidtec.ids.VT_Settings.*;
 
@@ -49,8 +48,7 @@ public class InstallHullmodButton extends DefaultButton {
         long bonusXP = VoidTecUtils.getBonusXPForInstalling(fleetMember);
         playerStats.addBonusXP(bonusXP, false, null, false);
 
-        Set<String> permaMods = memberVariant.getPermaMods();
-        String[] sMods = permaMods.toArray(new String[0]);
+        String[] sMods = installedSMods.toArray(new String[0]);
         for (int i = sMods.length; i > 0; i--) {
             memberVariant.removePermaMod(sMods[i - 1]);
         }

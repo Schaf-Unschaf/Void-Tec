@@ -1,5 +1,6 @@
 package de.schafunschaf.voidtec.campaign.intel.buttons.infopanel.repair;
 
+import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
 import de.schafunschaf.voidtec.campaign.crafting.AugmentPartsManager;
@@ -7,8 +8,10 @@ import de.schafunschaf.voidtec.campaign.crafting.AugmentPartsUtility;
 import de.schafunschaf.voidtec.campaign.crafting.parts.CraftingComponent;
 import de.schafunschaf.voidtec.campaign.intel.buttons.DefaultButton;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.ids.VT_Strings;
+import de.schafunschaf.voidtec.util.CargoUtils;
 import de.schafunschaf.voidtec.util.FormattingTools;
 import de.schafunschaf.voidtec.util.VoidTecUtils;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
@@ -30,7 +33,14 @@ public class RepairAugmentButton extends DefaultButton {
     @Override
     public void buttonPressConfirmed(IntelUIAPI ui) {
         if (augment.isRepairable() && AugmentPartsUtility.canRepairAugment(augment)) {
-            AugmentPartsUtility.repairAugment(augment, 1);
+            if (augment.isInstalled()) {
+                AugmentPartsUtility.repairAugment(augment, 1);
+            } else {
+                CargoAPI sourceStorage = CargoUtils.removeAugmentFromStorage(augment);
+                AugmentApplier cloneAugment = AugmentDataManager.cloneAugment(this.augment);
+                cloneAugment.repairAugment(1);
+                CargoUtils.addAugmentToCargo(cloneAugment, sourceStorage);
+            }
         }
     }
 

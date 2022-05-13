@@ -18,7 +18,8 @@ public class AugmentDataManager {
     }
 
     public static AugmentApplier cloneAugment(AugmentApplier augment) {
-        AugmentApplier clonedAugment = createAugmentFromData(AUGMENT_DATA_MAP.get(augment.getAugmentID().toLowerCase()), augment.getInitialQuality());
+        AugmentApplier clonedAugment = createAugmentFromData(AUGMENT_DATA_MAP.get(augment.getAugmentID().toLowerCase()),
+                                                             augment.getInitialQuality());
         if (!isNull(clonedAugment)) {
             clonedAugment.damageAugment(augment.getInitialQuality().ordinal() - augment.getAugmentQuality().ordinal(), false);
         }
@@ -61,7 +62,7 @@ public class AugmentDataManager {
                 List<String> forbiddenFactions = augmentData.getForbiddenFactions();
                 List<String> augmentDataTags = augmentData.getTags();
 
-                factionMult = !isNull(faction) && augmentData.getManufacturer().equals(faction.getId()) ? sameFactionMult : 1f;
+                factionMult = !isNull(faction) && augmentData.getManufacturer().contains(faction.getId()) ? sameFactionMult : 1f;
                 float weight = ignoreWeighting ? 1 : augmentData.getRarity() * factionMult;
 
                 boolean matchesTag = true;
@@ -96,7 +97,7 @@ public class AugmentDataManager {
                 List<String> forbiddenFactions = augmentData.getForbiddenFactions();
                 List<String> augmentDataTags = augmentData.getTags();
 
-                factionMult = !isNull(faction) && augmentData.getManufacturer().equals(faction.getId()) ? sameFactionMult : 1f;
+                factionMult = !isNull(faction) && augmentData.getManufacturer().contains(faction.getId()) ? sameFactionMult : 1f;
                 float weight = ignoreWeighting ? 1 : augmentData.getRarity() * factionMult;
 
                 boolean matchesTag = true;

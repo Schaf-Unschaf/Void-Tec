@@ -4,6 +4,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
+import de.schafunschaf.voidtec.util.ui.plugins.NumberFieldPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.Color;
@@ -102,5 +103,20 @@ public class UIUtils {
         tooltip.addCustom(customPanel, 0f);
 
         return customPanel;
+    }
+
+    public static TextFieldAPI addNumberField(TooltipMakerAPI tooltip, float width, float height, float minValue, float maxValue,
+                                              float padding) {
+        NumberFieldPlugin plugin = new NumberFieldPlugin(minValue, maxValue);
+        CustomPanelAPI customPanel = Global.getSettings().createCustom(width, height, plugin);
+        TooltipMakerAPI uiElement = customPanel.createUIElement(width, height, false);
+
+        TextFieldAPI textField = uiElement.addTextField(width, 0f);
+        plugin.setTextField(textField);
+
+        customPanel.addUIElement(uiElement).inTL(0, 0);
+        tooltip.addCustom(customPanel, padding);
+
+        return textField;
     }
 }

@@ -1,0 +1,20 @@
+{
+  "voidtec": {
+    "sheepDebug": false,
+    "enableRemoveHullmodButton": false,
+    "enableChangeSlotButton": false,
+    "sModPenalty": true,
+    "aiHullmodChance": 50,
+    "aiSlotFillChance": 50,
+    "recoverChance": 40,
+    "destroyChanceOnRecover": 50,
+    "damageChanceOnRecover": 75,
+    "basePartAmount": 5,
+    "basicRepairModifier": 3.0,
+    "primaryRepairModifier": 2.0,
+    "secondaryRepairModifier": 1.0,
+    "basicDisassembleModifier": 3.0,
+    "primaryDisassembleModifier": 2.0,
+    "secondaryDisassembleModifier": 1.0
+  }
+}

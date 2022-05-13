@@ -1,0 +1,11 @@
+id,message,weighting
+vt_1,"Welcome back, $captain.",10
+vt_2,How are you today?,5
+vt_3,Hello $firstName!,5
+vt_4,All systems are operational.,5
+vt_5,Baaaaaa!,0.1
+vt_6,Have a nice day.,7
+vt_7,I miss you!,1
+vt_8,I love you!,0.5
+vt_9,Did you get a haircut?,1
+vt_10,You've got mail!,1

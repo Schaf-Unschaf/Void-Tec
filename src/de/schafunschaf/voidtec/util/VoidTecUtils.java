@@ -2,27 +2,24 @@ package de.schafunschaf.voidtec.util;
 
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
-import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Skills;
 import com.fs.starfarer.api.util.Misc;
-import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
+import com.fs.starfarer.api.util.Pair;
+import com.fs.starfarer.api.util.WeightedRandomPicker;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
 import de.schafunschaf.voidtec.combat.vesai.AugmentSlot;
 import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
-import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
-import de.schafunschaf.voidtec.ids.VT_Items;
 import de.schafunschaf.voidtec.ids.VT_Settings;
+import de.schafunschaf.voidtec.imported.WelcomeMessageLoader;
 import lombok.SneakyThrows;
 
 import java.awt.Color;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
-import java.util.Random;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
@@ -41,24 +38,6 @@ public class VoidTecUtils {
 
     public static boolean canPayForInstallation(float installCost) {
         return Global.getSector().getPlayerFleet().getCargo().getCredits().get() >= installCost;
-    }
-
-    public static void addAugmentToFleetCargo(AugmentApplier augment) {
-        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
-        cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, augment), 1);
-    }
-
-    public static void addRandomAugmentsToFleetCargo(Random random, int numPerItem, int quantity) {
-        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
-        for (int i = 0; i < quantity; i++) {
-            cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, AugmentDataManager.getRandomAugment(random, true)),
-                             numPerItem);
-        }
-    }
-
-    public static void addChestToFleetCargo(SpecialItemData baseChestData) {
-        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
-        cargo.addSpecial(baseChestData, 1f);
     }
 
     public static float calcNeededCreditsForRepair(AugmentApplier augment) {
@@ -95,5 +74,15 @@ public class VoidTecUtils {
     public static int getBonusXPPercentage(long bonusXP) {
         long xpForLevelUp = Global.getSettings().getLevelupPlugin().getXPForLevel(Global.getSector().getPlayerStats().getLevel() + 1);
         return Math.round(100f / xpForLevelUp * bonusXP);
+    }
+
+    public static String getRandomIntelMessage() {
+        WeightedRandomPicker<String> picker = new WeightedRandomPicker<>();
+
+        for (Pair<String, Float> pair : WelcomeMessageLoader.getMessageList()) {
+            picker.add(pair.one, pair.two);
+        }
+
+        return picker.pick();
     }
 }

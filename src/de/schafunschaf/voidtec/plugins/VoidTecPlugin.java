@@ -19,7 +19,7 @@ import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.helper.ModLoadingHelper;
 import de.schafunschaf.voidtec.ids.VT_Items;
 import de.schafunschaf.voidtec.ids.VT_Settings;
-import de.schafunschaf.voidtec.util.VoidTecUtils;
+import de.schafunschaf.voidtec.util.CargoUtils;
 import lombok.extern.log4j.Log4j;
 
 import java.util.Random;
@@ -72,27 +72,27 @@ public class VoidTecPlugin extends BaseModPlugin {
             }
             removeFaultyChests(Global.getSector().getPlayerFleet().getCargo());
 
-            VoidTecUtils.addChestToFleetCargo(new AugmentChestData(VT_Items.STORAGE_CHEST_XS, null, "Augment Storage Chest", 200));
+            CargoUtils.addChestToFleetCargo(new AugmentChestData(VT_Items.STORAGE_CHEST_XS, null, "Augment Storage Chest", 200));
             memoryAPI.set(DEV_CHEST, 1);
         }
 
         if (VT_Settings.sheepDebug) {
-            VoidTecUtils.addRandomAugmentsToFleetCargo(null, 10, 50);
-            VoidTecUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_rainbowEngines", AugmentQuality.CUSTOMISED));
-            VoidTecUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_rainbowShields", AugmentQuality.CUSTOMISED));
-            VoidTecUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_engineRecolor", AugmentQuality.CUSTOMISED));
-            VoidTecUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_engineRecolor", AugmentQuality.CUSTOMISED));
-            VoidTecUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_engineRecolor", AugmentQuality.CUSTOMISED));
-            VoidTecUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_pursuitEngines", AugmentQuality.getRandomQuality(null,
-                                                                                                                                   true)));
-            VoidTecUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_travelDrives", AugmentQuality.getRandomQuality(null,
+            CargoUtils.addRandomAugmentsToFleetCargo(null, 10, 50);
+            CargoUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_rainbowEngines", AugmentQuality.CUSTOMISED));
+            CargoUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_rainbowShields", AugmentQuality.CUSTOMISED));
+            CargoUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_engineRecolor", AugmentQuality.CUSTOMISED));
+            CargoUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_engineRecolor", AugmentQuality.CUSTOMISED));
+            CargoUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_engineRecolor", AugmentQuality.CUSTOMISED));
+            CargoUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_pursuitEngines", AugmentQuality.getRandomQuality(null,
                                                                                                                                  true)));
+            CargoUtils.addAugmentToFleetCargo(AugmentDataManager.getAugment("vt_travelDrives", AugmentQuality.getRandomQuality(null,
+                                                                                                                               true)));
 
             for (int i = 0; i < 80; i++) {
                 AugmentApplier augment = AugmentDataManager.getRandomAugment(SlotCategory.getRandomCategory(null, true),
                                                                              AugmentQuality.DOMAIN, null, null, null, true);
                 augment.damageAugment(new Random().nextInt(6), false);
-                VoidTecUtils.addAugmentToFleetCargo(augment);
+                CargoUtils.addAugmentToFleetCargo(augment);
             }
         }
     }

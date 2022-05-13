@@ -3,8 +3,8 @@ package de.schafunschaf.voidtec.campaign.scripts.console.commands;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
+import de.schafunschaf.voidtec.util.CargoUtils;
 import de.schafunschaf.voidtec.util.ComparisonTools;
-import de.schafunschaf.voidtec.util.VoidTecUtils;
 import org.jetbrains.annotations.NotNull;
 import org.lazywizard.console.BaseCommand;
 import org.lazywizard.console.Console;
@@ -31,7 +31,7 @@ public class VT_AddAugment implements BaseCommand {
 
         try {
             AugmentApplier augment = AugmentDataManager.getAugment(augmentID, quality);
-            VoidTecUtils.addAugmentToFleetCargo(augment);
+            CargoUtils.addAugmentToFleetCargo(augment);
 
             Console.showMessage(
                     String.format("Added %s in %s quality to your cargo (%s).", augment.getName(), quality.getName(), augmentID));

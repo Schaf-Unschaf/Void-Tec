@@ -17,7 +17,7 @@ import java.util.List;
 public class AugmentData {
 
     protected String augmentID;
-    protected String manufacturer;
+    protected List<String> manufacturer;
     protected String name;
     protected TextWithHighlights description;
     protected int rarity;
@@ -35,6 +35,7 @@ public class AugmentData {
     protected String combatScriptPath = null;
     protected String rightClickActionPath = null;
     protected boolean uniqueMod = false;
+    protected List<String> incompatibleWith = new ArrayList<>();
     protected List<String> allowedFactions = new ArrayList<>();
     protected List<String> forbiddenFactions = new ArrayList<>();
     protected List<String> tags = new ArrayList<>();

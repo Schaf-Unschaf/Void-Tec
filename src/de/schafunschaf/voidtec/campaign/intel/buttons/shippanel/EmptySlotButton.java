@@ -38,12 +38,17 @@ public class EmptySlotButton extends DefaultButton {
         }
 
         if (canInstallAugment && VoidTecUtils.isPlayerDockedAtSpaceport()) {
-            AugmentApplier augmentFromCargo = AugmentManagerIntel.getSelectedAugmentInCargo().getAugment();
+            AugmentCargoWrapper selectedAugmentInCargo = AugmentManagerIntel.getSelectedAugmentInCargo();
+            if (isNull(selectedAugmentInCargo)) {
+                return;
+            }
+
+            AugmentApplier augmentFromCargo = selectedAugmentInCargo.getAugment();
             AugmentApplier augmentToInstall = augmentFromCargo.isStackable() ? AugmentDataManager.cloneAugment(augmentFromCargo) :
                                               augmentFromCargo;
             boolean success = augmentSlot.installAugment(augmentToInstall);
             if (success) {
-                CargoUtils.removeAugmentFromCargo(AugmentManagerIntel.getSelectedAugmentInCargo());
+                CargoUtils.removeAugmentFromCargo(selectedAugmentInCargo, 1);
             }
 
             AugmentManagerIntel.setSelectedInstalledAugment(success ? augmentToInstall : null);

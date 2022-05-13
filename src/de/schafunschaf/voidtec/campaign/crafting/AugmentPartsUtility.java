@@ -19,13 +19,6 @@ import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
 
 public class AugmentPartsUtility {
 
-    private static final int BASE_PART_AMOUNT = 5;
-    private static final float BASIC_REPAIR_MOD = 3;
-    private static final float PRIMARY_REPAIR_MOD = 2;
-    private static final float SECONDARY_REPAIR_MOD = 1;
-    private static final float BASIC_DISASSEMBLE_MOD = 3;
-    private static final float PRIMARY_DISASSEMBLE_MOD = 2;
-    private static final float SECONDARY_DISASSEMBLE_MOD = 1;
     private static final float BASIC_CRAFT_MOD = 1;
     private static final float PRIMARY_CRAFT_MOD = 3;
     private static final float SECONDARY_CRAFT_MOD = 2;
@@ -40,19 +33,19 @@ public class AugmentPartsUtility {
         AugmentQuality higherQuality = augment.getAugmentQuality().getHigherQuality();
         float qualityModifier = higherQuality.getModifier();
 
-        int baseCost = (int) Math.ceil(BASE_PART_AMOUNT * BASIC_REPAIR_MOD * qualityModifier);
+        int baseCost = (int) Math.ceil(VT_Settings.basePartAmount * VT_Settings.basicRepairMod * qualityModifier);
         AugmentComponent baseComponent = new AugmentComponent(AugmentPartsManager.BASIC_COMPONENT, higherQuality);
         baseComponent.addAmount(baseCost + random.nextInt(Math.max(baseCost / 2, 1)));
         neededComponents.add(baseComponent);
 
-        int primaryCost = (int) Math.ceil(BASE_PART_AMOUNT * PRIMARY_REPAIR_MOD * qualityModifier);
+        int primaryCost = (int) Math.ceil(VT_Settings.basePartAmount * VT_Settings.primaryRepairMod * qualityModifier);
         AugmentComponent primaryComponent = new AugmentComponent(augment.getPrimarySlot(), higherQuality);
         primaryComponent.addAmount(primaryCost + random.nextInt(Math.max(primaryCost / 2, 1)));
         neededComponents.add(primaryComponent);
 
         for (SlotCategory secondarySlot : augment.getSecondarySlots()) {
             int secondaryCost = (int) Math.ceil(
-                    BASE_PART_AMOUNT * SECONDARY_REPAIR_MOD * qualityModifier / augment.getSecondarySlots().size());
+                    VT_Settings.basePartAmount * VT_Settings.secondaryRepairMod * qualityModifier / augment.getSecondarySlots().size());
             AugmentComponent secondaryComponent = new AugmentComponent(secondarySlot, higherQuality);
             secondaryComponent.addAmount(secondaryCost + random.nextInt(Math.max(secondaryCost / 2, 1)));
             neededComponents.add(secondaryComponent);
@@ -99,9 +92,12 @@ public class AugmentPartsUtility {
         }
     }
 
-    public static void dismantleAugment(AugmentCargoWrapper augmentCargoWrapper) {
-        dismantleAugment(augmentCargoWrapper.getAugment());
-        CargoUtils.removeAugmentFromCargo(augmentCargoWrapper);
+    public static void dismantleAugment(AugmentCargoWrapper augmentCargoWrapper, int amount) {
+        for (int i = 0; i < amount; i++) {
+            dismantleAugment(augmentCargoWrapper.getAugment());
+        }
+
+        CargoUtils.removeAugmentFromCargo(augmentCargoWrapper, amount);
     }
 
     public static void dismantleAugment(AugmentApplier augment) {
@@ -124,7 +120,7 @@ public class AugmentPartsUtility {
         AugmentQuality initialQuality = augment.getInitialQuality();
         int damagedMalus = initialQuality.ordinal() - currentQuality.ordinal();
 
-        int basePartAmount = (int) Math.ceil(BASE_PART_AMOUNT * BASIC_DISASSEMBLE_MOD);
+        int basePartAmount = (int) Math.ceil(VT_Settings.basePartAmount * VT_Settings.basicDisassembleMod);
         AugmentComponent baseComponent = new AugmentComponent(AugmentPartsManager.BASIC_COMPONENT, currentQuality);
         AugmentComponent baseComponentIQ = new AugmentComponent(AugmentPartsManager.BASIC_COMPONENT, initialQuality);
         int addAmount = Math.max(Math.round(basePartAmount * (VT_Settings.partDisassemblePercentage / 100f))
@@ -132,7 +128,7 @@ public class AugmentPartsUtility {
 
         calculatePartsToAdd(possibleComponents, initialQuality, currentQuality, baseComponent, baseComponentIQ, addAmount);
 
-        int primaryPartAmount = (int) Math.ceil(BASE_PART_AMOUNT * PRIMARY_DISASSEMBLE_MOD);
+        int primaryPartAmount = (int) Math.ceil(VT_Settings.basePartAmount * VT_Settings.primaryDisassembleMod);
         AugmentComponent primaryComponent = new AugmentComponent(augment.getPrimarySlot(), currentQuality);
         AugmentComponent primaryComponentIQ = new AugmentComponent(augment.getPrimarySlot(), initialQuality);
         addAmount = Math.max(Math.round(basePartAmount * (VT_Settings.partDisassemblePercentage / 100f))
@@ -140,7 +136,8 @@ public class AugmentPartsUtility {
         calculatePartsToAdd(possibleComponents, initialQuality, currentQuality, primaryComponent, primaryComponentIQ, addAmount);
 
         for (SlotCategory secondarySlot : augment.getSecondarySlots()) {
-            int secondaryPartAmount = (int) Math.ceil(BASE_PART_AMOUNT * SECONDARY_DISASSEMBLE_MOD / augment.getSecondarySlots().size());
+            int secondaryPartAmount = (int) Math.ceil(
+                    VT_Settings.basePartAmount * VT_Settings.secondaryDisassembleMod / augment.getSecondarySlots().size());
             AugmentComponent secondaryComponent = new AugmentComponent(secondarySlot, currentQuality);
             AugmentComponent secondaryComponentIQ = new AugmentComponent(secondarySlot, initialQuality);
             addAmount = Math.max(Math.round(basePartAmount * (VT_Settings.partDisassemblePercentage / 100f))

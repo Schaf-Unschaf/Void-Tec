@@ -11,6 +11,7 @@ import de.schafunschaf.voidtec.campaign.items.augments.AugmentItemData;
 import de.schafunschaf.voidtec.campaign.items.chests.StorageChestData;
 import de.schafunschaf.voidtec.campaign.scripts.VT_DockedAtSpaceportHelper;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
+import de.schafunschaf.voidtec.combat.vesai.augments.AugmentDataManager;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Items;
 
@@ -137,12 +138,16 @@ public class CargoUtils {
         return ((AugmentItemData) cargoStack.getData()).getAugment();
     }
 
-    public static void removeAugmentFromCargo(AugmentCargoWrapper augmentCargoWrapper) {
+    public static void removeAugmentFromCargo(AugmentCargoWrapper augmentCargoWrapper, int amount) {
+        if (amount < 1) {
+            return;
+        }
+
         CargoAPI sourceCargo = augmentCargoWrapper.getSourceCargo();
 
         for (CargoStackAPI cargoStackAPI : sourceCargo.getStacksCopy()) {
             if (cargoStackAPI.getData() == augmentCargoWrapper.getAugmentCargoStack().getData()) {
-                cargoStackAPI.setSize(cargoStackAPI.getSize() - 1);
+                cargoStackAPI.setSize(cargoStackAPI.getSize() - amount);
                 sourceCargo.removeEmptyStacks();
                 return;
             }
@@ -159,5 +164,55 @@ public class CargoUtils {
         }
 
         return toCargo;
+    }
+
+    public static CargoAPI removeAugmentFromStorage(AugmentApplier augment) {
+        AugmentCargoWrapper foundAugmentWrapper = null;
+        CargoAPI cargoContainingAugment = null;
+        for (AugmentCargoWrapper augmentCargoWrapper : getAugmentsInCargo()) {
+            if (augment.equals(augmentCargoWrapper.getAugment())) {
+                foundAugmentWrapper = augmentCargoWrapper;
+                break;
+            }
+        }
+
+        if (!isNull(foundAugmentWrapper)) {
+            cargoContainingAugment = foundAugmentWrapper.getSourceCargo();
+            removeAugmentFromCargo(foundAugmentWrapper, 1);
+        }
+
+        return cargoContainingAugment;
+    }
+
+    /**
+     * Adds a new Augment to the Player-Fleet-Cargo. The supplied Augment gets cloned in the process.
+     *
+     * @param augment Augment which acts as a base for stats
+     */
+    public static void addAugmentToFleetCargo(AugmentApplier augment) {
+        addAugmentToCargo(augment, Global.getSector().getPlayerFleet().getCargo());
+    }
+
+    /**
+     * Adds a new Augment to the specified CargoAPI. The supplied Augment gets cloned in the process
+     *
+     * @param augment     Augment which acts as a base for stats
+     * @param targetCargo Cargo, where the Augment gets added to
+     */
+    public static void addAugmentToCargo(AugmentApplier augment, CargoAPI targetCargo) {
+        targetCargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, augment), 1);
+    }
+
+    public static void addRandomAugmentsToFleetCargo(Random random, int numPerItem, int quantity) {
+        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+        for (int i = 0; i < quantity; i++) {
+            cargo.addSpecial(new AugmentItemData(VT_Items.AUGMENT_ITEM, null, AugmentDataManager.getRandomAugment(random, true)),
+                             numPerItem);
+        }
+    }
+
+    public static void addChestToFleetCargo(SpecialItemData baseChestData) {
+        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+        cargo.addSpecial(baseChestData, 1f);
     }
 }

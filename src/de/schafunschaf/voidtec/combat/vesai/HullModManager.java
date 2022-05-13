@@ -275,7 +275,7 @@ public class HullModManager {
         int numOverLimitMods = Math.abs(currentBuiltInMods - maxBuiltInMods);
         boolean overLimit = currentBuiltInMods > maxBuiltInMods;
 
-        if (overLimit) {
+        if (VT_Settings.sModPenalty && overLimit) {
             String sumSupplyPenalty = (int) (supplyPenalty * numOverLimitMods) + "%";
             String sumRecoveryPenalty = (int) (recoveryPenalty * numOverLimitMods) + "%";
             String sumPerformancePenalty = Math.min(Math.round(performancePenalty * numOverLimitMods), 100) + "%";
