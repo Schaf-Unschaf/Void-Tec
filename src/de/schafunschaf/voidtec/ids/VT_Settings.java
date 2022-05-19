@@ -10,6 +10,8 @@ public class VT_Settings {
     public static boolean sheepDebug = false;
     public static boolean enableRemoveHullmodButton = false;
     public static boolean enableChangeSlotButton = false;
+    public static boolean enablePlayerAugmentBattleDamage = true;
+    public static boolean alwaysExpandTooltips = false;
     public static boolean randomSlotAmount = false;
     public static boolean hullmodInstallationWithSP = false;
     public static boolean sModPenalty = true;
@@ -19,6 +21,7 @@ public class VT_Settings {
     public static int removalCostSP = 1;
     public static int aiHullmodChance = 50;
     public static int aiSlotFillChance = 50;
+    public static float statRollRangeModifier = 1f;
     public static int recoverChance = 30;
     public static int destroyChanceOnRecover = 75;
     public static int damageChanceOnRecover = 75;

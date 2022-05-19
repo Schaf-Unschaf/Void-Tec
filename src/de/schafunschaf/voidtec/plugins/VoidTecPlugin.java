@@ -21,7 +21,9 @@ import de.schafunschaf.voidtec.ids.VT_Items;
 import de.schafunschaf.voidtec.ids.VT_Settings;
 import de.schafunschaf.voidtec.util.CargoUtils;
 import lombok.extern.log4j.Log4j;
+import org.json.JSONException;
 
+import java.io.IOException;
 import java.util.Random;
 
 import static de.schafunschaf.voidtec.util.ComparisonTools.isNull;
@@ -45,7 +47,7 @@ public class VoidTecPlugin extends BaseModPlugin {
     }
 
     @Override
-    public void onApplicationLoad() {
+    public void onApplicationLoad() throws JSONException, IOException {
         ModLoadingHelper.initStatMods();
         ModLoadingHelper.loadExternalData();
     }

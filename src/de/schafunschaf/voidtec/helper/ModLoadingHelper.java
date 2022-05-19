@@ -8,6 +8,9 @@ import de.schafunschaf.voidtec.combat.scripts.stats.StatScriptProvider;
 import de.schafunschaf.voidtec.combat.vesai.statmodifiers.StatModProvider;
 import de.schafunschaf.voidtec.imported.*;
 import lombok.extern.log4j.Log4j;
+import org.json.JSONException;
+
+import java.io.IOException;
 
 @Log4j
 public class ModLoadingHelper {
@@ -30,7 +33,7 @@ public class ModLoadingHelper {
         StatScriptProvider.initStatScripts();
     }
 
-    public static void loadExternalData() {
+    public static void loadExternalData() throws JSONException, IOException {
         SettingsLoader.loadSettings();
         AugmentDataLoader.loadAugmentFiles();
         SpecialShips.loadSpecialShipFiles();

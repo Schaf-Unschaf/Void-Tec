@@ -177,7 +177,7 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
             tooltip.addPara(VT_Strings.VT_DAMAGED_AUGMENT_DESC, Misc.getGrayColor(), smallPad);
         }
 
-        if (expanded) {
+        if (expanded || VT_Settings.alwaysExpandTooltips) {
             if (!stackSource.equals(AugmentManagerIntel.STACK_SOURCE)) {
                 addCostLabel(tooltip, largePad, transferHandler, stackSource);
             }
@@ -240,7 +240,8 @@ public class AugmentItemPlugin extends BaseSpecialItemPlugin {
     @Override
     public boolean isTooltipExpandable() {
         AugmentApplier augment = getAugmentItemData().getAugment();
-        return (!augment.isDestroyed() && (!augment.getPrimaryStatMods().isEmpty() || !augment.getSecondaryStatMods().isEmpty()));
+        return (!augment.isDestroyed() && (!augment.getPrimaryStatMods().isEmpty() || !augment.getSecondaryStatMods()
+                                                                                              .isEmpty())) && !VT_Settings.alwaysExpandTooltips;
     }
 
     @Override

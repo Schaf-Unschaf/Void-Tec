@@ -12,16 +12,19 @@ public class SettingsLoader {
 
     private static final String FILE_PATH = "data/config/modSettings.json";
 
-    public static void loadSettings() {
+    public static void loadSettings() throws JSONException, IOException {
         try {
             JSONObject settings = Global.getSettings().getMergedJSONForMod(FILE_PATH, VoidTecPlugin.MOD_ID)
-                    .optJSONObject("voidtec");
+                                        .optJSONObject("voidtec");
             VT_Settings.sheepDebug = settings.getBoolean("sheepDebug");
             VT_Settings.enableRemoveHullmodButton = settings.getBoolean("enableRemoveHullmodButton");
             VT_Settings.enableChangeSlotButton = settings.getBoolean("enableChangeSlotButton");
+            VT_Settings.enablePlayerAugmentBattleDamage = settings.getBoolean("enablePlayerAugmentBattleDamage");
+            VT_Settings.alwaysExpandTooltips = settings.getBoolean("alwaysExpandTooltips");
             VT_Settings.sModPenalty = settings.getBoolean("sModPenalty");
             VT_Settings.aiHullmodChance = settings.getInt("aiHullmodChance");
             VT_Settings.aiSlotFillChance = settings.getInt("aiSlotFillChance");
+            VT_Settings.statRollRangeModifier = (float) settings.getDouble("statRollRangeModifier");
             VT_Settings.recoverChance = settings.getInt("recoverChance");
             VT_Settings.destroyChanceOnRecover = settings.getInt("destroyChanceOnRecover");
             VT_Settings.damageChanceOnRecover = settings.getInt("damageChanceOnRecover");
@@ -34,6 +37,8 @@ public class SettingsLoader {
             VT_Settings.secondaryDisassembleMod = (float) settings.getDouble("secondaryDisassembleModifier");
         } catch (IOException | JSONException e) {
             e.printStackTrace();
+            // We want to know if the settings aren't being read.
+            throw e;
         }
     }
 }

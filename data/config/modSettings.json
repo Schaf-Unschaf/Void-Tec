@@ -3,12 +3,21 @@
     "sheepDebug": false,
     "enableRemoveHullmodButton": false,
     "enableChangeSlotButton": false,
+    "enablePlayerAugmentBattleDamage": true,
+    "alwaysExpandTooltips": false,
     "sModPenalty": true,
     "aiHullmodChance": 50,
     "aiSlotFillChance": 50,
+
+    # Modifies the min and max ranges for a stat roll. Default 1.0. Set to 0 to make stats always the average of the min and max values.
+    "statRollRangeModifier": 1.0,
+
+    # Recover-Chance -> Destroy-Chance -> Damage-Chance
     "recoverChance": 40,
     "destroyChanceOnRecover": 50,
     "damageChanceOnRecover": 75,
+
+    # Repairing
     "basePartAmount": 5,
     "basicRepairModifier": 3.0,
     "primaryRepairModifier": 2.0,

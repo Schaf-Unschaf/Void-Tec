@@ -1,2 +1,3 @@
 command,class,tags,syntax,help
 VT_AddAugment,de.schafunschaf.voidtec.campaign.scripts.console.commands.VT_AddAugment,campaign,VT_AddAugment <augmentID> [optionalQuality],"Adds the specified Augment to your cargo."
+VT_Reload,de.schafunschaf.voidtec.campaign.scripts.console.commands.VT_Reload,campaign,VT_Reload,"Reloads settings files."

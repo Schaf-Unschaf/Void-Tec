@@ -183,13 +183,15 @@ public class VT_CampaignListener extends BaseCampaignEventListener {
     }
 
     private void applyAfterBattleDamage(EngagementResultAPI result) {
-        EngagementResultForFleetAPI playerResult = result.getWinnerResult().isPlayer()
-                                                   ? result.getWinnerResult()
-                                                   : result.getLoserResult();
+        if (VT_Settings.enablePlayerAugmentBattleDamage) {
+            EngagementResultForFleetAPI playerResult = result.getWinnerResult().isPlayer()
+                                                       ? result.getWinnerResult()
+                                                       : result.getLoserResult();
 
-        for (FleetMemberAPI fleetMember : playerResult.getDeployed()) {
-            if (fleetMember.getFleetData().getFleet().isPlayerFleet()) {
-                applyAfterBattleDamageToAugments(result, fleetMember);
+            for (FleetMemberAPI fleetMember : playerResult.getDeployed()) {
+                if (fleetMember.getFleetData().getFleet().isPlayerFleet()) {
+                    applyAfterBattleDamageToAugments(result, fleetMember);
+                }
             }
         }
     }

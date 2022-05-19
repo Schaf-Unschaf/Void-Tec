@@ -54,8 +54,9 @@ public class AugmentManagerIntel extends BaseIntel {
     @Getter
     @Setter
     private static boolean isShowingManufacturingPanel = false;
+    private static String intelText = VoidTecUtils.getRandomIntelMessage();
 
-    private boolean welcomeMessageSent = false;
+    private final boolean welcomeMessageSent = Global.getSector().getMemoryWithoutUpdate().getBoolean("$_vt_welcomeMessageSent");
 
     public static AugmentManagerIntel getInstance() {
         IntelManagerAPI intelManager = Global.getSector().getIntelManager();
@@ -65,7 +66,7 @@ public class AugmentManagerIntel extends BaseIntel {
             instance = ((AugmentManagerIntel) intelManager.getIntel(AugmentManagerIntel.class).get(0));
         } else {
             instance = new AugmentManagerIntel();
-            instance.welcomeMessageSent = Global.getSector().getMemoryWithoutUpdate().getBoolean("$_vt_welcomeMessageSent");
+            Global.getSector().getMemoryWithoutUpdate().set("$_vt_welcomeMessageSent", true);
 
             if (!instance.welcomeMessageSent) {
                 Global.getSector().addTransientScript(new VT_WelcomeMessageScript());
@@ -170,15 +171,14 @@ public class AugmentManagerIntel extends BaseIntel {
     private void createIntelText(TooltipMakerAPI info) {
         Color color = getTitleColor(null);
         info.addPara(getName(), color, 0f);
-        String randomIntelMessage = VoidTecUtils.getRandomIntelMessage();
         String playerName = Global.getSector().getPlayerPerson().getNameString();
         FullName fullName = Global.getSector().getPlayerPerson().getName();
 
-        randomIntelMessage = randomIntelMessage.replace("$captain", playerName);
-        randomIntelMessage = randomIntelMessage.replace("$firstName", fullName.getFirst());
-        randomIntelMessage = randomIntelMessage.replace("$lastName", fullName.getLast());
+        intelText = intelText.replace("$captain", playerName);
+        intelText = intelText.replace("$firstName", fullName.getFirst());
+        intelText = intelText.replace("$lastName", fullName.getLast());
 
-        info.addPara(randomIntelMessage, 3f, Misc.getHighlightColor(), playerName, fullName.getFirst(), fullName.getLast());
+        info.addPara(intelText, 3f, Misc.getHighlightColor(), playerName, fullName.getFirst(), fullName.getLast());
     }
 
     private void createWelcomeMessage(TooltipMakerAPI info) {
@@ -187,6 +187,10 @@ public class AugmentManagerIntel extends BaseIntel {
         UIUtils.addHorizontalSeparator(info, info.computeStringWidth(welcomeTitle), 1f, VT_Colors.VT_COLOR_MAIN, 0f);
         info.addPara("Welcome Captain %s. To access the new Augmentation Interface, open your %s and go to the %s tab.", 3f,
                      Misc.getHighlightColor(), Global.getSector().getPlayerPerson().getNameString(), "Intel", "Important");
+    }
+
+    public static void getNewIntelText() {
+        intelText = VoidTecUtils.getRandomIntelMessage();
     }
 
     private void createDamageReport(TooltipMakerAPI info) {
@@ -223,5 +227,7 @@ public class AugmentManagerIntel extends BaseIntel {
         activeCategoryFilter = null;
         activeQualityFilter = null;
         augmentsInCargo = null;
+
+        getNewIntelText();
     }
 }
