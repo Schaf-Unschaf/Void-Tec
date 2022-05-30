@@ -35,7 +35,7 @@ public class ModLoadingHelper {
 
     public static void loadExternalData() throws JSONException, IOException {
         SettingsLoader.loadSettings();
-        AugmentDataLoader.loadAugmentFiles();
+//        AugmentDataLoader.loadAugmentFiles();
         SpecialShips.loadSpecialShipFiles();
         CustomFactionCategories.loadFactionCategoryFiles();
         WelcomeMessageLoader.loadMessageFiles();

@@ -19,6 +19,7 @@ import de.schafunschaf.voidtec.combat.vesai.augments.AugmentQuality;
 import de.schafunschaf.voidtec.helper.ModLoadingHelper;
 import de.schafunschaf.voidtec.ids.VT_Items;
 import de.schafunschaf.voidtec.ids.VT_Settings;
+import de.schafunschaf.voidtec.imported.AugmentDataLoader;
 import de.schafunschaf.voidtec.util.CargoUtils;
 import lombok.extern.log4j.Log4j;
 import org.json.JSONException;
@@ -54,6 +55,7 @@ public class VoidTecPlugin extends BaseModPlugin {
 
     @Override
     public void onGameLoad(boolean newGame) {
+        AugmentDataLoader.loadAugmentFiles();
         ModLoadingHelper.initManagerAndPlugins();
 
         VT_Settings.isIndEvoActive = Global.getSettings().getModManager().isModEnabled("IndEvo");

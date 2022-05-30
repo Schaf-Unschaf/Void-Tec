@@ -1,6 +1,6 @@
 {
   "voidtec": {
-    "sheepDebug": false,
+    "sheepDebug": true,
     "enableRemoveHullmodButton": false,
     "enableChangeSlotButton": false,
     "enablePlayerAugmentBattleDamage": true,

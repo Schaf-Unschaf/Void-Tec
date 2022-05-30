@@ -15,6 +15,7 @@ import de.schafunschaf.voidtec.combat.vesai.SlotCategory;
 import de.schafunschaf.voidtec.combat.vesai.augments.AugmentApplier;
 import de.schafunschaf.voidtec.helper.AugmentCargoWrapper;
 import de.schafunschaf.voidtec.ids.VT_Settings;
+import de.schafunschaf.voidtec.ids.VT_Strings;
 import de.schafunschaf.voidtec.util.ui.ButtonUtils;
 import de.schafunschaf.voidtec.util.ui.UIUtils;
 import lombok.RequiredArgsConstructor;
@@ -264,6 +265,8 @@ public class ShipPanel {
 
                 lastAugmentButton = augmentSlotButton;
             }
+
+            addInfoButton(shipElement, hullModManager.getFilledSlots());
         } else {
             new InstallHullmodButton(ship).addButton(shipElement, labelButtonWidth, augmentButtonSize)
                                           .getPosition()
@@ -275,6 +278,39 @@ public class ShipPanel {
             UIComponentAPI separatorComponent = shipElement.getPrev();
             separatorComponent.getPosition().belowLeft(shipListComponent, 13f);
         }
+    }
+
+    private void addInfoButton(final TooltipMakerAPI shipElement, final List<AugmentSlot> filledSlots) {
+        ButtonAPI button = shipElement.addButton("i", null, Misc.getPositiveHighlightColor(), Misc.getStoryDarkColor(), Alignment.MID,
+                                                 CutStyle.ALL, 16f, 16f, -16f);
+
+        button.getPosition().inTR(0f, 0f);
+        shipElement.addTooltipToPrevious(new BaseTooltipCreator() {
+            @Override
+            public float getTooltipWidth(Object tooltipParam) {
+                float width = 120f;
+                for (AugmentSlot slot : filledSlots) {
+                    float stringWidth = shipElement.computeStringWidth(slot.getSlottedAugment().getName());
+                    if (stringWidth > width) {
+                        width = stringWidth + 30f;
+                    }
+                }
+
+                return width;
+            }
+
+            @Override
+            public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
+                tooltip.setBulletedListMode(null);
+                tooltip.addPara("Fitted Augments:", 0f);
+                tooltip.setBulletedListMode(" " + VT_Strings.BULLET_CHAR);
+                for (AugmentSlot slot : filledSlots) {
+                    tooltip.setBulletColor(slot.getSlotCategory().getColor());
+                    String name = slot.getSlottedAugment().getName();
+                    tooltip.addPara(name, slot.getSlotCategory().getColor(), 3f);
+                }
+            }
+        }, TooltipMakerAPI.TooltipLocation.ABOVE);
     }
 
     private ButtonAPI createAugmentSlotButton(final TooltipMakerAPI uiElement, final AugmentSlot augmentSlot,
@@ -316,4 +352,5 @@ public class ShipPanel {
 
         return filteredList;
     }
+
 }
